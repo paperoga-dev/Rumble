@@ -16,6 +16,8 @@ Then create a *tokens.xml* file in the *app/src/main/res/values* folder, with th
 </resources>
 ```
 
+If classes are not found, but the project builds fine anyway, please trigger a ```File => Invalidate Caches / Restart ...``` action, in order to purge your current cache and reload the Java package.
+
 ## Maintainers
 
 Please contact on Tumblr, via message, one of the following developers:
