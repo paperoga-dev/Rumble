@@ -26,9 +26,7 @@ import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
 public interface Followers {
-    class Api extends TumblrApi<String> {
-
-        private String blogId;
+    class Api extends TumblrArray<String> {
 
         public Api(
                 Context context,
@@ -37,20 +35,17 @@ public interface Followers {
                 String appId,
                 String appVersion,
                 String[] additionalArgs) {
-            super(context, service, authToken, appId, appVersion);
-
-            this.blogId = additionalArgs[0];
+            super(context, service, authToken, appId, appVersion, additionalArgs);
         }
 
         @Override
         protected String getPath() {
-            /*
-            blog-identifier  String  Any blog identifier
-            limit            Number  The number of results to return: 1–20, inclusive  default: 20
-            offset           Number  Result to start at                                default: 0 (first follower)
-            */
+            return super.getPath() + "/followers";
+        }
 
-            return "/blog/" + blogId + ".tumblr.com/followers";
+        @Override
+        protected boolean requiresApiKey() {
+            return false;
         }
 
         @Override

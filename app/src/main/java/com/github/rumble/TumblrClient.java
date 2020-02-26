@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.util.Log;
 
 import org.scribe.builder.ServiceBuilder;
@@ -30,7 +29,7 @@ import org.scribe.exceptions.OAuthException;
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
-import java.lang.reflect.Constructor;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
@@ -171,7 +170,7 @@ public final class TumblrClient {
         }
     }
 
-    public <T> void call(
+    private <T> void doCall(
             Class<? extends TumblrApi<T>> clazz,
             Map<String, ?> queryParams,
             final OnCompletion<T> onCompletion,
@@ -185,7 +184,7 @@ public final class TumblrClient {
                     String.class,
                     String.class,
                     String[].class
-                };
+            };
 
             clazz.getDeclaredConstructor(cArg)
                     .newInstance(
@@ -216,10 +215,45 @@ public final class TumblrClient {
         }
     }
 
+    public <T> void call(
+            Class<? extends TumblrApi<T>> clazz,
+            Map<String, ?> queryParams,
+            final OnCompletion<T> onCompletion,
+            String ... additionalArgs) {
+        doCall(clazz, queryParams, onCompletion, additionalArgs);
+    }
+
     public <T> void call(Class<? extends TumblrApi<T>> clazz,
                          OnCompletion<T> onCompletion,
                          String ... additionalArgs) {
-        call(clazz, null, onCompletion, additionalArgs);
+        doCall(clazz, null, onCompletion, additionalArgs);
+    }
+
+    public <T> void call(
+            Class<? extends TumblrArray<T>> clazz,
+            String blogId,
+            int offset,
+            int limit,
+            Map<String, ?> queryParams,
+            final OnCompletion<T> onCompletion,
+            String ... additionalArgs) {
+        String[] aArgs = new String[additionalArgs.length + 3];
+        aArgs[0] = blogId;
+        aArgs[1] = String.valueOf(offset);
+        aArgs[2] = String.valueOf(limit);
+
+        System.arraycopy(additionalArgs, 0, aArgs, 3,additionalArgs.length);
+
+        doCall(clazz, queryParams, onCompletion, additionalArgs);
+    }
+
+    public <T> void call(Class<? extends TumblrArray<T>> clazz,
+                     String blogId,
+                     int offset,
+                     int limit,
+                     OnCompletion<T> onCompletion,
+                     String ... additionalArgs) {
+        call(clazz, blogId, offset, limit, null, onCompletion, additionalArgs);
     }
 
     public void setOnLoginListener(OnLoginListener onLoginListener) {

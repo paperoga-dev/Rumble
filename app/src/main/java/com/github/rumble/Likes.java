@@ -29,9 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public interface Likes {
-    class Api extends TumblrApi<String> {
-
-        private String blogId;
+    class Api extends TumblrArray<String> {
 
         public Api(
                 Context context,
@@ -40,19 +38,12 @@ public interface Likes {
                 String appId,
                 String appVersion,
                 String[] additionalArgs) {
-            super(context, service, authToken, appId, appVersion);
-
-            this.blogId = additionalArgs[0];
+            super(context, service, authToken, appId, appVersion, additionalArgs);
         }
 
         @Override
         protected String getPath() {
-            /*
-            limit   Number  The number of results to return: 1–20, inclusive   default: 20
-            offset  Number  Liked post number to start at                      default: 0 (first post)
-            */
-
-            return "/blog/" + blogId + ".tumblr.com/likes";
+            return super.getPath() + "/likes";
         }
 
         @Override
