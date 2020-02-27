@@ -47,13 +47,6 @@ public interface Likes {
         }
 
         @Override
-        protected Map<String, String> defaultParams() {
-            return new HashMap<String, String>(){{
-                put("api_key", getContext().getString(R.string.consumer_key));
-            }};
-        }
-
-        @Override
         protected String readData(JSONObject jsonObject) throws JSONException {
             // TODO: needs a run
             return "";

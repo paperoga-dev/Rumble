@@ -31,6 +31,7 @@ import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public abstract class TumblrApi<T> {
@@ -132,9 +133,18 @@ public abstract class TumblrApi<T> {
         return context;
     }
 
+    protected boolean requiresApiKey() {
+        return true;
+    }
+
     protected abstract String getPath();
     protected Map<String, String> defaultParams() {
-        return null;
+        Map<String, String> m = new HashMap<String, String>();
+
+        if (requiresApiKey())
+            m.put("api_key", getContext().getString(R.string.consumer_key));
+
+        return m;
     }
     protected abstract T readData(JSONObject jsonObject) throws JSONException;
 

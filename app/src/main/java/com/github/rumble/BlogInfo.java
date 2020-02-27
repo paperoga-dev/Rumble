@@ -20,68 +20,206 @@ package com.github.rumble;
 
 import android.content.Context;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface BlogInfo {
-    class Avatar {
-    };
 
-    class Data {
-        private String title;                 // String - The display title of the blog
-        private int posts;                    // Number - The total number of posts to this blog
-        private String name;                  // String - The short blog name that appears before tumblr.com in a standard blog hostname
-        private Date updated;                 // Number - The time of the most recent post, in seconds since the epoch
-        private String description;           // String - You guessed it! The blog's description
-        private boolean ask;                  // Boolean - Indicates whether the blog allows questions
-        private boolean askAnon;              // Boolean - Indicates whether the blog allows anonymous questions; returned only if ask is true
-        private List<Avatar> avatars;	      // Array - An array of avatar objects, each a different size, which should each have a width, height, and URL.
+    class SubmissionTerms {
+        public enum AcceptedTypes {
+            Text,
+            Photo,
+            Quote,
+            Link,
+            Video
+        }
 
-        public Data(
-                String title,
-                int posts,
-                String name,
-                Date updated,
-                String description,
-                boolean ask,
-                boolean askAnon,
-                List<Avatar> avatars) {
-            this.title = title;
-            this.posts = posts;
-            this.name = name;
-            this.updated = updated;
-            this.description = description;
-            this.ask = ask;
-            this.askAnon = askAnon;
-            this.avatars = avatars;
+        private Set<AcceptedTypes> acceptedTypes;
+        private Set<String> tags;
+        private String title;
+        private String guidelines;
+
+        /*
+        "submission_terms": {
+          "accepted_types":
+            [
+              "text",
+              "photo",
+              "quote",
+              "link",
+              "video"
+            ],
+          "tags":[
+            ],
+          "title": "Ecco, bravo, damme na' mano",
+          "guidelines": ""
+        },
+        */
+
+        public SubmissionTerms(JSONObject jsonSubmissionTermsObject) throws JSONException {
+            JSONArray acceptedTypes = jsonSubmissionTermsObject.getJSONArray("accepted_types");
+
+            this.acceptedTypes = new HashSet<>();
+            for (int i = 0; i < acceptedTypes.length(); ++i) {
+                if (acceptedTypes.getString(i).equalsIgnoreCase("text"))
+                    this.acceptedTypes.add(AcceptedTypes.Text);
+                else if (acceptedTypes.getString(i).equalsIgnoreCase("photo"))
+                    this.acceptedTypes.add(AcceptedTypes.Photo);
+                else if (acceptedTypes.getString(i).equalsIgnoreCase("quote"))
+                    this.acceptedTypes.add(AcceptedTypes.Quote);
+                else if (acceptedTypes.getString(i).equalsIgnoreCase("link"))
+                    this.acceptedTypes.add(AcceptedTypes.Link);
+                else if (acceptedTypes.getString(i).equalsIgnoreCase("video"))
+                    this.acceptedTypes.add(AcceptedTypes.Video);
+            }
+
+            JSONArray tags = jsonSubmissionTermsObject.getJSONArray("tags");
+            this.tags = new HashSet<>();
+            for (int i = 0; i < tags.length(); ++i)
+                this.tags.add(tags.getString(i));
+
+            this.title = jsonSubmissionTermsObject.getString("title");
+            this.guidelines = jsonSubmissionTermsObject.getString("guidelines");
+        }
+
+        public Set<AcceptedTypes> getAcceptedTypes() {
+            return acceptedTypes;
+        }
+
+        public Set<String> getTags() {
+            return tags;
         }
 
         public String getTitle() {
             return title;
         }
 
-        public int getPosts() {
-            return posts;
+        public String getGuidelines() {
+            return guidelines;
+        }
+    }
+
+    class Data {
+        enum Type {
+            Public,
+            Private
+        };
+
+        enum Tweet {
+            Auto,
+            Yes,
+            No
+        };
+
+        private boolean admin;                    // Boolean - is admin
+        private boolean ask;                      // Boolean - Indicates whether the blog allows questions
+        private boolean askAnon;                  // Boolean - Indicates whether the blog allows anonymous questions; returned only if ask is true
+        private String askPageTitle;              // String - Ask page title
+        private List<Avatar.Data> avatars;        // Array - List of available avatars
+        private boolean canChat;                  // Boolean - Allows chat
+        private boolean canSendFanMail;           // Boolean - ????
+        private boolean canSubmit;                // Boolean - Allows submissions
+        private boolean canSubscribe;             // Boolean - ????
+        private String description;               // String - Blog description
+        private int drafts;                       // Number - Drafts count
+        private boolean facebook;                 // Boolean - Is to Facebook linked
+        private boolean facebookOpengraphEnabled; // Boolean String - ????? (Y/N)
+        private boolean followed;                 // Boolean - ?????
+        private int followers;                    // Number - Followers count
+        private boolean isBlockedFromPrimary;     // Boolean - ????
+        private boolean isNFSW;                   // Boolean - NFSW blog
+        private int messages;                     // Number - Messages count;
+        private String name;                      // String - Blog name
+        private int posts;                        // Number - Posts count
+        private boolean primary;                  // Boolean - Is a primary blog
+        private int queue;                        // Number - Queued posts count
+        private boolean shareLikes;               // Boolean - ?????
+        private String submissionPageTitle;       // String - Submission page title
+        private SubmissionTerms submissionTerms;  // Submission Object => see above
+        private boolean subscribed;               // Boolean - ?????
+        // There is a theme object here, we skip it, it's useless for our purposes
+        private String title;                     // String - Blog title
+        private int totalPosts;                   // Number - Posts count
+        private Tweet tweet;                      // String - indicate if posts are tweeted auto, Y, N
+        private boolean twitterEnabled;           // Boolean - ?????
+        private boolean twitterSend;              // Boolean - ????
+        private Type type;                        // String - indicates whether a blog is public or private
+        private Date updated;                     // Number - Last updated time (epoch)
+        private String url;                       // String - Blog URL
+        private String uuid;                      // Stirng - Blog UUID
+
+        public Data(JSONObject blogObject) throws JSONException {
+            this.admin = blogObject.getBoolean("admin");
+            this.ask = blogObject.getBoolean("ask");
+            this.askAnon = blogObject.getBoolean("ask_anon");
+            this.askPageTitle = blogObject.getString("ask_page_title");
+
+            JSONArray avatars = blogObject.getJSONArray("avatars");
+
+            this.avatars = new ArrayList<>();
+            for (int i = 0; i < avatars.length(); ++i) {
+                this.avatars.add(new Avatar.Data(avatars.getJSONObject(i)));
+            }
+
+            this.canChat = blogObject.getBoolean("can_chat");
+            this.canSendFanMail = blogObject.getBoolean("can_send_fan_mail");
+            this.canSubmit = blogObject.getBoolean("can_submit");
+            this.canSubscribe = blogObject.getBoolean("can_subscribe");
+            this.description = blogObject.getString("description");
+            this.drafts = blogObject.getInt("drafts");
+            this.facebook = blogObject.getString("facebook").equalsIgnoreCase("Y");
+            this.facebookOpengraphEnabled = blogObject.getString("facebook_opengraph_enabled").equalsIgnoreCase("Y");
+            this.followed = blogObject.getBoolean("followed");
+            this.followers = blogObject.getInt("followers");
+            this.isBlockedFromPrimary = blogObject.getBoolean("is_blocked_from_primary");
+            this.isNFSW = blogObject.getBoolean("is_nfsw");
+            this.messages = blogObject.getInt("messages");
+            this.name = blogObject.getString("name");
+            this.posts = blogObject.getInt("posts");
+            this.primary = blogObject.getBoolean("primary");
+            this.queue = blogObject.getInt("queue");
+            this.shareLikes = blogObject.getBoolean("share_likes");
+            this.submissionPageTitle = blogObject.getString("submission_page_title");
+            this.submissionTerms = new SubmissionTerms(blogObject.getJSONObject("submission_terms"));
+            this.subscribed = blogObject.getBoolean("subscribed");
+            this.title = blogObject.getString("title");
+            this.totalPosts = blogObject.getInt("total_posts");
+
+            String tweet = blogObject.getString("tweet");
+            if (tweet.equalsIgnoreCase("Auto"))
+                this.tweet = Tweet.Auto;
+            else if (tweet.equalsIgnoreCase("Y"))
+                this.tweet = Tweet.Yes;
+            else
+                this.tweet = Tweet.No;
+
+            this.twitterEnabled = blogObject.getBoolean("twitter_enabled");
+            this.twitterSend = blogObject.getBoolean("twitter_send");
+
+            if (blogObject.getString("type").equalsIgnoreCase("public"))
+                this.type = Type.Public;
+            else
+                this.type = Type.Private;
+
+            this.updated = new Date(blogObject.getInt("updated") * 1000);
+            this.url = blogObject.getString("url");
+            this.uuid = blogObject.getString("uuid");
         }
 
-        public String getName() {
-            return name;
-        }
-
-        public Date getUpdated() {
-            return updated;
-        }
-
-        public String getDescription() {
-            return description;
+        public boolean isAdmin() {
+            return admin;
         }
 
         public boolean isAsk() {
@@ -92,12 +230,136 @@ public interface BlogInfo {
             return askAnon;
         }
 
-        public List<Avatar> getAvatars() {
+        public String getAskPageTitle() {
+            return askPageTitle;
+        }
+
+        public List<Avatar.Data> getAvatars() {
             return avatars;
+        }
+
+        public boolean isCanChat() {
+            return canChat;
+        }
+
+        public boolean isCanSendFanMail() {
+            return canSendFanMail;
+        }
+
+        public boolean isCanSubmit() {
+            return canSubmit;
+        }
+
+        public boolean isCanSubscribe() {
+            return canSubscribe;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public int getDrafts() {
+            return drafts;
+        }
+
+        public boolean isFacebook() {
+            return facebook;
+        }
+
+        public boolean isFacebookOpengraphEnabled() {
+            return facebookOpengraphEnabled;
+        }
+
+        public boolean isFollowed() {
+            return followed;
+        }
+
+        public int getFollowers() {
+            return followers;
+        }
+
+        public boolean isBlockedFromPrimary() {
+            return isBlockedFromPrimary;
+        }
+
+        public boolean isNFSW() {
+            return isNFSW;
+        }
+
+        public int getMessages() {
+            return messages;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getPosts() {
+            return posts;
+        }
+
+        public boolean isPrimary() {
+            return primary;
+        }
+
+        public int getQueue() {
+            return queue;
+        }
+
+        public boolean isShareLikes() {
+            return shareLikes;
+        }
+
+        public String getSubmissionPageTitle() {
+            return submissionPageTitle;
+        }
+
+        public SubmissionTerms getSubmissionTerms() {
+            return submissionTerms;
+        }
+
+        public boolean isSubscribed() {
+            return subscribed;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public int getTotalPosts() {
+            return totalPosts;
+        }
+
+        public Tweet getTweet() {
+            return tweet;
+        }
+
+        public boolean isTwitterEnabled() {
+            return twitterEnabled;
+        }
+
+        public boolean isTwitterSend() {
+            return twitterSend;
+        }
+
+        public Type getType() {
+            return type;
+        }
+
+        public Date getUpdated() {
+            return updated;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public String getUuid() {
+            return uuid;
         }
     };
 
-    class Api extends TumblrApi<Data> {
+    class Api extends TumblrBlogId<Data> {
 
         /*
         "response": {
@@ -108,26 +370,7 @@ public interface BlogInfo {
               "ask_anon": true,
               "ask_page_title": "Vediamo se la so",
               "avatar": [
-                {
-                  "width": 512,
-                  "height": 512,
-                  "url": "https:\/\/66.media.tumblr.com\/avatar_ed354109bd89_512.png"
-                },
-                {
-                  "width": 128,
-                  "height": 128,
-                  "url": "https:\/\/66.media.tumblr.com\/avatar_ed354109bd89_128.png"
-                },
-                {
-                  "width": 96,
-                  "height": 96,
-                  "url": "https:\/\/66.media.tumblr.com\/avatar_ed354109bd89_96.png"
-                },
-                {
-                  "width": 64,
-                  "height": 64,
-                  "url": "https:\/\/66.media.tumblr.com\/avatar_ed354109bd89_64.png"
-                }
+                => Array of Avatars Object, see Avatar.Data
               ],
               "can_chat": true,
               "can_send_fan_mail": true,
@@ -149,41 +392,11 @@ public interface BlogInfo {
               "share_likes": false,
               "submission_page_title": "Ecco, bravo, damme na' mano",
               "submission_terms": {
-                  "accepted_types":
-                    [
-                      "text",
-                      "photo",
-                      "quote",
-                      "link",
-                      "video"
-                    ],
-                  "tags":[
-                  ],
-                  "title": "Ecco, bravo, damme na' mano",
-                  "guidelines": ""
+                => SubmissionTerms Object, see above
                 },
               "subscribed": false,
               "theme": {
-                "header_full_width": 396,
-                "header_full_height": 396,
-                "header_focus_width": 396,
-                "header_focus_height": 222,
-                "avatar_shape": "square",
-                "background_color": "#fffaf4",
-                "body_font": "Helvetica Neue",
-                "header_bounds": "20,396,242,0",
-                "header_image": "https:\/\/static.tumblr.com\/9299a64d63c89e1caaf3eded41472a7e\/1nhjmvr\/irMpr5hpj\/tumblr_static_-516496371-content.png",
-                "header_image_focused": "https:\/\/static.tumblr.com\/e2f13b6f1d3f5b5bca60fa5db7c6ca8b\/1nhjmvr\/11Wpr5hpl\/tumblr_static_tumblr_static_-516496371-content_focused_v3.png",
-                "header_image_scaled": "https:\/\/static.tumblr.com\/9299a64d63c89e1caaf3eded41472a7e\/1nhjmvr\/irMpr5hpj\/tumblr_static_-516496371-content_2048_v2.png",
-                "header_stretch": true,
-                "link_color": "#529ECC",
-                "show_avatar": true,
-                "show_description": true,
-                "show_header_image": true,
-                "show_title": true,
-                "title_color": "#444444",
-                "title_font": "Calluna",
-                "title_font_weight": "bold"
+                => Theme data, we don't need it
               },
               "title": "Paperoga Coibentato",
               "total_posts": 791,
@@ -194,13 +407,10 @@ public interface BlogInfo {
               "updated": 1582480880,
               "url": "https:\/\/paperogacoibentato.tumblr.com\/",
               "uuid": "t:4ZHKojAk25vVcuhziYcWLw",
-              "is_optout_ads": true
             }
           }
         }
         */
-
-        private String blogId;
 
         public Api(
                 Context context,
@@ -209,37 +419,12 @@ public interface BlogInfo {
                 String appId,
                 String appVersion,
                 String[] additionalArgs) {
-            super(context, service, authToken, appId, appVersion);
-
-            this.blogId = additionalArgs[0];
-        }
-
-        @Override
-        protected String getPath() {
-            return "/blog/" + blogId + ".tumblr.com/info";
-        }
-
-        @Override
-        protected Map<String, String> defaultParams() {
-            return new HashMap<String, String>(){{
-                put("api_key", getContext().getString(R.string.consumer_key));
-            }};
+            super(context, service, authToken, appId, appVersion, additionalArgs);
         }
 
         @Override
         protected Data readData(JSONObject jsonObject) throws JSONException {
-            JSONObject blogObj = jsonObject.getJSONObject("blog");
-
-            return new Data(
-                blogObj.getString("title"),
-                blogObj.getInt("posts"),
-                blogObj.getString("name"),
-                new Date(blogObj.getInt("updated") * 1000),
-                blogObj.getString("description"),
-                blogObj.getBoolean("ask"),
-                blogObj.getBoolean("ask_anon"),
-                new ArrayList<Avatar>()
-            );
+            return new Data(jsonObject.getJSONObject("blog"));
         }
     }
 }

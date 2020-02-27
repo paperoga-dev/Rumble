@@ -26,10 +26,47 @@ import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
 public interface Avatar {
-    class Api extends TumblrApi<String> {
+    class Data {
+        /*
+        {
+          "width": 512,
+          "height": 512
+          "url": "https://66.media.tumblr.com/avatar_ed354109bd89_512.png"
+        }
+        */
 
-        private String blogId;
-        private String size;
+        private int width;   // Number - Avatar width
+        private int height;  // Number - Avatar height
+        private String url;  // String - Avatar url
+
+        public Data(int size, String url) {
+            this.width = size;
+            this.height = size;
+            this.url = url;
+        }
+
+        public Data(JSONObject avatarObject) throws JSONException {
+            this.width = avatarObject.getInt("width");
+            this.height = avatarObject.getInt("height");
+            this.url = avatarObject.getString("url");
+        }
+
+        public int getWidth() {
+            return width;
+        }
+
+        public int getHeight() {
+            return height;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+    };
+
+    class Api extends TumblrBlogId<Data> {
+
+        private int size;
 
         public Api(
                 Context context,
@@ -38,20 +75,19 @@ public interface Avatar {
                 String appId,
                 String appVersion,
                 String[] additionalArgs) {
-            super(context, service, authToken, appId, appVersion);
+            super(context, service, authToken, appId, appVersion, additionalArgs);
 
-            this.blogId = additionalArgs[0];
-            this.size = additionalArgs[1];
+            this.size = Integer.valueOf(additionalArgs[1]);
         }
 
         @Override
         protected String getPath() {
-            return "/blog/" + blogId + ".tumblr.com/avatar/" + size;
+            return super.getPath() + "/avatar/" + size;
         }
 
         @Override
-        protected String readData(JSONObject jsonObject) throws JSONException {
-            return jsonObject.getString("avatar_url");
+        protected Data readData(JSONObject jsonObject) throws JSONException {
+            return new Data(this.size, jsonObject.getString("avatar_url"));
         }
     }
 }

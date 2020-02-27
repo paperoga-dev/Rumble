@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
                 tv.append("Me: " + client.getMe().getName() + "\n");
                 tv.append("My blogs:\n");
-                for (UserInfo.Blog blog : client.getMe().getBlogs()) {
+                for (BlogInfo.Data blog : client.getMe().getBlogs()) {
                     tv.append("\t" + blog.getName() + "\n");
                     tv.append("\t\t" + blog.getTitle() + "\n");
 

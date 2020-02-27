@@ -26,8 +26,7 @@ import org.scribe.oauth.OAuthService;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class TumblrArray<T> extends TumblrApi<T> {
-    private String blogId;
+public abstract class TumblrArray<T> extends TumblrBlogId<T> {
     private int offset;
     private int limit;
 
@@ -38,43 +37,24 @@ public abstract class TumblrArray<T> extends TumblrApi<T> {
             String appId,
             String appVersion,
             String[] additionalArgs) {
-        super(context, service, authToken, appId, appVersion);
+        super(context, service, authToken, appId, appVersion, additionalArgs);
 
-        this.blogId = additionalArgs[0];
         this.offset = Integer.valueOf(additionalArgs[1]);
         this.limit = Integer.valueOf(additionalArgs[2]);
     }
 
     @Override
-    protected String getPath() {
-        /*
-        blog-identifier  String  Any blog identifier
-        limit            Number  The number of results to return: 1–20, inclusive  default: 20
-        offset           Number  Result to start at                                default: 0 (first follower)
-        */
-
-        return "/blog/" + getBlogId() + ".tumblr.com";
-    }
-
-    protected boolean requiresApiKey() {
-        return true;
-    }
-
-    @Override
     protected Map<String, String> defaultParams() {
-        Map<String, String> m = new HashMap<String, String>();
+        Map<String, String> m = super.defaultParams();
 
-        if (requiresApiKey())
-            m.put("api_key", getContext().getString(R.string.consumer_key));
-
+        /*
+        limit            Number  The number of results to return: 1–20, inclusive  default: 20
+        offset           Number  Result to start at                                default: 0
+        */
         m.put("limit", String.valueOf(limit));
         m.put("offset", String.valueOf(offset));
 
         return m;
-    }
-
-    public String getBlogId() {
-        return blogId;
     }
 
     public int getLimit() {
