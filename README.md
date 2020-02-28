@@ -1,3 +1,5 @@
+![Android CI](https://github.com/paperoga-dev/Rumble/workflows/Android%20CI/badge.svg)
+
 # Rumble
 Tumblr App for Android devices
 
