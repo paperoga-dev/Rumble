@@ -13,5 +13,7 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
+    - name: create temporary tokens resource file
+      run: echo "<?xml version=\"1.0\" encoding=\"utf-8\"?><resources><string name=\"consumer_key\">CK</string><string name=\"consumer_secret\">CS</string></resources>" > /home/runner/work/Rumble/Rumble/app/src/main/res/values/tokens.xml
     - name: Build with Gradle
       run: sudo ./gradlew build
