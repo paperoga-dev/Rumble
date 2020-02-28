@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -44,10 +45,10 @@ public class LoginActivity extends Activity {
         }
 
         @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
 
-            if (url.toLowerCase().contains(Constants.CALLBACK_URL.toLowerCase())) {
-                Uri uri = Uri.parse(url);
+            Uri uri = request.getUrl();
+            if (uri.toString().toLowerCase().contains(Constants.CALLBACK_URL.toLowerCase())) {
                 for (String strQuery : uri.getQueryParameterNames())
                     if (strQuery.contentEquals(Constants.OAUTH_VERIFIER)) {
 
@@ -82,7 +83,6 @@ public class LoginActivity extends Activity {
         // so don't keep track about this visit
         webView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
         webView.getSettings().setAppCacheEnabled(false);
-        webView.getSettings().setSaveFormData(false);
         webView.getSettings().setGeolocationEnabled(false);
         webView.getSettings().setDatabaseEnabled(false);
         webView.getSettings().setDomStorageEnabled(false);
