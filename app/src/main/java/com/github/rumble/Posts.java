@@ -7,15 +7,10 @@ import org.json.JSONObject;
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
 public interface Posts {
     class Data {
 
-    };
+    }
 
     class Api extends TumblrArray<Data> {
 

@@ -18,6 +18,7 @@
 
 package com.github.rumble;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -34,9 +35,9 @@ import org.scribe.model.Token;
 public class LoginActivity extends Activity {
 
     class CustomWebViewClient extends WebViewClient {
-        private Token token;
+        private final Token token;
 
-        public CustomWebViewClient(Token token) {
+        CustomWebViewClient(Token token) {
             super();
 
             this.token = token;
@@ -68,6 +69,7 @@ public class LoginActivity extends Activity {
 
     private WebView webView;
 
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

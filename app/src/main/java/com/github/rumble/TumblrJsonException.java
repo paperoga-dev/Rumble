@@ -20,7 +20,7 @@ package com.github.rumble;
 
 import org.json.JSONException;
 
-public class TumblrJsonException extends TumblrException {
+class TumblrJsonException extends TumblrException {
     private JSONException e;
 
     public TumblrJsonException(JSONException e) {

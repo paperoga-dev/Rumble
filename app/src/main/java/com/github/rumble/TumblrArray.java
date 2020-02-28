@@ -23,14 +23,13 @@ import android.content.Context;
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public abstract class TumblrArray<T> extends TumblrBlogId<T> {
-    private int offset;
-    private int limit;
+    private final int offset;
+    private final int limit;
 
-    protected TumblrArray(
+    TumblrArray(
             Context context,
             OAuthService service,
             Token authToken,
@@ -39,8 +38,8 @@ public abstract class TumblrArray<T> extends TumblrBlogId<T> {
             String[] additionalArgs) {
         super(context, service, authToken, appId, appVersion, additionalArgs);
 
-        this.offset = Integer.valueOf(additionalArgs[1]);
-        this.limit = Integer.valueOf(additionalArgs[2]);
+        this.offset = Integer.parseInt(additionalArgs[1]);
+        this.limit = Integer.parseInt(additionalArgs[2]);
     }
 
     @Override

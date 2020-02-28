@@ -26,13 +26,10 @@ import org.json.JSONObject;
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public interface BlogInfo {
@@ -68,7 +65,7 @@ public interface BlogInfo {
         },
         */
 
-        public SubmissionTerms(JSONObject jsonSubmissionTermsObject) throws JSONException {
+        SubmissionTerms(JSONObject jsonSubmissionTermsObject) throws JSONException {
             JSONArray acceptedTypes = jsonSubmissionTermsObject.getJSONArray("accepted_types");
 
             this.acceptedTypes = new HashSet<>();
@@ -115,13 +112,13 @@ public interface BlogInfo {
         enum Type {
             Public,
             Private
-        };
+        }
 
         enum Tweet {
             Auto,
             Yes,
             No
-        };
+        }
 
         private boolean admin;                    // Boolean - is admin
         private boolean ask;                      // Boolean - Indicates whether the blog allows questions
@@ -357,7 +354,7 @@ public interface BlogInfo {
         public String getUuid() {
             return uuid;
         }
-    };
+    }
 
     class Api extends TumblrBlogId<Data> {
 

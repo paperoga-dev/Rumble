@@ -29,11 +29,10 @@ import org.scribe.exceptions.OAuthException;
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
-public final class TumblrClient {
+final class TumblrClient {
 
     public interface OnCompletion<T> {
         void onSuccess(T result);
@@ -53,12 +52,12 @@ public final class TumblrClient {
         void onAccessDenied();
     }
 
-    private Context context;
+    private final Context context;
     private String appName;
     private String appVersion;
 
     private Token authToken;
-    private OAuthService oAuthService;
+    private final OAuthService oAuthService;
     private OnLoginListener onLoginListener;
     private OnFailureListener onFailureListener;
 
@@ -244,7 +243,7 @@ public final class TumblrClient {
 
         System.arraycopy(additionalArgs, 0, aArgs, 3,additionalArgs.length);
 
-        doCall(clazz, queryParams, onCompletion, additionalArgs);
+        doCall(clazz, queryParams, onCompletion, aArgs);
     }
 
     public <T> void call(Class<? extends TumblrArray<T>> clazz,

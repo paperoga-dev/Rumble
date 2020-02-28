@@ -26,7 +26,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.scribe.exceptions.OAuthException;
 import org.scribe.model.OAuthRequest;
-import org.scribe.model.Response;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
@@ -34,7 +33,7 @@ import org.scribe.oauth.OAuthService;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class TumblrApi<T> {
+abstract class TumblrApi<T> {
 
     public interface OnCompletion<T> {
         void onSuccess(T result);
@@ -43,9 +42,9 @@ public abstract class TumblrApi<T> {
 
     private static class TumblrCall<T> extends AsyncTask<OAuthRequest, Void, String> {
 
-        private OnCompletion<T> onCompletion;
+        private final OnCompletion<T> onCompletion;
         private OAuthException networkException;
-        private TumblrApi<T> api;
+        private final TumblrApi<T> api;
 
         private TumblrCall(TumblrApi<T> api, OnCompletion<T> onCompletion) {
             super();
@@ -108,13 +107,13 @@ public abstract class TumblrApi<T> {
         }
     }
 
-    private Context context;
-    private OAuthService service;
-    private Token authToken;
-    private String appId;
-    private String appVersion;
+    private final Context context;
+    private final OAuthService service;
+    private final Token authToken;
+    private final String appId;
+    private final String appVersion;
 
-    protected TumblrApi(
+    TumblrApi(
             Context context,
             OAuthService service,
             Token authToken,
@@ -133,13 +132,13 @@ public abstract class TumblrApi<T> {
         return context;
     }
 
-    protected boolean requiresApiKey() {
+    boolean requiresApiKey() {
         return true;
     }
 
     protected abstract String getPath();
-    protected Map<String, String> defaultParams() {
-        Map<String, String> m = new HashMap<String, String>();
+    Map<String, String> defaultParams() {
+        Map<String, String> m = new HashMap<>();
 
         if (requiresApiKey())
             m.put("api_key", getContext().getString(R.string.consumer_key));
@@ -169,7 +168,7 @@ public abstract class TumblrApi<T> {
 
         service.signRequest(authToken, request);
 
-        new TumblrCall<T>(this, onCompletion).execute(request);
+        new TumblrCall<>(this, onCompletion).execute(request);
     }
 
     public void call(OnCompletion<T> onCompletion) {

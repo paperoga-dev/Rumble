@@ -23,8 +23,8 @@ import android.util.Log;
 import java.io.IOException;
 import java.io.OutputStream;
 
-public class LogOutputStream extends OutputStream {
-    private String appId;
+class LogOutputStream extends OutputStream {
+    private final String appId;
     private String mem;
 
     public LogOutputStream(String appId) {
@@ -40,7 +40,7 @@ public class LogOutputStream extends OutputStream {
         if (c == '\n') {
             flush();
         } else {
-            mem += new Character(c);
+            mem += c;
         }
     }
 

@@ -18,7 +18,7 @@
 
 package com.github.rumble;
 
-public final class Constants {
+final class Constants {
     public static final int PERFORM_LOGIN = 1;
 
     public static final String APP_NAME = "Rumble";

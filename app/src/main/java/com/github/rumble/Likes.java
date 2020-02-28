@@ -25,9 +25,6 @@ import org.json.JSONObject;
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public interface Likes {
     class Api extends TumblrArray<String> {
 

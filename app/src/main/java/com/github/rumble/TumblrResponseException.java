@@ -18,7 +18,7 @@
 
 package com.github.rumble;
 
-public class TumblrResponseException extends TumblrException {
+class TumblrResponseException extends TumblrException {
     private int responseCode;
     private String responseMessage;
 

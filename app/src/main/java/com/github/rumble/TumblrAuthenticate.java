@@ -28,7 +28,7 @@ import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 
-public class TumblrAuthenticate {
+class TumblrAuthenticate {
 
     public interface OnAuthenticationListener {
         void onAuthenticationRequest(
@@ -40,15 +40,15 @@ public class TumblrAuthenticate {
         void onFailure(OAuthException exception);
     }
 
-    private class RequestTokenTask extends AsyncTask<Void, Void, String> {
-        private TumblrAuthenticate authenticator;
-        private OAuthService oAuthService;
-        private OnAuthenticationListener onAuthenticationListener;
+    private static class RequestTokenTask extends AsyncTask<Void, Void, String> {
+        private final TumblrAuthenticate authenticator;
+        private final OAuthService oAuthService;
+        private final OnAuthenticationListener onAuthenticationListener;
 
         private Token requestToken;
         private OAuthException exc;
 
-        public RequestTokenTask(
+        RequestTokenTask(
                 TumblrAuthenticate authenticator,
                 OAuthService oAuthService,
                 OnAuthenticationListener onAuthenticationListener) {
@@ -97,15 +97,15 @@ public class TumblrAuthenticate {
         }
     }
 
-    private class AccessTokenTask extends AsyncTask<Void, Void, Token> {
-        private String authVerifier;
-        private Token requestToken;
-        private OAuthService oAuthService;
-        private Context context;
-        private OnAuthenticationListener onAuthenticationListener;
+    private static class AccessTokenTask extends AsyncTask<Void, Void, Token> {
+        private final String authVerifier;
+        private final Token requestToken;
+        private final OAuthService oAuthService;
+        private final Context context;
+        private final OnAuthenticationListener onAuthenticationListener;
         private OAuthException exc;
 
-        public AccessTokenTask(
+        AccessTokenTask(
                 String authVerifier,
                 Token requestToken,
                 OAuthService oAuthService,
@@ -155,8 +155,8 @@ public class TumblrAuthenticate {
         }
     }
 
-    private OAuthService oAuthService;
-    private Context context;
+    private final OAuthService oAuthService;
+    private final Context context;
     private OnAuthenticationListener onAuthenticationListener;
 
     public TumblrAuthenticate(String appId, Context context) {

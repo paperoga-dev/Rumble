@@ -18,8 +18,8 @@
 
 package com.github.rumble;
 
-public abstract class TumblrException extends Exception {
-    public TumblrException(String message) {
+abstract class TumblrException extends Exception {
+    TumblrException(String message) {
         super(message);
     }
 }

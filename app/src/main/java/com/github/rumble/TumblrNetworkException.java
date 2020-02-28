@@ -20,8 +20,8 @@ package com.github.rumble;
 
 import org.scribe.exceptions.OAuthException;
 
-public class TumblrNetworkException extends TumblrException {
-    private OAuthException e;
+class TumblrNetworkException extends TumblrException {
+    private final OAuthException e;
 
     public TumblrNetworkException(OAuthException e) {
         super(e.getMessage());

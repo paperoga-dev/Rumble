@@ -6,9 +6,9 @@ import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
 public abstract class TumblrBlogId<T> extends TumblrApi<T> {
-    private String blogId;
+    private final String blogId;
 
-    protected TumblrBlogId(
+    TumblrBlogId(
             Context context,
             OAuthService service,
             Token authToken,

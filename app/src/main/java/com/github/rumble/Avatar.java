@@ -39,7 +39,7 @@ public interface Avatar {
         private int height;  // Number - Avatar height
         private String url;  // String - Avatar url
 
-        public Data(int size, String url) {
+        Data(int size, String url) {
             this.width = size;
             this.height = size;
             this.url = url;
@@ -62,11 +62,11 @@ public interface Avatar {
         public String getUrl() {
             return url;
         }
-    };
+    }
 
     class Api extends TumblrBlogId<Data> {
 
-        private int size;
+        private final int size;
 
         public Api(
                 Context context,
@@ -77,7 +77,7 @@ public interface Avatar {
                 String[] additionalArgs) {
             super(context, service, authToken, appId, appVersion, additionalArgs);
 
-            this.size = Integer.valueOf(additionalArgs[1]);
+            this.size = Integer.parseInt(additionalArgs[1]);
         }
 
         @Override

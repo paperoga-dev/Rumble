@@ -34,7 +34,7 @@ public interface UserInfo {
         Html,
         MarkDown,
         Raw
-    };
+    }
 
     class Data {
         private String name;                  // String - The user's tumblr short name
@@ -43,7 +43,7 @@ public interface UserInfo {
         private PostFormat defaultPostFormat; // String - The default posting format - html, markdown, or raw
         private List<BlogInfo.Data> blogs;    // Array - Each item is a blog the user has permissions to post to
 
-        public Data(JSONObject userObject) throws JSONException {
+        Data(JSONObject userObject) throws JSONException {
             this.name = userObject.getString("name");
             this.likes = userObject.getInt("likes");
             this.following = userObject.getInt("following");
@@ -83,7 +83,7 @@ public interface UserInfo {
         public List<BlogInfo.Data> getBlogs() {
             return blogs;
         }
-    };
+    }
 
     class Api extends TumblrApi<Data> {
 
