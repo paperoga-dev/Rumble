@@ -25,8 +25,37 @@ import org.json.JSONObject;
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
+import java.util.List;
+
 public interface Likes {
-    class Api extends TumblrArray<String> {
+    class Post {
+
+    }
+
+    class Data implements TumblrArrayItem<Post> {
+        private List<Post> likedPosts;
+        private int likedCount;
+
+        public Data(JSONObject likesObject) throws JSONException {
+            super();
+
+            // TODO: Post
+            // this.likedPosts = ...;
+            this.likedCount = likesObject.getInt("liked_count");
+        }
+
+        @Override
+        public List<Post> getItems() {
+            return likedPosts;
+        }
+
+        @Override
+        public int getCount() {
+            return likedCount;
+        }
+    }
+
+    class Api extends TumblrArray<Data> {
 
         public Api(
                 Context context,
@@ -44,9 +73,8 @@ public interface Likes {
         }
 
         @Override
-        protected String readData(JSONObject jsonObject) throws JSONException {
-            // TODO: needs a run
-            return "";
+        protected Data readData(JSONObject jsonObject) throws JSONException {
+            return new Data(jsonObject);
         }
     }
 }

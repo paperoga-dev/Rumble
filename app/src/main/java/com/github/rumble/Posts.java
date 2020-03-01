@@ -7,9 +7,23 @@ import org.json.JSONObject;
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
-public interface Posts {
-    class Data {
+import java.util.List;
 
+public interface Posts {
+    class Post {
+
+    }
+
+    class Data implements TumblrArrayItem<Post> {
+        @Override
+        public int getCount() {
+            return 0;
+        }
+
+        @Override
+        public List<Post> getItems() {
+            return null;
+        }
     }
 
     class Api extends TumblrArray<Data> {

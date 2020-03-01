@@ -30,12 +30,18 @@ import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 final class TumblrClient {
 
     public interface OnCompletion<T> {
         void onSuccess(T result);
+    }
+
+    public interface OnArrayCompletion<T> {
+        void onSuccess(List<T> result, int offset, int limit, int count);
     }
 
     public interface OnFailureListener {
@@ -228,31 +234,111 @@ final class TumblrClient {
         doCall(clazz, null, onCompletion, additionalArgs);
     }
 
-    public <T> void call(
-            Class<? extends TumblrArray<T>> clazz,
+    private <T, W extends TumblrArrayItem<T>> void call(
+            final List<T> resultList,
+            final Class<? extends TumblrApi<W>> clazz,
+            final String blogId,
+            final int sourceOffset,
+            final int currentOffset,
+            final int sourceLimit,
+            final int currentLimit,
+            final Map<String, ?> queryParams,
+            final OnArrayCompletion<T> onCompletion,
+            final String ... additionalArgs) {
+        String[] aArgs = new String[additionalArgs.length + 3];
+        aArgs[0] = blogId;
+        aArgs[1] = String.valueOf(currentOffset);
+        aArgs[2] = String.valueOf(currentLimit);
+
+        System.arraycopy(additionalArgs, 0, aArgs, 3, additionalArgs.length);
+
+        doCall(
+                clazz,
+                queryParams,
+                new TumblrClient.OnCompletion<W>() {
+                    @Override
+                    public void onSuccess(W result) {
+                        resultList.addAll(result.getItems());
+
+                        int newOffset = currentOffset + result.getItems().size();
+
+                        int newLimit = Math.min(
+                                20,
+                                ((sourceLimit == -1)? result.getCount() : sourceLimit) - resultList.size()
+                        );
+
+                        if (newLimit <= 0) {
+                            if (onCompletion != null)
+                                onCompletion.onSuccess(resultList, sourceOffset, sourceLimit, result.getCount());
+                        } else {
+                            call(
+                                    resultList,
+                                    clazz,
+                                    blogId,
+                                    sourceOffset,
+                                    newOffset,
+                                    sourceLimit,
+                                    newLimit,
+                                    queryParams,
+                                    onCompletion,
+                                    additionalArgs
+                            );
+                        }
+                    }
+                },
+                aArgs
+        );
+    }
+
+    public <T, W extends TumblrArrayItem<T>> void call(
+            Class<? extends TumblrApi<W>> clazz,
+            String blogId,
+            final int offset,
+            final int limit,
+            final Map<String, ?> queryParams,
+            final OnArrayCompletion<T> onCompletion,
+            String ... additionalArgs) {
+        call(
+                new ArrayList<T>(),
+                clazz,
+                blogId,
+                offset,
+                offset,
+                limit,
+                limit,
+                queryParams,
+                onCompletion,
+                additionalArgs
+        );
+    }
+
+    public <T, W extends TumblrArrayItem<T>> void call(
+            Class<? extends TumblrApi<W>> clazz,
             String blogId,
             int offset,
             int limit,
-            Map<String, ?> queryParams,
-            final OnCompletion<T> onCompletion,
+            OnArrayCompletion<T> onCompletion,
             String ... additionalArgs) {
-        String[] aArgs = new String[additionalArgs.length + 3];
-        aArgs[0] = blogId;
-        aArgs[1] = String.valueOf(offset);
-        aArgs[2] = String.valueOf(limit);
-
-        System.arraycopy(additionalArgs, 0, aArgs, 3,additionalArgs.length);
-
-        doCall(clazz, queryParams, onCompletion, aArgs);
+        call(clazz, blogId, offset, limit, null, onCompletion, additionalArgs);
     }
 
-    public <T> void call(Class<? extends TumblrArray<T>> clazz,
-                     String blogId,
-                     int offset,
-                     int limit,
-                     OnCompletion<T> onCompletion,
-                     String ... additionalArgs) {
-        call(clazz, blogId, offset, limit, null, onCompletion, additionalArgs);
+    public <T, W extends TumblrArrayItem<T>> void call(
+            Class<? extends TumblrApi<W>> clazz,
+            String blogId,
+            int offset,
+            Map<String, ?> queryParams,
+            final OnArrayCompletion<T> onCompletion,
+            String ... additionalArgs) {
+        call(clazz, blogId, offset, 20, queryParams, onCompletion, additionalArgs);
+    }
+
+    public <T, W extends TumblrArrayItem<T>> void call(
+            Class<? extends TumblrApi<W>> clazz,
+            String blogId,
+            int offset,
+            OnArrayCompletion<T> onCompletion,
+            String ... additionalArgs) {
+        call(clazz, blogId, offset, 20, null, onCompletion, additionalArgs);
     }
 
     public void setOnLoginListener(OnLoginListener onLoginListener) {

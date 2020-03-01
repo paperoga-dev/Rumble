@@ -25,7 +25,7 @@ import org.scribe.oauth.OAuthService;
 
 import java.util.Map;
 
-public abstract class TumblrArray<T> extends TumblrBlogId<T> {
+public abstract class TumblrArray<T extends TumblrArrayItem> extends TumblrBlogId<T> {
     private final int offset;
     private final int limit;
 

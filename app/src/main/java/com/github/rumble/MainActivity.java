@@ -32,6 +32,8 @@ import android.widget.TextView;
 import org.scribe.exceptions.OAuthException;
 import org.scribe.model.Token;
 
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
 
     private TumblrClient client;
@@ -73,6 +75,19 @@ public class MainActivity extends AppCompatActivity {
                         blog.getName()
                     );
                 }
+
+                client.call(
+                        Following.Api.class,
+                        client.getMe().getName(),
+                        0,
+                        -1,
+                        new TumblrClient.OnArrayCompletion<Following.Blog>() {
+                            @Override
+                            public void onSuccess(List<Following.Blog> result, int offset, int limit, int count) {
+
+                            }
+                        }
+                 );
             }
 
             @Override

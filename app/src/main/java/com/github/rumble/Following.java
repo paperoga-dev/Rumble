@@ -25,8 +25,37 @@ import org.json.JSONObject;
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
+import java.util.List;
+
 public interface Following {
-    class Api extends TumblrArray<String> {
+    class Blog {
+
+    }
+
+    class Data implements TumblrArrayItem<Blog> {
+        private List<Blog> blogs;
+        private int totalBlogs;
+
+        public Data(JSONObject followingObject) throws JSONException {
+            super();
+
+            // TODO: Post
+            // this.blogs = ...;
+            this.totalBlogs = followingObject.getInt("total_blogs");
+        }
+
+        @Override
+        public int getCount() {
+            return totalBlogs;
+        }
+
+        @Override
+        public List<Blog> getItems() {
+            return blogs;
+        }
+    }
+
+    class Api extends TumblrArray<Data> {
 
         public Api(
                 Context context,
@@ -49,9 +78,8 @@ public interface Following {
         }
 
         @Override
-        protected String readData(JSONObject jsonObject) throws JSONException {
-            // TODO: needs a run
-            return "";
+        protected Data readData(JSONObject jsonObject) throws JSONException {
+            return new Data(jsonObject);
         }
     }
 }

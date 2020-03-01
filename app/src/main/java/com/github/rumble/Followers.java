@@ -20,13 +20,77 @@ package com.github.rumble;
 
 import android.content.Context;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 public interface Followers {
-    class Api extends TumblrArray<String> {
+    class User {
+        private String name;
+        private boolean following;
+        private String url;
+        private Date updated;
+
+        public User(JSONObject userObject) throws JSONException {
+            super();
+
+            this.name = userObject.getString("name");
+            this.following = userObject.getBoolean("following");
+            this.url = userObject.getString("url");
+            this.updated = new Date(userObject.getInt("updated") * 1000);
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public boolean isFollowing() {
+            return following;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public Date getUpdated() {
+            return updated;
+        }
+    }
+
+    class Data implements TumblrArrayItem<User> {
+        private int totalUsers;
+        private List<User> users;
+
+        public Data(JSONObject followersObject) throws JSONException {
+            super();
+
+            this.totalUsers = followersObject.getInt("total_users");
+            this.users = new ArrayList<>();
+
+            JSONArray users = followersObject.getJSONArray("users");
+            for (int i = 0; i < users.length(); ++i) {
+                this.users.add(new User(users.getJSONObject(i)));
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return totalUsers;
+        }
+
+        @Override
+        public List<User> getItems() {
+            return users;
+        }
+    }
+
+    class Api extends TumblrArray<Data> {
 
         public Api(
                 Context context,
@@ -49,9 +113,8 @@ public interface Followers {
         }
 
         @Override
-        protected String readData(JSONObject jsonObject) throws JSONException {
-            // TODO: needs a run
-            return "";
+        protected Data readData(JSONObject jsonObject) throws JSONException {
+            return new Data(jsonObject);
         }
     }
 }
