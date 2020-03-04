@@ -43,7 +43,7 @@ public interface Followers {
             this.name = userObject.getString("name");
             this.following = userObject.getBoolean("following");
             this.url = userObject.getString("url");
-            this.updated = new Date(userObject.getInt("updated") * 1000);
+            this.updated = new Date(userObject.getInt("updated") * 1000L);
         }
 
         public String getName() {

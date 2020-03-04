@@ -87,7 +87,7 @@ final class TumblrClient {
 
         try {
             PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-            appName = pInfo.applicationInfo.name;
+            appName = pInfo.applicationInfo.packageName;
             appVersion = pInfo.versionName;
         } catch (PackageManager.NameNotFoundException e) {
             // should never happen, anyway it isn't a big deal
@@ -248,7 +248,7 @@ final class TumblrClient {
         String[] aArgs = new String[additionalArgs.length + 3];
         aArgs[0] = blogId;
         aArgs[1] = String.valueOf(currentOffset);
-        aArgs[2] = String.valueOf(currentLimit);
+        aArgs[2] = String.valueOf((currentLimit == -1)? 20 : Math.min(currentLimit, 20));
 
         System.arraycopy(additionalArgs, 0, aArgs, 3, additionalArgs.length);
 
@@ -267,7 +267,7 @@ final class TumblrClient {
                                 ((sourceLimit == -1)? result.getCount() : sourceLimit) - resultList.size()
                         );
 
-                        if (newLimit <= 0) {
+                        if ((newLimit <= 0) || result.getItems().isEmpty()) {
                             if (onCompletion != null)
                                 onCompletion.onSuccess(resultList, sourceOffset, sourceLimit, result.getCount());
                         } else {

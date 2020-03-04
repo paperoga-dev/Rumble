@@ -21,7 +21,7 @@ package com.github.rumble;
 import org.scribe.builder.api.DefaultApi10a;
 import org.scribe.model.Token;
 
-class OAuthTumblrApi extends DefaultApi10a {
+public class OAuthTumblrApi extends DefaultApi10a {
     private static final String AUTHORIZE_URL = "https://www.tumblr.com/oauth/authorize?oauth_token=%s";
     private static final String REQUEST_TOKEN_RESOURCE = "https://www.tumblr.com/oauth/request_token";
     private static final String ACCESS_TOKEN_RESOURCE = "https://www.tumblr.com/oauth/access_token";

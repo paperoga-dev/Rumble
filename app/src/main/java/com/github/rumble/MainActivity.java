@@ -38,6 +38,62 @@ public class MainActivity extends AppCompatActivity {
 
     private TumblrClient client;
     private TumblrAuthenticate authenticator;
+    private TextView tv;
+
+    private void requestFollowing() {
+        client.call(
+                Following.Api.class,
+                client.getMe().getName(),
+                0,
+                -1,
+                new TumblrClient.OnArrayCompletion<BlogInfo.Base>() {
+                    @Override
+                    public void onSuccess(List<BlogInfo.Base> result, int offset, int limit, int count) {
+                        tv.append("\toffset = " + String.valueOf(offset) + "\n");
+                        tv.append("\tlimit = " + String.valueOf(limit) + "\n");
+                        tv.append("\tcount = " + String.valueOf(count) + "\n");
+
+                        for (BlogInfo.Base blog : result) {
+                            tv.append("\t\t" + blog.getName() + "\n");
+                            tv.append("\t\t" + blog.getTitle() + "\n");
+                            tv.append("\t\t" + blog.getDescription() + "\n");
+                            tv.append("\t\t" + blog.getUrl() + "\n");
+                            tv.append("\t\t" + blog.getUuid() + "\n");
+                            tv.append("\t\t" + blog.getUpdated().toString() + "\n");
+                        }
+                    }
+                }
+        );
+    }
+
+    private void requestBlogInfo(final List<BlogInfo.Data> list, final int current) {
+        if (current == list.size()) {
+            requestFollowing();
+            return;
+        }
+
+        client.call(BlogInfo.Api.class, new TumblrClient.OnCompletion<BlogInfo.Data>() {
+                    @Override
+                    public void onSuccess(BlogInfo.Data result) {
+                        if (current == list.size()) {
+                            requestFollowing();
+                            return;
+                        }
+
+                        tv.append("\t\t\t" + result.getName() + "\n");
+                        tv.append("\t\t\t" + result.getTitle() + "\n");
+                        tv.append("\t\t\t" + result.getDescription() + "\n");
+                        tv.append("\t\t\t" + result.getPosts() + "\n");
+                        tv.append("\t\t\t" + result.getUpdated().toString() + "\n");
+                        tv.append("\t\t\t" + result.isAsk() + "\n");
+                        tv.append("\t\t\t" + result.isAskAnon() + "\n");
+
+                        requestBlogInfo(list, current + 1);
+                    }
+                },
+                list.get(current).getName()
+        );
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
 
         client = new TumblrClient(getApplicationContext());
 
-        final TextView tv = findViewById(R.id.textView);
+        tv = findViewById(R.id.textView);
         tv.setText("");
 
         client.setOnLoginListener(new TumblrClient.OnLoginListener() {
@@ -59,35 +115,9 @@ public class MainActivity extends AppCompatActivity {
                 for (BlogInfo.Data blog : client.getMe().getBlogs()) {
                     tv.append("\t" + blog.getName() + "\n");
                     tv.append("\t\t" + blog.getTitle() + "\n");
-
-                    client.call(BlogInfo.Api.class, new TumblrClient.OnCompletion<BlogInfo.Data>() {
-                            @Override
-                            public void onSuccess(BlogInfo.Data result) {
-                                tv.append("\t\t\t" + result.getName() + "\n");
-                                tv.append("\t\t\t" + result.getTitle() + "\n");
-                                tv.append("\t\t\t" + result.getDescription() + "\n");
-                                tv.append("\t\t\t" + result.getPosts() + "\n");
-                                tv.append("\t\t\t" + result.getUpdated().toString() + "\n");
-                                tv.append("\t\t\t" + result.isAsk() + "\n");
-                                tv.append("\t\t\t" + result.isAskAnon() + "\n");
-                            }
-                        },
-                        blog.getName()
-                    );
                 }
 
-                client.call(
-                        Following.Api.class,
-                        client.getMe().getName(),
-                        0,
-                        -1,
-                        new TumblrClient.OnArrayCompletion<Following.Blog>() {
-                            @Override
-                            public void onSuccess(List<Following.Blog> result, int offset, int limit, int count) {
-
-                            }
-                        }
-                 );
+                requestBlogInfo(client.getMe().getBlogs(), 0);
             }
 
             @Override

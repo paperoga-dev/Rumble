@@ -45,10 +45,11 @@ public class LoginActivity extends Activity {
         }
 
         @Override
-        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+        @SuppressWarnings("deprecation")
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
 
-            Uri uri = request.getUrl();
-            if (uri.toString().toLowerCase().contains(Constants.CALLBACK_URL.toLowerCase())) {
+            if (url.toLowerCase().contains(Constants.CALLBACK_URL.toLowerCase())) {
+                Uri uri = Uri.parse(url);
                 for (String strQuery : uri.getQueryParameterNames())
                     if (strQuery.contentEquals(Constants.OAUTH_VERIFIER)) {
 

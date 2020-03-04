@@ -34,6 +34,50 @@ import java.util.Set;
 
 public interface BlogInfo {
 
+    class Base {
+        private String description;               // String - Blog description
+        private String name;                      // String - Blog name
+        private String title;                     // String - Blog title
+        private Date updated;                     // Number - Last updated time (epoch)
+        private String url;                       // String - Blog URL
+        private String uuid;                      // String - Blog UUID
+
+        public Base(JSONObject blogObject) throws JSONException {
+            super();
+
+            this.description = blogObject.getString("description");
+            this.name = blogObject.getString("name");
+            this.title = blogObject.getString("title");
+            this.updated = new Date(blogObject.getInt("updated") * 1000L);
+            this.url = blogObject.getString("url");
+            this.uuid = blogObject.getString("uuid");
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public Date getUpdated() {
+            return updated;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public String getUuid() {
+            return uuid;
+        }
+    }
+
     class SubmissionTerms {
         public enum AcceptedTypes {
             Text,
@@ -108,7 +152,7 @@ public interface BlogInfo {
         }
     }
 
-    class Data {
+    class Data extends Base {
         enum Type {
             Public,
             Private
@@ -129,16 +173,14 @@ public interface BlogInfo {
         private boolean canSendFanMail;           // Boolean - ????
         private boolean canSubmit;                // Boolean - Allows submissions
         private boolean canSubscribe;             // Boolean - ????
-        private String description;               // String - Blog description
         private int drafts;                       // Number - Drafts count
         private boolean facebook;                 // Boolean - Is to Facebook linked
         private boolean facebookOpengraphEnabled; // Boolean String - ????? (Y/N)
         private boolean followed;                 // Boolean - ?????
         private int followers;                    // Number - Followers count
         private boolean isBlockedFromPrimary;     // Boolean - ????
-        private boolean isNFSW;                   // Boolean - NFSW blog
+        private boolean isNSFW;                   // Boolean - NSFW blog
         private int messages;                     // Number - Messages count;
-        private String name;                      // String - Blog name
         private int posts;                        // Number - Posts count
         private boolean primary;                  // Boolean - Is a primary blog
         private int queue;                        // Number - Queued posts count
@@ -147,23 +189,21 @@ public interface BlogInfo {
         private SubmissionTerms submissionTerms;  // Submission Object => see above
         private boolean subscribed;               // Boolean - ?????
         // There is a theme object here, we skip it, it's useless for our purposes
-        private String title;                     // String - Blog title
         private int totalPosts;                   // Number - Posts count
         private Tweet tweet;                      // String - indicate if posts are tweeted auto, Y, N
         private boolean twitterEnabled;           // Boolean - ?????
         private boolean twitterSend;              // Boolean - ????
         private Type type;                        // String - indicates whether a blog is public or private
-        private Date updated;                     // Number - Last updated time (epoch)
-        private String url;                       // String - Blog URL
-        private String uuid;                      // Stirng - Blog UUID
 
         public Data(JSONObject blogObject) throws JSONException {
+            super(blogObject);
+
             this.admin = blogObject.getBoolean("admin");
             this.ask = blogObject.getBoolean("ask");
             this.askAnon = blogObject.getBoolean("ask_anon");
             this.askPageTitle = blogObject.getString("ask_page_title");
 
-            JSONArray avatars = blogObject.getJSONArray("avatars");
+            JSONArray avatars = blogObject.getJSONArray("avatar");
 
             this.avatars = new ArrayList<>();
             for (int i = 0; i < avatars.length(); ++i) {
@@ -174,16 +214,14 @@ public interface BlogInfo {
             this.canSendFanMail = blogObject.getBoolean("can_send_fan_mail");
             this.canSubmit = blogObject.getBoolean("can_submit");
             this.canSubscribe = blogObject.getBoolean("can_subscribe");
-            this.description = blogObject.getString("description");
             this.drafts = blogObject.getInt("drafts");
             this.facebook = blogObject.getString("facebook").equalsIgnoreCase("Y");
             this.facebookOpengraphEnabled = blogObject.getString("facebook_opengraph_enabled").equalsIgnoreCase("Y");
             this.followed = blogObject.getBoolean("followed");
             this.followers = blogObject.getInt("followers");
             this.isBlockedFromPrimary = blogObject.getBoolean("is_blocked_from_primary");
-            this.isNFSW = blogObject.getBoolean("is_nfsw");
+            this.isNSFW = blogObject.getBoolean("is_nsfw");
             this.messages = blogObject.getInt("messages");
-            this.name = blogObject.getString("name");
             this.posts = blogObject.getInt("posts");
             this.primary = blogObject.getBoolean("primary");
             this.queue = blogObject.getInt("queue");
@@ -191,7 +229,6 @@ public interface BlogInfo {
             this.submissionPageTitle = blogObject.getString("submission_page_title");
             this.submissionTerms = new SubmissionTerms(blogObject.getJSONObject("submission_terms"));
             this.subscribed = blogObject.getBoolean("subscribed");
-            this.title = blogObject.getString("title");
             this.totalPosts = blogObject.getInt("total_posts");
 
             String tweet = blogObject.getString("tweet");
@@ -209,10 +246,6 @@ public interface BlogInfo {
                 this.type = Type.Public;
             else
                 this.type = Type.Private;
-
-            this.updated = new Date(blogObject.getInt("updated") * 1000);
-            this.url = blogObject.getString("url");
-            this.uuid = blogObject.getString("uuid");
         }
 
         public boolean isAdmin() {
@@ -251,10 +284,6 @@ public interface BlogInfo {
             return canSubscribe;
         }
 
-        public String getDescription() {
-            return description;
-        }
-
         public int getDrafts() {
             return drafts;
         }
@@ -279,16 +308,12 @@ public interface BlogInfo {
             return isBlockedFromPrimary;
         }
 
-        public boolean isNFSW() {
-            return isNFSW;
+        public boolean isNSFW() {
+            return isNSFW;
         }
 
         public int getMessages() {
             return messages;
-        }
-
-        public String getName() {
-            return name;
         }
 
         public int getPosts() {
@@ -319,10 +344,6 @@ public interface BlogInfo {
             return subscribed;
         }
 
-        public String getTitle() {
-            return title;
-        }
-
         public int getTotalPosts() {
             return totalPosts;
         }
@@ -341,18 +362,6 @@ public interface BlogInfo {
 
         public Type getType() {
             return type;
-        }
-
-        public Date getUpdated() {
-            return updated;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-
-        public String getUuid() {
-            return uuid;
         }
     }
 
@@ -417,6 +426,11 @@ public interface BlogInfo {
                 String appVersion,
                 String[] additionalArgs) {
             super(context, service, authToken, appId, appVersion, additionalArgs);
+        }
+
+        @Override
+        protected String getPath() {
+            return super.getPath() + "/info";
         }
 
         @Override

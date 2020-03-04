@@ -165,6 +165,8 @@ abstract class TumblrApi<T> {
         request.addHeader("User-Agent", appId + "/" + appVersion);
 
         Log.v(Constants.APP_NAME, "Request: " + request.toString());
+        Log.v(Constants.APP_NAME, "Query Params: " + request.getQueryStringParams().asFormUrlEncodedString());
+        Log.v(Constants.APP_NAME, "Headers: " + request.getHeaders().toString());
 
         service.signRequest(authToken, request);
 

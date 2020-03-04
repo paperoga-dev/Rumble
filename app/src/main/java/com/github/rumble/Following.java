@@ -20,28 +20,29 @@ package com.github.rumble;
 
 import android.content.Context;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public interface Following {
-    class Blog {
-
-    }
-
-    class Data implements TumblrArrayItem<Blog> {
-        private List<Blog> blogs;
+    class Data implements TumblrArrayItem<BlogInfo.Base> {
+        private List<BlogInfo.Base> blogs;
         private int totalBlogs;
 
         public Data(JSONObject followingObject) throws JSONException {
             super();
 
-            // TODO: Post
-            // this.blogs = ...;
             this.totalBlogs = followingObject.getInt("total_blogs");
+
+            this.blogs = new ArrayList<>();
+            JSONArray blogs = followingObject.getJSONArray("blogs");
+            for (int i = 0; i < blogs.length(); ++i)
+                this.blogs.add(new BlogInfo.Base(blogs.getJSONObject(i)));
         }
 
         @Override
@@ -50,7 +51,7 @@ public interface Following {
         }
 
         @Override
-        public List<Blog> getItems() {
+        public List<BlogInfo.Base> getItems() {
             return blogs;
         }
     }
