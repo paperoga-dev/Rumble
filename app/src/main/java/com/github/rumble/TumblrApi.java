@@ -19,7 +19,8 @@
 package com.github.rumble;
 
 import android.content.Context;
-import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -40,69 +41,76 @@ abstract class TumblrApi<T> {
         void onFailure(TumblrException e);
     }
 
-    private static class TumblrCall<T> extends AsyncTask<OAuthRequest, Void, String> {
+    private static class TumblrCall<T> implements Runnable {
 
         private final OnCompletion<T> onCompletion;
-        private OAuthException networkException;
         private final TumblrApi<T> api;
+        private OAuthRequest request;
 
-        private TumblrCall(TumblrApi<T> api, OnCompletion<T> onCompletion) {
+        private TumblrCall(TumblrApi<T> api, OAuthRequest request, OnCompletion<T> onCompletion) {
             super();
 
             this.api = api;
+            this.request = request;
             this.onCompletion = onCompletion;
-            this.networkException = null;
         }
 
         @Override
-        protected String doInBackground(OAuthRequest... requests) {
-            try {
-                return requests[0].send().getBody();
-            } catch(OAuthException e) {
-                networkException = e;
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String jsonResponse) {
+        public void run() {
             if (onCompletion == null)
                 return;
 
-            if (networkException != null) {
-                onCompletion.onFailure(new TumblrNetworkException(networkException));
-                return;
-            }
-
             try {
+                String jsonResponse = request.send().getBody();
                 Log.v(Constants.APP_NAME, "JSON Response: " + jsonResponse);
 
                 JSONObject rootObj = new JSONObject(jsonResponse);
 
                 JSONObject metaObj = rootObj.getJSONObject("meta");
-                int responseCode = metaObj.getInt("status");
-                String responseMessage = metaObj.getString("msg");
+                final int responseCode = metaObj.getInt("status");
+                final String responseMessage = metaObj.getString("msg");
 
                 switch (responseCode) {
                     case 200:
                     case 201:
-                        onCompletion.onSuccess(
-                                api.readData(rootObj.getJSONObject("response"))
-                        );
+                        final T out = api.readData(rootObj.getJSONObject("response"));
+                        new Handler(Looper.getMainLooper()).post(
+                                new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        onCompletion.onSuccess(out);
+                                    }
+                                });
                         break;
 
                     default:
-                        onCompletion.onFailure(
-                                new TumblrResponseException(
-                                        responseCode,
-                                        responseMessage
-                                )
-                        );
+                        new Handler(Looper.getMainLooper()).post(new Runnable() {
+                            @Override
+                            public void run() {
+                                onCompletion.onFailure(
+                                        new TumblrResponseException(
+                                                responseCode,
+                                                responseMessage
+                                        )
+                                );
+                            }
+                        });
                         break;
                 }
-            } catch (JSONException e) {
-                onCompletion.onFailure(new TumblrJsonException(e));
+            } catch (final JSONException e) {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        onCompletion.onFailure(new TumblrJsonException(e));
+                    }
+                });
+            } catch (final OAuthException e) {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        onCompletion.onFailure(new TumblrNetworkException(e));
+                    }
+                });
             }
         }
     }
@@ -170,7 +178,7 @@ abstract class TumblrApi<T> {
 
         service.signRequest(authToken, request);
 
-        new TumblrCall<>(this, onCompletion).execute(request);
+        new Thread(new TumblrCall<>(this, request, onCompletion)).start();
     }
 
     public void call(OnCompletion<T> onCompletion) {
