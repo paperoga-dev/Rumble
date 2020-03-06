@@ -37,7 +37,7 @@ public interface Followers {
         private String url;
         private Date updated;
 
-        public User(JSONObject userObject) throws JSONException {
+        User(JSONObject userObject) throws JSONException {
             super();
 
             this.name = userObject.getString("name");
@@ -67,7 +67,7 @@ public interface Followers {
         private int totalUsers;
         private List<User> users;
 
-        public Data(JSONObject followersObject) throws JSONException {
+        Data(JSONObject followersObject) throws JSONException {
             super();
 
             this.totalUsers = followersObject.getInt("total_users");

@@ -45,7 +45,7 @@ abstract class TumblrApi<T> {
 
         private final OnCompletion<T> onCompletion;
         private final TumblrApi<T> api;
-        private OAuthRequest request;
+        private final OAuthRequest request;
 
         private TumblrCall(TumblrApi<T> api, OAuthRequest request, OnCompletion<T> onCompletion) {
             super();

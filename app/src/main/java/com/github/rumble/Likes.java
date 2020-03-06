@@ -36,7 +36,7 @@ public interface Likes {
         private List<Post> likedPosts;
         private int likedCount;
 
-        public Data(JSONObject likesObject) throws JSONException {
+        Data(JSONObject likesObject) throws JSONException {
             super();
 
             // TODO: Post

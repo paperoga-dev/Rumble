@@ -19,7 +19,8 @@
 package com.github.rumble;
 
 import android.content.Context;
-import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import org.scribe.builder.ServiceBuilder;
@@ -40,13 +41,10 @@ class TumblrAuthenticate {
         void onFailure(OAuthException exception);
     }
 
-    private static class RequestTokenTask extends AsyncTask<Void, Void, String> {
+    private static class RequestTokenTask implements Runnable {
         private final TumblrAuthenticate authenticator;
         private final OAuthService oAuthService;
         private final OnAuthenticationListener onAuthenticationListener;
-
-        private Token requestToken;
-        private OAuthException exc;
 
         RequestTokenTask(
                 TumblrAuthenticate authenticator,
@@ -57,53 +55,48 @@ class TumblrAuthenticate {
             this.authenticator = authenticator;
             this.oAuthService = oAuthService;
             this.onAuthenticationListener = onAuthenticationListener;
-
-            this.requestToken = null;
-            this.exc = null;
         }
 
         @Override
-        protected String doInBackground(Void... voids) {
-            try {
-                requestToken = oAuthService.getRequestToken();
-                Log.v(Constants.APP_NAME, "Request Token: " + requestToken.toString());
-
-                return oAuthService.getAuthorizationUrl(requestToken);
-            } catch (OAuthException e) {
-                exc = e;
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String authenticationUrl) {
+        public void run() {
             if (onAuthenticationListener == null)
                 return;
 
-            if (authenticationUrl == null) {
-                if (exc != null) {
-                    onAuthenticationListener.onFailure(exc);
-                }
-            } else {
+            try {
+                final Token requestToken = oAuthService.getRequestToken();
+                Log.v(Constants.APP_NAME, "Request Token: " + requestToken.toString());
+
+                final String authenticationUrl = oAuthService.getAuthorizationUrl(requestToken);
                 Log.v(Constants.APP_NAME, "Authentication URL: " + authenticationUrl);
 
-                onAuthenticationListener.onAuthenticationRequest(
-                        authenticator,
-                        requestToken,
-                        authenticationUrl
-                );
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        onAuthenticationListener.onAuthenticationRequest(
+                                authenticator,
+                                requestToken,
+                                authenticationUrl
+                        );
+                    }
+                });
+
+            } catch (final OAuthException e) {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        onAuthenticationListener.onFailure(e);
+                    }
+                });
             }
         }
     }
 
-    private static class AccessTokenTask extends AsyncTask<Void, Void, Token> {
+    private static class AccessTokenTask implements Runnable {
         private final String authVerifier;
         private final Token requestToken;
         private final OAuthService oAuthService;
         private final Context context;
         private final OnAuthenticationListener onAuthenticationListener;
-        private OAuthException exc;
 
         AccessTokenTask(
                 String authVerifier,
@@ -118,30 +111,15 @@ class TumblrAuthenticate {
             this.oAuthService = oAuthService;
             this.context = context;
             this.onAuthenticationListener = onAuthenticationListener;
-            this.exc = null;
         }
 
         @Override
-        protected Token doInBackground(Void... voids) {
-            try {
-                return oAuthService.getAccessToken(requestToken, new Verifier(authVerifier));
-            } catch (OAuthException e) {
-                exc = e;
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Token authToken) {
+        public void run() {
             if (onAuthenticationListener == null)
                 return;
 
-            if (authToken == null) {
-                if (exc != null) {
-                    onAuthenticationListener.onFailure(exc);
-                }
-            } else {
+            try {
+                final Token authToken = oAuthService.getAccessToken(requestToken, new Verifier(authVerifier));
                 Log.v(Constants.APP_NAME, "Access Token: " + authToken.toString());
 
                 context.getSharedPreferences(Constants.APP_NAME, Context.MODE_PRIVATE)
@@ -150,7 +128,20 @@ class TumblrAuthenticate {
                         .putString(Constants.OAUTH_TOKEN_SECRET_KEY, authToken.getSecret())
                         .apply();
 
-                onAuthenticationListener.onAuthenticationGranted(authToken);
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        onAuthenticationListener.onAuthenticationGranted(authToken);
+                    }
+                });
+
+            } catch (final OAuthException e) {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        onAuthenticationListener.onFailure(e);
+                    }
+                });
             }
         }
     }
@@ -159,7 +150,7 @@ class TumblrAuthenticate {
     private final Context context;
     private OnAuthenticationListener onAuthenticationListener;
 
-    public TumblrAuthenticate(String appId, Context context) {
+    TumblrAuthenticate(String appId, Context context) {
         super();
 
         this.oAuthService = new ServiceBuilder()
@@ -173,23 +164,25 @@ class TumblrAuthenticate {
         this.onAuthenticationListener = null;
     }
 
-    public void request() {
+    void request() {
         if (onAuthenticationListener == null)
             return;
 
-        new RequestTokenTask(this, oAuthService, onAuthenticationListener).execute();
+        new Thread(new RequestTokenTask(this, oAuthService, onAuthenticationListener)).start();
     }
 
-    public void verify(Token requestToken, String authVerifier) {
-        Log.v(Constants.APP_NAME, "In verify: requestToken = " + requestToken.toString());
-        Log.v(Constants.APP_NAME, "In verify: authVerifier = " + authVerifier);
+    void verify(Token requestToken, String authVerifier) {
+        Log.v(Constants.APP_NAME, "Verify: requestToken = " + requestToken.toString());
+        Log.v(Constants.APP_NAME, "Verify: authVerifier = " + authVerifier);
 
-        new AccessTokenTask(
-                authVerifier,
-                requestToken,
-                oAuthService,
-                context,
-                onAuthenticationListener).execute();
+        new Thread (
+            new AccessTokenTask(
+                    authVerifier,
+                    requestToken,
+                    oAuthService,
+                    context,
+                    onAuthenticationListener)
+        ).start();
     }
 
     void setOnAuthenticationListener(OnAuthenticationListener onAuthenticationListener) {

@@ -34,7 +34,7 @@ public interface Following {
         private List<BlogInfo.Base> blogs;
         private int totalBlogs;
 
-        public Data(JSONObject followingObject) throws JSONException {
+        Data(JSONObject followingObject) throws JSONException {
             super();
 
             this.totalBlogs = followingObject.getInt("total_blogs");
