@@ -60,6 +60,10 @@ abstract class TumblrApi<T> {
             if (onCompletion == null)
                 return;
 
+            Log.v(Constants.APP_NAME, "Request: " + request.toString());
+            Log.v(Constants.APP_NAME, "Query Params: " + request.getQueryStringParams().asFormUrlEncodedString());
+            Log.v(Constants.APP_NAME, "Headers: " + request.getHeaders().toString());
+
             try {
                 String jsonResponse = request.send().getBody();
                 Log.v(Constants.APP_NAME, "JSON Response: " + jsonResponse);
@@ -145,6 +149,7 @@ abstract class TumblrApi<T> {
     }
 
     protected abstract String getPath();
+
     Map<String, String> defaultParams() {
         Map<String, String> m = new HashMap<>();
 
@@ -153,9 +158,10 @@ abstract class TumblrApi<T> {
 
         return m;
     }
+
     protected abstract T readData(JSONObject jsonObject) throws JSONException;
 
-    public void call(Map<String, ?> queryParams, OnCompletion<T> onCompletion) {
+    public Runnable call(Map<String, ?> queryParams, OnCompletion<T> onCompletion) {
         OAuthRequest request = new OAuthRequest(Verb.GET, Constants.API_ENDPOINT + getPath());
 
         if (defaultParams() != null) {
@@ -172,16 +178,12 @@ abstract class TumblrApi<T> {
 
         request.addHeader("User-Agent", appId + "/" + appVersion);
 
-        Log.v(Constants.APP_NAME, "Request: " + request.toString());
-        Log.v(Constants.APP_NAME, "Query Params: " + request.getQueryStringParams().asFormUrlEncodedString());
-        Log.v(Constants.APP_NAME, "Headers: " + request.getHeaders().toString());
-
         service.signRequest(authToken, request);
 
-        new Thread(new TumblrCall<>(this, request, onCompletion)).start();
+        return new TumblrCall<>(this, request, onCompletion);
     }
 
-    public void call(OnCompletion<T> onCompletion) {
-        call(null, onCompletion);
+    public Runnable call(OnCompletion<T> onCompletion) {
+        return call(null, onCompletion);
     }
 }

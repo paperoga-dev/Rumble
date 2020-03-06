@@ -33,6 +33,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 final class TumblrClient {
 
@@ -67,6 +71,8 @@ final class TumblrClient {
     private OnLoginListener onLoginListener;
     private OnFailureListener onFailureListener;
 
+    private final ExecutorService executorService;
+
     private UserInfo.Data me;
 
     public TumblrClient(Context context) {
@@ -84,6 +90,14 @@ final class TumblrClient {
         onFailureListener = null;
 
         this.me = null;
+
+        this.executorService = new ThreadPoolExecutor(
+                1,
+                1,
+                0L,
+                TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>()
+        );
 
         try {
             PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
@@ -123,36 +137,38 @@ final class TumblrClient {
     private void login(Token authToken) {
         this.authToken = authToken;
 
-        new UserInfo.Api(context, oAuthService, authToken, appName, appVersion, null)
-                .call(new TumblrApi.OnCompletion<UserInfo.Data>() {
-                    @Override
-                    public void onSuccess(UserInfo.Data result) {
-                        me = result;
+        executorService.submit(
+            new UserInfo.Api(context, oAuthService, authToken, appName, appVersion, null)
+                    .call(new TumblrApi.OnCompletion<UserInfo.Data>() {
+                        @Override
+                        public void onSuccess(UserInfo.Data result) {
+                            me = result;
 
-                        if (onLoginListener != null)
-                            onLoginListener.onAccessGranted();
-                    }
-
-                    @Override
-                    public void onFailure(TumblrException e) {
-                        if (e instanceof TumblrNetworkException) {
-                            // we cannot reach Tumblr, fail but do not remove our tokens
-                            onFailureListener.onNetworkFailure(((TumblrNetworkException) e).getException());
-                        } else {
-                            // we can reach Tumblr, but we cannot access it. So, throw away our tokens, and
-                            // let's ask a new authentication
-                            Log.v(Constants.APP_NAME, "Auth token not valid");
-
-                            context.getSharedPreferences(Constants.APP_NAME, Context.MODE_PRIVATE)
-                                    .edit()
-                                    .remove(Constants.OAUTH_TOKEN_KEY)
-                                    .remove(Constants.OAUTH_TOKEN_SECRET_KEY)
-                                    .apply();
-
-                            doLogin();
+                            if (onLoginListener != null)
+                                onLoginListener.onAccessGranted();
                         }
-                    }
-                });
+
+                        @Override
+                        public void onFailure(TumblrException e) {
+                            if (e instanceof TumblrNetworkException) {
+                                // we cannot reach Tumblr, fail but do not remove our tokens
+                                onFailureListener.onNetworkFailure(((TumblrNetworkException) e).getException());
+                            } else {
+                                // we can reach Tumblr, but we cannot access it. So, throw away our tokens, and
+                                // let's ask a new authentication
+                                Log.v(Constants.APP_NAME, "Auth token not valid");
+
+                                context.getSharedPreferences(Constants.APP_NAME, Context.MODE_PRIVATE)
+                                        .edit()
+                                        .remove(Constants.OAUTH_TOKEN_KEY)
+                                        .remove(Constants.OAUTH_TOKEN_SECRET_KEY)
+                                        .apply();
+
+                                doLogin();
+                            }
+                        }
+                    })
+        );
     }
 
     public void login() {
@@ -191,27 +207,29 @@ final class TumblrClient {
                     String[].class
             };
 
-            clazz.getDeclaredConstructor(cArg)
-                    .newInstance(
-                            context,
-                            oAuthService,
-                            authToken,
-                            appName,
-                            appVersion,
-                            additionalArgs)
-                    .call(queryParams, new TumblrApi.OnCompletion<T>() {
-                        @Override
-                        public void onSuccess(T result) {
-                            if (onCompletion != null)
-                                onCompletion.onSuccess(result);
-                        }
+            executorService.submit(
+                clazz.getDeclaredConstructor(cArg)
+                        .newInstance(
+                                context,
+                                oAuthService,
+                                authToken,
+                                appName,
+                                appVersion,
+                                additionalArgs)
+                        .call(queryParams, new TumblrApi.OnCompletion<T>() {
+                            @Override
+                            public void onSuccess(T result) {
+                                if (onCompletion != null)
+                                    onCompletion.onSuccess(result);
+                            }
 
-                        @Override
-                        public void onFailure(TumblrException e) {
-                            if (onFailureListener != null)
-                                onFailureListener.onFailure(e);
-                        }
-                    });
+                            @Override
+                            public void onFailure(TumblrException e) {
+                                if (onFailureListener != null)
+                                    onFailureListener.onFailure(e);
+                            }
+                        })
+            );
         } catch (IllegalAccessException |
                 NoSuchMethodException |
                 InvocationTargetException |
