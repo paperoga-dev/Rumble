@@ -34,39 +34,21 @@ import java.util.Set;
 
 public interface BlogInfo {
 
-    class Base {
-        private String description;               // String - Blog description
+    class Reference {
         private String name;                      // String - Blog name
-        private String title;                     // String - Blog title
-        private Date updated;                     // Number - Last updated time (epoch)
         private String url;                       // String - Blog URL
         private String uuid;                      // String - Blog UUID
 
-        public Base(JSONObject blogObject) throws JSONException {
+        public Reference(JSONObject blogObject) throws JSONException {
             super();
 
-            this.description = blogObject.getString("description");
             this.name = blogObject.getString("name");
-            this.title = blogObject.getString("title");
-            this.updated = new Date(blogObject.getInt("updated") * 1000L);
             this.url = blogObject.getString("url");
             this.uuid = blogObject.getString("uuid");
         }
 
-        public String getDescription() {
-            return description;
-        }
-
         public String getName() {
             return name;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public Date getUpdated() {
-            return updated;
         }
 
         public String getUrl() {
@@ -75,6 +57,32 @@ public interface BlogInfo {
 
         public String getUuid() {
             return uuid;
+        }
+    }
+
+    class Base extends Reference {
+        private String description;               // String - Blog description
+        private String title;                     // String - Blog title
+        private Date updated;                     // Number - Last updated time (epoch)
+
+        public Base(JSONObject blogObject) throws JSONException {
+            super(blogObject);
+
+            this.description = blogObject.getString("description");
+            this.title = blogObject.getString("title");
+            this.updated = new Date(blogObject.getInt("updated") * 1000L);
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public Date getUpdated() {
+            return updated;
         }
     }
 

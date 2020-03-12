@@ -1,478 +1,282 @@
 package com.github.rumble;
 
-import android.content.Context;
+import android.app.Application;
+import android.graphics.Color;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.scribe.model.Token;
-import org.scribe.oauth.OAuthService;
 
-import java.lang.reflect.Array;
+import java.io.InvalidClassException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public interface Posts {
-    enum State {
-        Published,
-        Queued,
-        Draft,
-        Private
-    }
 
-    enum Format {
-        Html,
-        Markdown
-    }
-
-    abstract class Post {
-        private String blogName;
-        private BlogInfo.Base blog;
-        private long id;
+    abstract class Media {
         private String url;
-        private String slug;
-        private Date timestamp;
-        private State state;
-        private Format format;
-        private String reblogKey;
-        private List<String> tags;
-        private String shortUrl;
-        private String summary;
-        private boolean shouldOpenInLegacy;
-        private boolean followed;
-        private boolean liked;
-        private int noteCount;
-        private String title;
-        private String body;
-        private boolean canLike;
-        private boolean canReblog;
-        private boolean canSendInMessage;
-        private boolean canReply;
-        private boolean displayAvatar;
+        private String mimeType;
+        private boolean originalDimensionsMissing;
+        private boolean cropped;
+        private boolean hasOriginalDimensions;
 
-        public Post(JSONObject postObject) throws JSONException {
+        public Media(JSONObject mediaObject) throws JSONException {
             super();
 
-            this.blogName = postObject.getString("blog_name");
-            this.blog = new BlogInfo.Base(postObject.getJSONObject("blog"));
-            this.id = postObject.getLong("id");
-            this.url = postObject.getString("post_url");
-            this.slug = postObject.getString("slug");
-            this.timestamp = new Date(postObject.getInt("timestamp") * 1000L);
-
-            String state = postObject.getString("state");
-            if (state.equalsIgnoreCase("queued"))
-                this.state = State.Queued;
-            else if (state.equalsIgnoreCase("draft"))
-                this.state = State.Draft;
-            else if (state.equalsIgnoreCase("private"))
-                this.state = State.Private;
-            else
-                this.state = State.Published;
-
-            String format = postObject.getString("format");
-            if (format.equalsIgnoreCase("markdown"))
-                this.format = Format.Markdown;
-            else
-                this.format = Format.Html;
-
-            this.reblogKey = postObject.getString("reblog_key");
-
-            this.tags = new ArrayList<>();
-            JSONArray tags = postObject.getJSONArray("tags");
-            for (int i = 0; i < tags.length(); ++i) {
-                this.tags.add(tags.getString(i));
-            }
-
-            this.shortUrl = postObject.getString("short_url");
-            this.summary = postObject.getString("summary");
-            this.shouldOpenInLegacy = postObject.getBoolean("should_open_in_legacy");
-            this.followed = postObject.getBoolean("followed");
-            this.liked = postObject.getBoolean("liked");
-            this.noteCount = postObject.getInt("note_count");
-            this.canLike = postObject.getBoolean("can_like");
-            this.canReblog = postObject.getBoolean("can_reblog");
-            this.canSendInMessage = postObject.getBoolean("can_send_in_message");
-            this.canReply = postObject.getBoolean("can_reply");
-            this.displayAvatar = postObject.getBoolean("display_avatar");
-        }
-
-        public String getBlogName() {
-            return blogName;
-        }
-
-        public BlogInfo.Base getBlog() {
-            return blog;
-        }
-
-        public long getId() {
-            return id;
+            this.url = mediaObject.getString("url");
+            this.mimeType = mediaObject.optString("type", "");
+            this.originalDimensionsMissing = mediaObject.optBoolean(
+                    "original_dimensions_missing",
+                    false
+            );
+            this.cropped = mediaObject.optBoolean("cropped", false);
+            this.hasOriginalDimensions = mediaObject.optBoolean(
+                    "has_original_dimensions",
+                    false
+            );
         }
 
         public String getUrl() {
             return url;
         }
 
-        public String getSlug() {
-            return slug;
+        public String getMimeType() {
+            return mimeType;
         }
 
-        public Date getTimestamp() {
-            return timestamp;
+        public boolean areOriginalDimensionsMissing() {
+            return originalDimensionsMissing;
         }
 
-        public State getState() {
-            return state;
+        public boolean isCropped() {
+            return cropped;
         }
 
-        public Format getFormat() {
-            return format;
-        }
-
-        public String getReblogKey() {
-            return reblogKey;
-        }
-
-        public List<String> getTags() {
-            return tags;
-        }
-
-        public String getShortUrl() {
-            return shortUrl;
-        }
-
-        public String getSummary() {
-            return summary;
-        }
-
-        public boolean isShouldOpenInLegacy() {
-            return shouldOpenInLegacy;
-        }
-
-        public boolean isFollowed() {
-            return followed;
-        }
-
-        public boolean isLiked() {
-            return liked;
-        }
-
-        public int getNoteCount() {
-            return noteCount;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public String getBody() {
-            return body;
-        }
-
-        public boolean canLike() {
-            return canLike;
-        }
-
-        public boolean canReblog() {
-            return canReblog;
-        }
-
-        public boolean canSendInMessage() {
-            return canSendInMessage;
-        }
-
-        public boolean canReply() {
-            return canReply;
-        }
-
-        public boolean isDisplayAvatar() {
-            return displayAvatar;
+        public boolean hasOriginalDimensions() {
+            return hasOriginalDimensions;
         }
     }
 
-    class Text extends Post {
+    class Image extends Media {
+        private int width;
+        private int height;
 
-        // text only
-        // title -> string, can be null
-        // body -> string
+        public Image(JSONObject mediaObject) throws JSONException {
+            super(mediaObject);
 
-        public Text(JSONObject postObject) throws JSONException {
-            super(postObject);
+            this.width = mediaObject.optInt("width", 0);
+            this.height = mediaObject.optInt("height", 0);
+        }
+
+        public int getWidth() {
+            return width;
+        }
+
+        public int getHeight() {
+            return height;
         }
     }
 
-    class Photo extends Post {
+    abstract class ContentItem {
 
-        // photo only
-        // image_permalink -> string
-        // photos -> array of objects
-        //   -> caption -> string
-        //   -> original_size -> object
-        //   -> -> url -> string
-        //   -> -> width -> number
-        //   -> -> height -> number
-        //   -> alt_sizes -> array of objects
-        //   -> -> url -> string
-        //   -> -> width -> number
-        //   -> -> height -> number
-
-        public Photo(JSONObject postObject) throws JSONException {
-            super(postObject);
-        }
     }
 
-    class Answer extends Post {
+    abstract class FormattingItem {
+        private int start;
+        private int end;
 
-        // answer only
-        // asking_name -> string
-        // asking_url -> object, can be null (anonymous?)
-        // question -> string
-        // answer -> string
-
-        public Answer(JSONObject postObject) throws JSONException {
-            super(postObject);
-        }
-    }
-
-    class Link extends Post {
-
-        // link only
-        // title -> string
-        // url -> string
-        // link_image -> url
-        // link_image_dimensions -> object
-        // -> width -> number
-        // -> height -> number
-        // link_author -> object
-        // excerpt -> string
-        // publisher -> string
-        // photos -> array of objects
-        //  -> image object (see above)
-        // description -> string
-
-        public Link(JSONObject postObject) throws JSONException {
-            super(postObject);
-        }
-    }
-
-    class Video extends Post {
-
-        // video only
-        // source_url -> string
-        // source_title -> string
-        // caption -> string
-        // video_url -> string
-        // html5_capable -> boolean
-        // thumbnail_url -> string
-        // thumbnail_width -> number
-        // thumbnail_height -> number
-        // duration -> number
-        // player -> object
-        // -> width -> number
-        // -> embed_code -> string
-        // video_type -> string (unknown values, "tumblr")
-
-        public Video(JSONObject postObject) throws JSONException {
-            super(postObject);
-        }
-    }
-
-    class Audio extends Post {
-
-        // audio only
-        // source_url -> stirng
-        // source_title -> string
-        // track_name -> string
-        // album_art -> string
-        // caption -> string
-        // player -> string
-        // embed -> string
-        // plays -> number
-        // audio_url -> string
-        // audio_source_url -> string
-        // is_external -> boolean
-        // audio_type -> string ("soundcloud", unknown values)
-
-        public Audio(JSONObject postObject) throws JSONException {
-            super(postObject);
-        }
-    }
-
-    class Quote extends Post {
-
-        // quote only
-        // text -> string
-        // source -> string
-
-        public Quote(JSONObject postObject) throws JSONException {
-            super(postObject);
-        }
-    }
-
-    class Chat extends Post {
-
-        // chat only
-        // title -> string (can be null)
-        // body -> string
-        // dialogue -> array of objects
-        // -> name -> string
-        // -> label -> string
-        // -> phrase -> string
-
-        public Chat(JSONObject postObject) throws JSONException {
-            super(postObject);
-        }
-    }
-
-    class Data implements TumblrArrayItem<Post> {
-        private List<Post> posts;
-        private int totalPosts;
-
-        public Data(JSONObject postsObject) throws JSONException {
+        public FormattingItem(JSONObject formattingObject) throws JSONException {
             super();
 
-            this.totalPosts = postsObject.getInt("total_posts");
-            this.posts = new ArrayList<>();
-
-            JSONArray posts = postsObject.getJSONArray("posts");
-            for (int i = 0; i < posts.length(); ++i) {
-                JSONObject post = posts.getJSONObject(i);
-
-                String type = post.getString("type");
-
-                if (type.equalsIgnoreCase("quote"))
-                    this.posts.add(new Quote(post));
-                else if (type.equalsIgnoreCase("link"))
-                    this.posts.add(new Link(post));
-                else if (type.equalsIgnoreCase("answer"))
-                    this.posts.add(new Answer(post));
-                else if (type.equalsIgnoreCase("video"))
-                    this.posts.add(new Video(post));
-                else if (type.equalsIgnoreCase("audio"))
-                    this.posts.add(new Audio(post));
-                else if (type.equalsIgnoreCase("photo"))
-                    this.posts.add(new Photo(post));
-                else if (type.equalsIgnoreCase("chat"))
-                    this.posts.add(new Chat(post));
-                else
-                    this.posts.add(new Text(post));
-            }
+            this.start = formattingObject.getInt("start");
+            this.end = formattingObject.getInt("end");
         }
 
-        @Override
-        public int getCount() {
-            return totalPosts;
+        public int getStart() {
+            return start;
         }
 
-        @Override
-        public List<Post> getItems() {
-            return posts;
+        public int getEnd() {
+            return end;
         }
     }
 
-    class Api extends TumblrArray<Data> {
+    class Bold extends FormattingItem {
+        public Bold(JSONObject formattingObject) throws JSONException {
+            super(formattingObject);
+        }
+    }
 
-        /*
-        {
-          "type": "text",
-          "blog_name": "paperogacoibentato",
-          "blog": {
-            "name": "paperogacoibentato",
-            "title": "Paperoga Coibentato",
-            "description": "Anche un papero sa arrampicarsi su un albero se viene adulato",
-            "url": "https://paperogacoibentato.tumblr.com/",
-            "uuid": "t:4ZHKojAk25vVcuhziYcWLw",
-            "updated": 1583512064
-          },
-          "id": 611577585127784448,
-          "post_url": "https://paperogacoibentato.tumblr.com/post/611577585127784448/dopo-settimane-di-tentativi-andati-a-vuoto",
-          "slug": "dopo-settimane-di-tentativi-andati-a-vuoto",
-          "date": "2020-03-03 14:30:35 GMT",
-          "timestamp": 1583245835,
-          "state": "published",
-          "format": "html",
-          "reblog_key": "CPz5wM9v",
-          "tags": [
-            "io",
-            "diario",
-            "non adoro vantarmi",
-            "ma lo sto facendo",
-            "e pure bene"
-          ],
-          "short_url": "https://tmblr.co/Zz2sqWXymfBA8W00",
-          "summary": "Dopo settimane di tentativi andati a vuoto, fallimenti, ripensamenti, idee cadute nel nulla, esperimenti finiti in esplosioni...",
-          "should_open_in_legacy": false,
-          "followed": false,
-          "liked": false,
-          "note_count": 27,
-          "title": null,
-          "body": "<p>Dopo settimane di tentativi andati a vuoto, ...",
-          "reblog": {
-            "comment": "<p><p>Dopo settimane di tentativi andati a vuoto...",
-            "tree_html": ""
-          },
-          "trail": [
-            {
-              "blog": {
-                "name": "paperogacoibentato",
-                "active": true,
-                "theme": {
-                  ...
-                },
-                "share_likes": false,
-                "share_following": false,
-                "can_be_followed": false
-              },
-              "post": {
-                "id": "611577585127784448"
-              },
-              "content_raw": "<p><p>Dopo settimane di tentativi ...",
-              "content": "<p><p>Dopo settimane di tentativi ...",
-              "is_current_item": true,
-              "is_root_item": true
+    class Italic extends FormattingItem {
+        public Italic(JSONObject formattingObject) throws JSONException {
+            super(formattingObject);
+        }
+    }
+
+    class Strikethrough extends FormattingItem {
+        public Strikethrough(JSONObject formattingObject) throws JSONException {
+            super(formattingObject);
+        }
+    }
+
+    class Link extends FormattingItem {
+        private String url;
+
+        public Link(JSONObject formattingObject) throws JSONException {
+            super(formattingObject);
+
+            this.url = formattingObject.getString("url");
+        }
+
+        public String getUrl() {
+            return url;
+        }
+    }
+
+    class Mention extends FormattingItem {
+        private BlogInfo.Reference blog;
+
+        public Mention(JSONObject formattingObject) throws JSONException {
+            super(formattingObject);
+
+            this.blog = new BlogInfo.Reference(formattingObject.getJSONObject("blog"));
+        }
+
+        public BlogInfo.Reference getBlog() {
+            return blog;
+        }
+    }
+
+    class Color extends FormattingItem {
+        private int color;
+
+        public Color(JSONObject formattingObject) throws JSONException {
+            super(formattingObject);
+
+            this.color = android.graphics.Color.parseColor(formattingObject.getString("color"));
+        }
+
+        public int getColor() {
+            return color;
+        }
+    }
+
+    class Text extends ContentItem {
+        private String text;
+        private List<FormattingItem> formattingItems;
+
+        private static final Map<String, Class<? extends FormattingItem>> typesMap =
+                new HashMap<String, Class<? extends FormattingItem>>(){{
+                    put("bold", Bold.class);
+                    put("italic", Italic.class);
+                    put("strikethrough", Strikethrough.class);
+                    put("link", Link.class);
+                    put("mention", Mention.class);
+                    put("color", Color.class);
+                }};
+
+        public Text(JSONObject textObject) throws JSONException, RuntimeException {
+            super();
+
+            this.text = textObject.getString("text");
+
+            this.formattingItems = new ArrayList<>();
+            JSONArray formattingItems = textObject.optJSONArray("formatting");
+            for (int i = 0; i < formattingItems.length(); ++i) {
+                JSONObject formattingItem = formattingItems.getJSONObject(i);
+                String type = formattingItem.getString("type");
+                try {
+                    this.formattingItems.add(
+                            typesMap.get(type)
+                                    .getDeclaredConstructor(JSONObject.class)
+                                    .newInstance(formattingItem)
+                    );
+                } catch (InstantiationException |
+                        InvocationTargetException |
+                        NoSuchMethodException |
+                        IllegalAccessException e) {
+                    throw new RuntimeException("Add missing formatting type: " + type);
+                }
             }
-          ],
-          "can_like": true,
-          "can_reblog": true,
-          "can_send_in_message": true,
-          "can_reply": true,
-          "display_avatar": true
-        }
-        */
-
-        public Api(
-                Context context,
-                OAuthService service,
-                Token authToken,
-                String appId,
-                String appVersion,
-                String[] additionalArgs) {
-            super(context, service, authToken, appId, appVersion, additionalArgs);
         }
 
-        @Override
-        protected String getPath() {
-            return super.getPath() + "/posts";
+        public String getText() {
+            return text;
         }
+    }
 
-        @Override
-        protected Map<String, String> defaultParams() {
-            Map<String, String> m = super.defaultParams();
-
-            /*
-            blog-identifier String Any blog identifier
-             */
-            m.put("blog_identifier", getBlogId());
-
-            return m;
+    class Heading1 extends Text {
+        public Heading1(JSONObject textObject) throws JSONException {
+            super(textObject);
         }
+    }
 
+    class Heading2 extends Text {
+        public Heading2(JSONObject textObject) throws JSONException {
+            super(textObject);
+        }
+    }
 
-        @Override
-        protected Data readData(JSONObject jsonObject) throws JSONException {
-            return new Data(jsonObject);
+    class Quirky extends Text {
+        public Quirky(JSONObject textObject) throws JSONException {
+            super(textObject);
+        }
+    }
+
+    class Quote extends Text {
+        public Quote(JSONObject textObject) throws JSONException {
+            super(textObject);
+        }
+    }
+
+    class Indented extends Text {
+        public Indented(JSONObject textObject) throws JSONException {
+            super(textObject);
+        }
+    }
+
+    class Chat extends Text {
+        public Chat(JSONObject textObject) throws JSONException {
+            super(textObject);
+        }
+    }
+
+    class OrderedListItem extends Text {
+        public OrderedListItem(JSONObject textObject) throws JSONException {
+            super(textObject);
+        }
+    }
+
+    class UnorderedListItem extends Text {
+        public UnorderedListItem(JSONObject textObject) throws JSONException {
+            super(textObject);
+        }
+    }
+
+    abstract class Post {
+        private long id;
+        private BlogInfo.Base blog;
+        private List<ContentItem> content;
+
+        public Post(JSONObject postObject) throws JSONException {
+            super();
+
+            this.id = postObject.getLong("id");
+            this.blog = new BlogInfo.Data(postObject);
+
+            this.content = new ArrayList<>();
+            JSONArray content = postObject.getJSONArray("content");
+            for (int i = 0; i < content.length(); ++i) {
+                JSONObject contentItem = content.getJSONObject(i);
+
+                String contentType = contentItem.getString("type");
+                if (contentType.equalsIgnoreCase("text")) {
+                    this.content.add(new Text(contentItem));
+                }
+            }
         }
     }
 }

@@ -32,7 +32,6 @@ import android.widget.TextView;
 import org.scribe.exceptions.OAuthException;
 import org.scribe.model.Token;
 
-import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -60,14 +59,14 @@ public class MainActivity extends AppCompatActivity {
                 tv.append("My blogs:\n");
 
                 client.call(
-                        Posts.Api.class,
-                        "rinasawayamaupdates",
+                        OldPosts.Api.class,
+                        "masoassai",
                         0,
                         -1,
-                        new TumblrClient.OnArrayCompletion<Posts.Post>() {
+                        new TumblrClient.OnArrayCompletion<OldPosts.Post>() {
                             @Override
-                            public void onSuccess(List<Posts.Post> result, int offset, int limit, int count) {
-                                for (Posts.Post post : result) {
+                            public void onSuccess(List<OldPosts.Post> result, int offset, int limit, int count) {
+                                for (OldPosts.Post post : result) {
                                     tv.append("Type: " + post.getClass().getName() + "\n");
                                     tv.append("Blog name: " + post.getBlogName() + "\n");
                                     tv.append("Id: " + post.getId() + "\n");
