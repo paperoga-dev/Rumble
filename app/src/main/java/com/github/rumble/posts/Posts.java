@@ -39,6 +39,7 @@ public interface Posts {
         private long id;
         private BlogInfo.Base blog;
         private List<ContentItem> content;
+        private List<LayoutItem> layout;
 
         public Post(JSONObject postObject) throws JSONException {
             super();
@@ -50,6 +51,15 @@ public interface Posts {
             JSONArray content = postObject.getJSONArray("content");
             for (int i = 0; i < content.length(); ++i) {
                 this.content.add(ContentItem.create(content.getJSONObject(i)));
+            }
+
+            this.layout = new ArrayList<>();
+            JSONArray layout = postObject.optJSONArray("layout");
+            if (layout == null)
+                return;
+
+            for (int i = 0; i < layout.length(); ++i) {
+                this.layout.add(LayoutItem.create(layout.getJSONObject(i)));
             }
         }
 
@@ -63,6 +73,10 @@ public interface Posts {
 
         public List<ContentItem> getContent() {
             return content;
+        }
+
+        public List<LayoutItem> getLayout() {
+            return layout;
         }
     }
 
