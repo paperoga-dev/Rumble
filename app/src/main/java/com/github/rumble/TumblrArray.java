@@ -29,7 +29,7 @@ public abstract class TumblrArray<T extends TumblrArrayItem> extends TumblrBlogI
     private final int offset;
     private final int limit;
 
-    TumblrArray(
+    protected TumblrArray(
             Context context,
             OAuthService service,
             Token authToken,

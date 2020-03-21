@@ -16,11 +16,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.rumble;
+package com.github.rumble.posts.media;
 
-import java.util.List;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-public interface TumblrArrayItem<T> {
-    int getCount();
-    List<T> getItems();
+public class Image extends Base {
+    private int width;
+    private int height;
+
+    public Image(JSONObject mediaObject) throws JSONException {
+        super(mediaObject);
+
+        this.width = mediaObject.optInt("width", 0);
+        this.height = mediaObject.optInt("height", 0);
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
 }

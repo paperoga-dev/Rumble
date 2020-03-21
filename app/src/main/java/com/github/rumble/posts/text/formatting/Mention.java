@@ -16,11 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.rumble;
+package com.github.rumble.posts.text.formatting;
 
-import java.util.List;
+import com.github.rumble.BlogInfo;
 
-public interface TumblrArrayItem<T> {
-    int getCount();
-    List<T> getItems();
+import org.json.JSONException;
+import org.json.JSONObject;
+
+public class Mention extends Base {
+    private BlogInfo.Reference blog;
+
+    public Mention(JSONObject formattingObject) throws JSONException {
+        super(formattingObject);
+
+        this.blog = new BlogInfo.Reference(formattingObject.getJSONObject("blog"));
+    }
+
+    public BlogInfo.Reference getBlog() {
+        return blog;
+    }
 }

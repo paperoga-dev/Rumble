@@ -16,11 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.rumble;
+package com.github.rumble.posts.text;
 
-import java.util.List;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-public interface TumblrArrayItem<T> {
-    int getCount();
-    List<T> getItems();
+public class Indented extends Base {
+    public Indented(JSONObject textObject) throws JSONException {
+        super(textObject);
+    }
 }

@@ -16,11 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.rumble;
+package com.github.rumble.posts.text.formatting;
 
-import java.util.List;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-public interface TumblrArrayItem<T> {
-    int getCount();
-    List<T> getItems();
+public class Color extends Base {
+    private int color;
+
+    public Color(JSONObject formattingObject) throws JSONException {
+        super(formattingObject);
+
+        this.color = android.graphics.Color.parseColor(formattingObject.getString("color"));
+    }
+
+    public int getColor() {
+        return color;
+    }
 }

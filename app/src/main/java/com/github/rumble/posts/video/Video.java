@@ -16,11 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.rumble;
+package com.github.rumble.posts.video;
 
-import java.util.List;
+import com.github.rumble.posts.link.Base;
 
-public interface TumblrArrayItem<T> {
-    int getCount();
-    List<T> getItems();
+import org.json.JSONException;
+import org.json.JSONObject;
+
+public class Video extends Base {
+    public Video(JSONObject videoObject) throws JSONException {
+        super(videoObject);
+    }
 }
