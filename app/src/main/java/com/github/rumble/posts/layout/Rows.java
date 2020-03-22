@@ -18,5 +18,37 @@
 
 package com.github.rumble.posts.layout;
 
-public class Rows extends Base {
+import com.github.rumble.posts.LayoutItem;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Rows extends LayoutItem {
+    private final List<List<Integer>> display;
+
+    public Rows(JSONObject layoutObject) throws JSONException {
+        super();
+
+        this.display = new ArrayList<>();
+
+        JSONArray display = layoutObject.getJSONArray("display");
+        for (int i = 0; i < display.length(); ++i) {
+            List<Integer> tBlocks = new ArrayList<>();
+
+            JSONArray blocks = display.getJSONObject(i).getJSONArray("blocks");
+            for (int j = 0; j < blocks.length(); ++j) {
+                tBlocks.add(Integer.valueOf(blocks.getInt(i)));
+            }
+
+            this.display.add(tBlocks);
+        }
+    }
+
+    public List<List<Integer>> getDisplay() {
+        return display;
+    }
 }

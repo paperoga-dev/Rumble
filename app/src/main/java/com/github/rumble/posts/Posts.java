@@ -35,17 +35,29 @@ import java.util.List;
 
 public interface Posts {
 
-    class Post {
+    class Base {
         private long id;
+
+        public Base(JSONObject postObject) throws JSONException {
+            super();
+
+            this.id = postObject.getLong("id");
+        }
+
+        public long getId() {
+            return id;
+        }
+    }
+
+    class Post extends Base {
         private BlogInfo.Base blog;
         private List<ContentItem> content;
         private List<LayoutItem> layout;
 
         public Post(JSONObject postObject) throws JSONException {
-            super();
+            super(postObject);
 
-            this.id = postObject.getLong("id");
-            this.blog = new BlogInfo.Data(postObject);
+            this.blog = new BlogInfo.Data(postObject.getJSONObject("blog"));
 
             this.content = new ArrayList<>();
             JSONArray content = postObject.getJSONArray("content");
@@ -61,10 +73,6 @@ public interface Posts {
             for (int i = 0; i < layout.length(); ++i) {
                 this.layout.add(LayoutItem.create(layout.getJSONObject(i)));
             }
-        }
-
-        public long getId() {
-            return id;
         }
 
         public BlogInfo.Base getBlog() {

@@ -18,5 +18,36 @@
 
 package com.github.rumble.posts.layout;
 
-public class Condensed extends Base {
+import com.github.rumble.posts.LayoutItem;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Condensed extends LayoutItem {
+    private final List<Integer> blocks;
+    private final int truncateAfter;
+
+    public Condensed(JSONObject layoutObject) throws JSONException {
+        super();
+
+        this.truncateAfter = layoutObject.optInt("truncate_after", -1);
+        this.blocks = new ArrayList<>();
+
+        JSONArray blocks = layoutObject.getJSONArray("blocks");
+        for (int i = 0; i < blocks.length(); ++i) {
+            this.blocks.add(blocks.getInt(i));
+        }
+    }
+
+    public List<Integer> getBlocks() {
+        return blocks;
+    }
+
+    public int getTruncateAfter() {
+        return truncateAfter;
+    }
 }

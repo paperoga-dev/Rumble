@@ -18,5 +18,65 @@
 
 package com.github.rumble.posts.layout;
 
-public class Ask extends Base {
+import com.github.rumble.posts.LayoutItem;
+import com.github.rumble.posts.attribution.Base;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class Ask extends LayoutItem {
+    private final List<Integer> blocks;
+    private Base attribution;
+
+    private static final Map<String, Class<? extends com.github.rumble.posts.attribution.Base>> typesMap =
+            new HashMap<String, Class<? extends com.github.rumble.posts.attribution.Base>>() {{
+                put("link", com.github.rumble.posts.attribution.Link.class);
+                put("blog", com.github.rumble.posts.attribution.Blog.class);
+                put("post", com.github.rumble.posts.attribution.Post.class);
+                put("app", com.github.rumble.posts.attribution.App.class);
+            }};
+
+    public Ask(JSONObject layoutObject) throws JSONException {
+        super();
+
+        this.blocks = new ArrayList<>();
+
+        JSONArray blocks = layoutObject.getJSONArray("blocks");
+        for (int i = 0; i < blocks.length(); ++i) {
+            this.blocks.add(blocks.getInt(i));
+        }
+
+        JSONObject attributionObject = layoutObject.optJSONObject("attribution");
+        if (attributionObject == null)
+            return;
+
+        String attributionType = attributionObject.getString("type");
+
+        try {
+            this.attribution = typesMap.get(attributionType)
+                    .getDeclaredConstructor(JSONObject.class)
+                    .newInstance(attributionObject);
+        } catch (NullPointerException |
+                InstantiationException |
+                InvocationTargetException |
+                NoSuchMethodException |
+                IllegalAccessException e) {
+            throw new RuntimeException("Add missing attribution type: " + attributionType);
+        }
+    }
+
+    public List<Integer> getBlocks() {
+        return blocks;
+    }
+
+    public Base getAttribution() {
+        return attribution;
+    }
 }
