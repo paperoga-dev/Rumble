@@ -41,7 +41,7 @@ public class Rows extends LayoutItem {
 
             JSONArray blocks = display.getJSONObject(i).getJSONArray("blocks");
             for (int j = 0; j < blocks.length(); ++j) {
-                tBlocks.add(Integer.valueOf(blocks.getInt(i)));
+                tBlocks.add(blocks.getInt(i));
             }
 
             this.display.add(tBlocks);

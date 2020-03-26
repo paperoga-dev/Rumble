@@ -1,6 +1,6 @@
 package com.github.rumble.posts.attribution;
 
-import com.github.rumble.posts.media.Image;
+import com.github.rumble.posts.media.Media;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -8,14 +8,14 @@ import org.json.JSONObject;
 public class App extends Base {
     private String name;
     private String displayText;
-    private Image logo;
+    private Media logo;
 
     public App(JSONObject attributionObject) throws JSONException {
         super(attributionObject);
 
         this.name = attributionObject.getString("app_name");
         this.displayText = attributionObject.getString("display_text");
-        this.logo = new Image(attributionObject.getJSONObject("logo"));
+        this.logo = new Media(attributionObject.getJSONObject("logo"));
     }
 
     public String getName() {
@@ -26,7 +26,7 @@ public class App extends Base {
         return displayText;
     }
 
-    public Image getLogo() {
+    public Media getLogo() {
         return logo;
     }
 }

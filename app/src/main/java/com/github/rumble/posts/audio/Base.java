@@ -19,16 +19,82 @@
 package com.github.rumble.posts.audio;
 
 import com.github.rumble.posts.ContentItem;
+import com.github.rumble.posts.media.Media;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public abstract class Base extends ContentItem {
+public class Base extends ContentItem {
+    private final String url;
+    private final Media media;
+    private final String provider;
+    private final String title;
+    private final String artist;
+    private final String album;
+    private final Media poster;
+    private final String embedHtml;
+    private final String embedUrl;
+
+    // TODO: metadata
+
+    private com.github.rumble.posts.attribution.Base attribution;
+
     public Base(JSONObject audioObject) throws JSONException {
         super();
+
+        this.url = audioObject.optString("url", "");
+        this.media = allocateOrNothing(Media.class, audioObject, "media");
+        this.provider = audioObject.optString("provider", "");
+        this.title = audioObject.optString("title", "");
+        this.artist = audioObject.optString("artist", "");
+        this.album = audioObject.optString("album", "");
+        this.poster = allocateOrNothing(Media.class, audioObject, "poster");
+        this.embedHtml = audioObject.optString("embed_html", "");
+        this.embedUrl = audioObject.optString("embed_url", "");
+        this.attribution = com.github.rumble.posts.attribution.Base.doCreate(audioObject.optJSONObject("attribution"));
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public Media getMedia() {
+        return media;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getArtist() {
+        return artist;
+    }
+
+    public String getAlbum() {
+        return album;
+    }
+
+    public Media getPoster() {
+        return poster;
+    }
+
+    public String getEmbedHtml() {
+        return embedHtml;
+    }
+
+    public String getEmbedUrl() {
+        return embedUrl;
+    }
+
+    public com.github.rumble.posts.attribution.Base getAttribution() {
+        return attribution;
     }
 
     public static ContentItem doCreate(JSONObject audioObject) throws JSONException {
-        return new Audio(audioObject);
+        return new Base(audioObject);
     }
 }

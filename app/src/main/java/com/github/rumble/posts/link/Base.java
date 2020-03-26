@@ -19,16 +19,61 @@
 package com.github.rumble.posts.link;
 
 import com.github.rumble.posts.ContentItem;
+import com.github.rumble.posts.media.Media;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public abstract class Base extends ContentItem {
+public class Base extends ContentItem {
+    private String url;
+    private String title;
+    private String description;
+    private String author;
+    private String siteName;
+    private String displayUrl;
+    private Media poster;
+
     public Base(JSONObject linkObject) throws JSONException {
         super();
+
+        this.url = linkObject.getString("url");
+        this.title = linkObject.optString("title", "");
+        this.description = linkObject.optString("description", "");
+        this.author = linkObject.optString("author", "");
+        this.siteName = linkObject.optString("site_name", "");
+        this.displayUrl = linkObject.optString("display_url", "");
+        this.poster = allocateOrNothing(Media.class, linkObject, "poster");
     }
 
     public static ContentItem doCreate(JSONObject linkObject) throws JSONException {
-        return new Link(linkObject);
+        return new Base(linkObject);
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public String getSiteName() {
+        return siteName;
+    }
+
+    public String getDisplayUrl() {
+        return displayUrl;
+    }
+
+    public Media getPoster() {
+        return poster;
     }
 }

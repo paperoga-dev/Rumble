@@ -36,6 +36,18 @@ public abstract class ContentItem {
                 put("video", com.github.rumble.posts.video.Base.class);
             }};
 
+    static public <T> T allocateOrNothing(Class<T> clazz, JSONObject jsonObject, String key) {
+        try {
+            JSONObject object = jsonObject.optJSONObject(key);
+            return (object != null) ? clazz.getDeclaredConstructor(JSONObject.class).newInstance(jsonObject) : null;
+        } catch (InvocationTargetException |
+                NoSuchMethodException |
+                IllegalAccessException |
+                InstantiationException e) {
+            throw new RuntimeException(clazz.getName() + "has no construction with a JSONObject argument");
+        }
+    }
+
     static ContentItem create(JSONObject contentItem) throws JSONException {
         String type = contentItem.getString("type");
         try {

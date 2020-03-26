@@ -19,16 +19,75 @@
 package com.github.rumble.posts.video;
 
 import com.github.rumble.posts.ContentItem;
+import com.github.rumble.posts.media.Media;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public abstract class Base extends ContentItem {
+public class Base extends ContentItem {
+    private final String url;
+    private final Media media;
+    private final String provider;
+    private final String embedHtml;
+    private final EmbedIframe embedIframe;
+    private final String embedUrl;
+    private final Media poster;
+
+    // TODO: metadata
+
+    private com.github.rumble.posts.attribution.Base attribution;
+    private boolean canAutoPlayOnCellular;
+
     public Base(JSONObject videoObject) throws JSONException {
         super();
+
+        this.url = videoObject.optString("url", "");
+        this.media = allocateOrNothing(Media.class, videoObject, "media");
+        this.provider = videoObject.optString("provider", "");
+        this.embedHtml = videoObject.optString("embed_html", "");
+        this.embedIframe = allocateOrNothing(EmbedIframe.class, videoObject, "embed_iframe");
+        this.embedUrl = videoObject.optString("embed_url", "");
+        this.poster = allocateOrNothing(Media.class, videoObject, "poster");
+        this.attribution = com.github.rumble.posts.attribution.Base.doCreate(videoObject.optJSONObject("attribution"));
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public Media getMedia() {
+        return media;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public String getEmbedHtml() {
+        return embedHtml;
+    }
+
+    public EmbedIframe getEmbedIframe() {
+        return embedIframe;
+    }
+
+    public String getEmbedUrl() {
+        return embedUrl;
+    }
+
+    public Media getPoster() {
+        return poster;
+    }
+
+    public com.github.rumble.posts.attribution.Base getAttribution() {
+        return attribution;
+    }
+
+    public boolean canAutoPlayOnCellular() {
+        return canAutoPlayOnCellular;
     }
 
     public static ContentItem doCreate(JSONObject videoObject) throws JSONException {
-        return new Video(videoObject);
+        return new Base(videoObject);
     }
 }

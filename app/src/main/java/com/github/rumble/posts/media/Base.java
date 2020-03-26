@@ -20,53 +20,65 @@ package com.github.rumble.posts.media;
 
 import com.github.rumble.posts.ContentItem;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public abstract class Base extends ContentItem {
-    private String url;
-    private String mimeType;
-    private boolean originalDimensionsMissing;
-    private boolean cropped;
-    private boolean hasOriginalDimensions;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+public class Base extends ContentItem {
+    private List<Media> media;
+    private List<Integer> colors;
+    private String feedbackToken;
+    private com.github.rumble.posts.attribution.Base attribution;
+    private String altText;
 
     public Base(JSONObject mediaObject) throws JSONException {
         super();
 
-        this.url = mediaObject.getString("url");
-        this.mimeType = mediaObject.optString("type", "");
-        this.originalDimensionsMissing = mediaObject.optBoolean(
-                "original_dimensions_missing",
-                false
-        );
-        this.cropped = mediaObject.optBoolean("cropped", false);
-        this.hasOriginalDimensions = mediaObject.optBoolean(
-                "has_original_dimensions",
-                false
-        );
+        JSONArray media = mediaObject.getJSONArray("media");
+        this.media = new ArrayList<>();
+        for (int i = 0; i < media.length(); ++i) {
+            this.media.add(new Media(media.getJSONObject(i)));
+        }
+
+        this.colors = new ArrayList<>();
+        JSONObject colors = mediaObject.optJSONObject("colors");
+        if (colors != null) {
+            Iterator<String> it = colors.keys();
+            while (it.hasNext()) {
+                this.colors.add(Integer.valueOf(colors.getString(it.next()), 16));
+            }
+        }
+
+        this.feedbackToken = mediaObject.optString("feedback_token", "");
+        this.attribution = com.github.rumble.posts.attribution.Base.doCreate(mediaObject.optJSONObject("attribution"));
+        this.altText = mediaObject.optString("alt_text", "");
     }
 
-    public String getUrl() {
-        return url;
+    public List<Media> getMedia() {
+        return media;
     }
 
-    public String getMimeType() {
-        return mimeType;
+    public List<Integer> getColors() {
+        return colors;
     }
 
-    public boolean areOriginalDimensionsMissing() {
-        return originalDimensionsMissing;
+    public String getFeedbackToken() {
+        return feedbackToken;
     }
 
-    public boolean isCropped() {
-        return cropped;
+    public com.github.rumble.posts.attribution.Base getAttribution() {
+        return attribution;
     }
 
-    public boolean hasOriginalDimensions() {
-        return hasOriginalDimensions;
+    public String getAltText() {
+        return altText;
     }
 
     public static ContentItem doCreate(JSONObject mediaObject) throws JSONException {
-        return new Image(mediaObject);
+        return new Base(mediaObject);
     }
 }
