@@ -1,5 +1,6 @@
 package com.github.rumble.posts.attribution;
 
+import com.github.rumble.posts.ContentItem;
 import com.github.rumble.posts.media.Media;
 
 import org.json.JSONException;
@@ -13,9 +14,9 @@ public class App extends Base {
     public App(JSONObject attributionObject) throws JSONException {
         super(attributionObject);
 
-        this.name = attributionObject.getString("app_name");
-        this.displayText = attributionObject.getString("display_text");
-        this.logo = new Media(attributionObject.getJSONObject("logo"));
+        this.name = attributionObject.optString("app_name", "");
+        this.displayText = attributionObject.optString("display_text", "");
+        this.logo = ContentItem.allocateOrNothing(Media.class, attributionObject, "logo");
     }
 
     public String getName() {
@@ -28,5 +29,9 @@ public class App extends Base {
 
     public Media getLogo() {
         return logo;
+    }
+
+    public static Base doCreate(JSONObject attributionObject) throws JSONException {
+        return new App(attributionObject);
     }
 }

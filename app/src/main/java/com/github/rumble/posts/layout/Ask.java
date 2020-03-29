@@ -57,4 +57,8 @@ public class Ask extends LayoutItem {
     public Base getAttribution() {
         return attribution;
     }
+
+    public static LayoutItem doCreate(JSONObject layoutObject) throws JSONException {
+        return new Ask(layoutObject);
+    }
 }

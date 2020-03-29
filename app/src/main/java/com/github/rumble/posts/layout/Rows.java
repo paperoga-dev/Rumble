@@ -78,4 +78,8 @@ public class Rows extends LayoutItem {
     public List<Blocks> getBlocksList() {
         return blocksList;
     }
+
+    public static LayoutItem doCreate(JSONObject layoutObject) throws JSONException {
+        return new Rows(layoutObject);
+    }
 }

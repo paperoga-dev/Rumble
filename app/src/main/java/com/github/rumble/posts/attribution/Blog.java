@@ -17,4 +17,8 @@ public class Blog extends Base {
     public BlogInfo.Base getBlog() {
         return blog;
     }
+
+    public static Base doCreate(JSONObject attributionObject) throws JSONException {
+        return new Blog(attributionObject);
+    }
 }

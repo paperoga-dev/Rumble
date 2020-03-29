@@ -50,4 +50,8 @@ public class Condensed extends LayoutItem {
     public int getTruncateAfter() {
         return truncateAfter;
     }
+
+    public static LayoutItem doCreate(JSONObject layoutObject) throws JSONException {
+        return new Condensed(layoutObject);
+    }
 }

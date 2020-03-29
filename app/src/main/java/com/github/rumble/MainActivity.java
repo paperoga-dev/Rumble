@@ -27,7 +27,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.github.rumble.posts.Posts;
 
 import org.scribe.exceptions.OAuthException;
 import org.scribe.model.Token;
@@ -56,8 +59,26 @@ public class MainActivity extends AppCompatActivity {
                 tv.append("Logged in!\n");
 
                 tv.append("Me: " + client.getMe().getName() + "\n");
-                tv.append("My blogs:\n");
+                tv.append("My posts:\n");
 
+                client.call(
+                        Posts.Api.class,
+                        "paperogacoibentato",
+                        0,
+                        20,
+                        new TumblrClient.OnArrayCompletion<Posts.Post>() {
+                            @Override
+                            public void onSuccess(List<Posts.Post> result, int offset, int limit, int count) {
+                                LinearLayout layout = findViewById(R.id.layoutDashboard);
+
+                                for (Posts.Post post : result) {
+                                    layout.addView(post.render(layout.getContext()));
+                                }
+                            }
+                        }
+                );
+
+                /*
                 client.call(
                         OldPosts.Api.class,
                         "masoassai",
@@ -78,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                         }
                 );
+                */
 
                 /*
                 for (BlogInfo.Data blog : client.getMe().getBlogs()) {
@@ -151,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
         client.setOnFailureListener(new TumblrClient.OnFailureListener() {
             @Override
             public void onFailure(TumblrException e) {
-                tv.append("Command failure\n");
+                tv.append("Command failure\n" + e.getMessage() + "\n");
             }
 
             @Override

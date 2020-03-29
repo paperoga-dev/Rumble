@@ -115,6 +115,13 @@ abstract class TumblrApi<T> {
                         onCompletion.onFailure(new TumblrNetworkException(e));
                     }
                 });
+            } catch (final RuntimeException e) {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        onCompletion.onFailure(new TumblrRuntimeException(e));
+                    }
+                });
             }
         }
     }

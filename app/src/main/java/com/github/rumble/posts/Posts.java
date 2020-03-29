@@ -23,6 +23,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import com.github.rumble.BlogInfo;
+import com.github.rumble.R;
 import com.github.rumble.TumblrArray;
 import com.github.rumble.TumblrArrayItem;
 import com.github.rumble.posts.layout.Rows;
@@ -34,7 +35,9 @@ import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -62,7 +65,7 @@ public interface Posts {
         public Post(JSONObject postObject) throws JSONException {
             super(postObject);
 
-            this.blog = new BlogInfo.Data(postObject.getJSONObject("blog"));
+            this.blog = new BlogInfo.Base(postObject.getJSONObject("blog"));
 
             this.content = new ArrayList<>();
             JSONArray content = postObject.getJSONArray("content");
@@ -105,7 +108,7 @@ public interface Posts {
 
             SortedSet<Integer> indexes = new TreeSet<>();
 
-            for (int i = 0; i < getLayout().size(); ++i)
+            for (int i = 0; i < getContent().size(); ++i)
                 indexes.add(i);
 
             for (int i = 0; i < getLayout().size(); ++i) {
@@ -115,6 +118,7 @@ public interface Posts {
                     for (Rows.Blocks blocks : rows.getBlocksList()) {
                         if (blocks.getIndexes().size() > 1) {
                             LinearLayout blockLayout = new LinearLayout(context);
+                            blockLayout.setOrientation(LinearLayout.HORIZONTAL);
 
                             blockLayout.setLayoutParams(
                                     new LinearLayout.LayoutParams(
@@ -122,7 +126,6 @@ public interface Posts {
                                             LinearLayout.LayoutParams.WRAP_CONTENT
                                     )
                             );
-                            blockLayout.setOrientation(LinearLayout.HORIZONTAL);
 
                             for (Integer index : blocks.getIndexes()) {
                                 blockLayout.addView(getContent().get(index).render(context));
@@ -190,6 +193,15 @@ public interface Posts {
         @Override
         protected String getPath() {
             return super.getPath() + "/posts";
+        }
+
+        @Override
+        public Map<String, String> defaultParams() {
+            Map<String, String> m = super.defaultParams();
+
+            m.put("npf", "true");
+
+            return m;
         }
 
         @Override

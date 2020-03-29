@@ -42,7 +42,7 @@ public abstract class ContentItem {
     static public <T> T allocateOrNothing(Class<T> clazz, JSONObject jsonObject, String key) {
         try {
             JSONObject object = jsonObject.optJSONObject(key);
-            return (object != null) ? clazz.getDeclaredConstructor(JSONObject.class).newInstance(jsonObject) : null;
+            return (object != null) ? clazz.getDeclaredConstructor(JSONObject.class).newInstance(object) : null;
         } catch (InvocationTargetException |
                 NoSuchMethodException |
                 IllegalAccessException |
