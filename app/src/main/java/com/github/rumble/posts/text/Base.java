@@ -109,4 +109,6 @@ public abstract class Base extends ContentItem {
     public String getText() {
         return text;
     }
+
+
 }

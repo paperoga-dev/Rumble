@@ -18,11 +18,23 @@
 
 package com.github.rumble.posts.text;
 
+import android.content.Context;
+import android.view.View;
+import android.widget.TextView;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class OrderedListItem extends Base {
     public OrderedListItem(JSONObject textObject) throws JSONException {
         super(textObject);
+    }
+
+    @Override
+    public View render(Context context) {
+        TextView tv = new TextView(context);
+        tv.setText("This is an ordered list item: " + getText());
+
+        return tv;
     }
 }

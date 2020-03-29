@@ -28,27 +28,54 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Rows extends LayoutItem {
-    private final List<List<Integer>> display;
+    enum Type {
+        Plain,
+        Carousel
+    }
+
+    public class Blocks {
+        private final List<Integer> indexes;
+        private Type type;
+
+        public Blocks(JSONObject blockObject) throws JSONException {
+            super();
+
+            this.indexes = new ArrayList<>();
+
+            JSONArray blocks = blockObject.getJSONArray("blocks");
+            for (int i = 0; i < blocks.length(); ++i) {
+                this.indexes.add(blocks.getInt(i));
+            }
+
+            this.type = Type.Plain;
+            JSONObject mode = blockObject.optJSONObject("mode");
+            if ((mode != null) && mode.optString("type", "").equalsIgnoreCase("carousel"))
+                this.type = Type.Carousel;
+        }
+
+        public List<Integer> getIndexes() {
+            return indexes;
+        }
+
+        public Type getType() {
+            return type;
+        }
+    }
+
+    private final List<Blocks> blocksList;
 
     public Rows(JSONObject layoutObject) throws JSONException {
         super();
 
-        this.display = new ArrayList<>();
+        this.blocksList = new ArrayList<>();
 
         JSONArray display = layoutObject.getJSONArray("display");
         for (int i = 0; i < display.length(); ++i) {
-            List<Integer> tBlocks = new ArrayList<>();
-
-            JSONArray blocks = display.getJSONObject(i).getJSONArray("blocks");
-            for (int j = 0; j < blocks.length(); ++j) {
-                tBlocks.add(blocks.getInt(i));
-            }
-
-            this.display.add(tBlocks);
+            this.blocksList.add(new Blocks(display.getJSONObject(i)));
         }
     }
 
-    public List<List<Integer>> getDisplay() {
-        return display;
+    public List<Blocks> getBlocksList() {
+        return blocksList;
     }
 }

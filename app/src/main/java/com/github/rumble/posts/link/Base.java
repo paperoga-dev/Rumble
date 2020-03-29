@@ -18,6 +18,10 @@
 
 package com.github.rumble.posts.link;
 
+import android.content.Context;
+import android.view.View;
+import android.widget.TextView;
+
 import com.github.rumble.posts.ContentItem;
 import com.github.rumble.posts.media.Media;
 
@@ -75,5 +79,13 @@ public class Base extends ContentItem {
 
     public Media getPoster() {
         return poster;
+    }
+
+    @Override
+    public View render(Context context) {
+        TextView tv = new TextView(context);
+        tv.setText("This is an link for " + getUrl());
+
+        return tv;
     }
 }

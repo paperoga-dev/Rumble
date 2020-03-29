@@ -18,11 +18,23 @@
 
 package com.github.rumble.posts.text;
 
+import android.content.Context;
+import android.view.View;
+import android.widget.TextView;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Heading1 extends Base {
     public Heading1(JSONObject textObject) throws JSONException {
         super(textObject);
+    }
+
+    @Override
+    public View render(Context context) {
+        TextView tv = new TextView(context);
+        tv.setText("This is a heading1: " + getText());
+
+        return tv;
     }
 }

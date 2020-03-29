@@ -18,6 +18,10 @@
 
 package com.github.rumble.posts.audio;
 
+import android.content.Context;
+import android.view.View;
+import android.widget.TextView;
+
 import com.github.rumble.posts.ContentItem;
 import com.github.rumble.posts.media.Media;
 
@@ -96,5 +100,13 @@ public class Base extends ContentItem {
 
     public static ContentItem doCreate(JSONObject audioObject) throws JSONException {
         return new Base(audioObject);
+    }
+
+    @Override
+    public View render(Context context) {
+        TextView tv = new TextView(context);
+        tv.setText("This is an audio player for " + getUrl());
+
+        return tv;
     }
 }

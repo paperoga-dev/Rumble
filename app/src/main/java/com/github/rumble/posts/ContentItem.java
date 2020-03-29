@@ -18,6 +18,9 @@
 
 package com.github.rumble.posts;
 
+import android.content.Context;
+import android.view.View;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,6 +50,8 @@ public abstract class ContentItem {
             throw new RuntimeException(clazz.getName() + "has no construction with a JSONObject argument");
         }
     }
+
+    public abstract View render(Context context);
 
     static ContentItem create(JSONObject contentItem) throws JSONException {
         String type = contentItem.getString("type");

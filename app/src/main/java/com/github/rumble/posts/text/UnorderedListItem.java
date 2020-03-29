@@ -18,11 +18,23 @@
 
 package com.github.rumble.posts.text;
 
+import android.content.Context;
+import android.view.View;
+import android.widget.TextView;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class UnorderedListItem extends Base {
     public UnorderedListItem(JSONObject textObject) throws JSONException {
         super(textObject);
+    }
+
+    @Override
+    public View render(Context context) {
+        TextView tv = new TextView(context);
+        tv.setText("This is a unordered list item: " + getText());
+
+        return tv;
     }
 }

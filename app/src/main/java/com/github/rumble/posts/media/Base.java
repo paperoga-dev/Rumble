@@ -18,6 +18,11 @@
 
 package com.github.rumble.posts.media;
 
+import android.content.Context;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
 import com.github.rumble.posts.ContentItem;
 
 import org.json.JSONArray;
@@ -76,6 +81,28 @@ public class Base extends ContentItem {
 
     public String getAltText() {
         return altText;
+    }
+
+    @Override
+    public View render(Context context) {
+        LinearLayout mainLayout = new LinearLayout(context);
+
+        mainLayout.setLayoutParams(
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+        );
+        mainLayout.setOrientation(LinearLayout.VERTICAL);
+
+        for (Media media : getMedia()) {
+            TextView tv = new TextView(context);
+            tv.setText("This is an media for " + media.getUrl());
+
+            mainLayout.addView(tv);
+        }
+
+        return mainLayout;
     }
 
     public static ContentItem doCreate(JSONObject mediaObject) throws JSONException {

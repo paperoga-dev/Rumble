@@ -19,10 +19,13 @@
 package com.github.rumble.posts;
 
 import android.content.Context;
+import android.view.View;
+import android.widget.LinearLayout;
 
 import com.github.rumble.BlogInfo;
 import com.github.rumble.TumblrArray;
 import com.github.rumble.TumblrArrayItem;
+import com.github.rumble.posts.layout.Rows;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,6 +35,8 @@ import org.scribe.oauth.OAuthService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public interface Posts {
 
@@ -85,6 +90,60 @@ public interface Posts {
 
         public List<LayoutItem> getLayout() {
             return layout;
+        }
+
+        public View render(Context context) {
+            LinearLayout mainLayout = new LinearLayout(context);
+
+            mainLayout.setLayoutParams(
+                    new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+            );
+            mainLayout.setOrientation(LinearLayout.VERTICAL);
+
+            SortedSet<Integer> indexes = new TreeSet<>();
+
+            for (int i = 0; i < getLayout().size(); ++i)
+                indexes.add(i);
+
+            for (int i = 0; i < getLayout().size(); ++i) {
+                if (getLayout().get(i) instanceof Rows) {
+                    Rows rows = (Rows) getLayout().get(i);
+
+                    for (Rows.Blocks blocks : rows.getBlocksList()) {
+                        if (blocks.getIndexes().size() > 1) {
+                            LinearLayout blockLayout = new LinearLayout(context);
+
+                            blockLayout.setLayoutParams(
+                                    new LinearLayout.LayoutParams(
+                                            LinearLayout.LayoutParams.MATCH_PARENT,
+                                            LinearLayout.LayoutParams.WRAP_CONTENT
+                                    )
+                            );
+                            blockLayout.setOrientation(LinearLayout.HORIZONTAL);
+
+                            for (Integer index : blocks.getIndexes()) {
+                                blockLayout.addView(getContent().get(index).render(context));
+                                indexes.remove(index);
+                            }
+
+                            mainLayout.addView(blockLayout);
+                        } else if (!blocks.getIndexes().isEmpty()) {
+                            Integer index = blocks.getIndexes().get(0);
+                            mainLayout.addView(getContent().get(index).render(context));
+                            indexes.remove(index);
+                        }
+                    }
+                }
+            }
+
+            for (Integer index : indexes) {
+                mainLayout.addView(getContent().get(index).render(context));
+            }
+
+            return mainLayout;
         }
     }
 
