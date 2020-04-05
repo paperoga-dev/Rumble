@@ -19,6 +19,10 @@
 package com.github.rumble.posts.text;
 
 import android.content.Context;
+import android.graphics.Typeface;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.TypefaceSpan;
 import android.view.View;
 import android.widget.TextView;
 
@@ -32,9 +36,15 @@ public class Quirky extends Base {
 
     @Override
     public View render(Context context) {
-        TextView tv = new TextView(context);
-        tv.setText("This is a quirky: " + getText());
+        SpannableStringBuilder ssb = getFormattedText(context);
 
-        return tv;
+        ssb.setSpan(
+                Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL),
+                0,
+                getText().length(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        );
+
+        return createTextView(context, ssb);
     }
 }

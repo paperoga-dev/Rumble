@@ -18,6 +18,12 @@
 
 package com.github.rumble.posts.text.formatting;
 
+import android.content.Context;
+import android.graphics.Typeface;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.UnderlineSpan;
+
 import com.github.rumble.BlogInfo;
 
 import org.json.JSONException;
@@ -34,5 +40,15 @@ public class Mention extends Base {
 
     public BlogInfo.Reference getBlog() {
         return blog;
+    }
+
+    @Override
+    public void apply(SpannableStringBuilder stringBuilder, final Context context) {
+        stringBuilder.setSpan(
+                new UnderlineSpan(),
+                getStart(),
+                getEnd(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        );
     }
 }

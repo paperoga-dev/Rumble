@@ -18,11 +18,26 @@
 
 package com.github.rumble.posts.text.formatting;
 
+import android.content.Context;
+import android.graphics.Typeface;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Bold extends Base {
     public Bold(JSONObject formattingObject) throws JSONException {
         super(formattingObject);
+    }
+
+    @Override
+    public void apply(SpannableStringBuilder stringBuilder, final Context context) {
+        stringBuilder.setSpan(
+                new android.text.style.StyleSpan(Typeface.BOLD),
+                getStart(),
+                getEnd(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        );
     }
 }

@@ -19,6 +19,9 @@
 package com.github.rumble.posts.text;
 
 import android.content.Context;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.RelativeSizeSpan;
 import android.view.View;
 import android.widget.TextView;
 
@@ -32,9 +35,10 @@ public class Heading2 extends Base {
 
     @Override
     public View render(Context context) {
-        TextView tv = new TextView(context);
-        tv.setText("This is a heading2: " + getText());
+        SpannableStringBuilder ssb = getFormattedText(context);
 
-        return tv;
+        ssb.setSpan(new RelativeSizeSpan(1.5f), 0, getText().length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        return createTextView(context, ssb);
     }
 }

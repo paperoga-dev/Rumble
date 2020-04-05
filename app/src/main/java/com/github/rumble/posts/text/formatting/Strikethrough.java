@@ -18,11 +18,26 @@
 
 package com.github.rumble.posts.text.formatting;
 
+import android.content.Context;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.StrikethroughSpan;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Strikethrough extends Base {
     public Strikethrough(JSONObject formattingObject) throws JSONException {
         super(formattingObject);
+    }
+
+    @Override
+    public void apply(SpannableStringBuilder stringBuilder, final Context context) {
+        stringBuilder.setSpan(
+                new StrikethroughSpan(),
+                getStart(),
+                getEnd(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        );
     }
 }

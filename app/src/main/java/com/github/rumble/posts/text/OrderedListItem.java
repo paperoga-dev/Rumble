@@ -19,6 +19,7 @@
 package com.github.rumble.posts.text;
 
 import android.content.Context;
+import android.text.SpannableStringBuilder;
 import android.view.View;
 import android.widget.TextView;
 
@@ -32,9 +33,6 @@ public class OrderedListItem extends Base {
 
     @Override
     public View render(Context context) {
-        TextView tv = new TextView(context);
-        tv.setText("This is an ordered list item: " + getText());
-
-        return tv;
+        return createTextView(context, getFormattedText(context));
     }
 }

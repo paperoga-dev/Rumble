@@ -19,6 +19,7 @@
 package com.github.rumble.posts;
 
 import android.content.Context;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
 
@@ -98,13 +99,15 @@ public interface Posts {
         public View render(Context context) {
             LinearLayout mainLayout = new LinearLayout(context);
 
-            mainLayout.setLayoutParams(
-                    new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT
-                    )
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
             );
+            layoutParams.setMargins(15, 15, 15, 15);
+
+            mainLayout.setLayoutParams(layoutParams);
             mainLayout.setOrientation(LinearLayout.VERTICAL);
+            mainLayout.setPadding(15, 15, 15, 15);
 
             SortedSet<Integer> indexes = new TreeSet<>();
 
@@ -119,23 +122,26 @@ public interface Posts {
                         if (blocks.getIndexes().size() > 1) {
                             LinearLayout blockLayout = new LinearLayout(context);
                             blockLayout.setOrientation(LinearLayout.HORIZONTAL);
+                            mainLayout.setPadding(15, 15, 15, 15);
 
-                            blockLayout.setLayoutParams(
-                                    new LinearLayout.LayoutParams(
-                                            LinearLayout.LayoutParams.MATCH_PARENT,
-                                            LinearLayout.LayoutParams.WRAP_CONTENT
-                                    )
+                            LinearLayout.LayoutParams blockLayoutParams = new LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT
                             );
+                            blockLayoutParams.setMargins(15, 15, 15, 15);
+                            blockLayout.setLayoutParams(blockLayoutParams);
+
+                            blockLayout.setGravity(Gravity.CENTER);
 
                             for (Integer index : blocks.getIndexes()) {
-                                blockLayout.addView(getContent().get(index).render(context));
+                                blockLayout.addView(getContent().get(index).render(context), blockLayoutParams);
                                 indexes.remove(index);
                             }
 
-                            mainLayout.addView(blockLayout);
+                            mainLayout.addView(blockLayout, blockLayoutParams);
                         } else if (!blocks.getIndexes().isEmpty()) {
                             Integer index = blocks.getIndexes().get(0);
-                            mainLayout.addView(getContent().get(index).render(context));
+                            mainLayout.addView(getContent().get(index).render(context), layoutParams);
                             indexes.remove(index);
                         }
                     }
@@ -143,7 +149,7 @@ public interface Posts {
             }
 
             for (Integer index : indexes) {
-                mainLayout.addView(getContent().get(index).render(context));
+                mainLayout.addView(getContent().get(index).render(context), layoutParams);
             }
 
             return mainLayout;

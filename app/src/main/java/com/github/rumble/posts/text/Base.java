@@ -18,6 +18,10 @@
 
 package com.github.rumble.posts.text;
 
+import android.content.Context;
+import android.text.SpannableStringBuilder;
+import android.widget.TextView;
+
 import com.github.rumble.posts.ContentItem;
 
 import org.json.JSONArray;
@@ -100,6 +104,24 @@ public abstract class Base extends ContentItem {
                 IllegalAccessException e) {
             throw new RuntimeException("Add missing text subtype: " + subType);
         }
+    }
+
+    protected SpannableStringBuilder getFormattedText(Context context) {
+        SpannableStringBuilder ssb = new SpannableStringBuilder(getText());
+
+        for (com.github.rumble.posts.text.formatting.Base formattingItem : getFormattingItems()) {
+            formattingItem.apply(ssb, context);
+        }
+
+        return ssb;
+    }
+
+    protected TextView createTextView(Context context, SpannableStringBuilder stringBuilder) {
+        TextView tv = new TextView(context);
+        tv.setTextSize(20.0f);
+        tv.setText(stringBuilder);
+
+        return tv;
     }
 
     public List<com.github.rumble.posts.text.formatting.Base> getFormattingItems() {

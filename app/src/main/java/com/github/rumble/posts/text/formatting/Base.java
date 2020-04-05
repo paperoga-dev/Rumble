@@ -18,6 +18,9 @@
 
 package com.github.rumble.posts.text.formatting;
 
+import android.content.Context;
+import android.text.SpannableStringBuilder;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -39,4 +42,6 @@ public abstract class Base {
     public int getEnd() {
         return end;
     }
+
+    public abstract void apply(SpannableStringBuilder stringBuilder, final Context context);
 }

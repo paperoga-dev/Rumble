@@ -19,6 +19,9 @@
 package com.github.rumble.posts.text;
 
 import android.content.Context;
+import android.graphics.Typeface;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.view.View;
 import android.widget.TextView;
 
@@ -32,9 +35,15 @@ public class Chat extends Base {
 
     @Override
     public View render(Context context) {
-        TextView tv = new TextView(context);
-        tv.setText("This is a chat: " + getText());
+        SpannableStringBuilder ssb = getFormattedText(context);
 
-        return tv;
+        ssb.setSpan(
+                Typeface.create(Typeface.MONOSPACE, Typeface.NORMAL),
+                0,
+                getText().length(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        );
+
+        return createTextView(context, ssb);
     }
 }
