@@ -33,7 +33,7 @@ public class Rows extends LayoutItem {
         Carousel
     }
 
-    public class Blocks {
+    public static class Blocks {
         private final List<Integer> indexes;
         private Type type;
 

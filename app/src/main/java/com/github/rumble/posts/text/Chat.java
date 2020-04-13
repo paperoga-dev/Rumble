@@ -23,7 +23,6 @@ import android.graphics.Typeface;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.view.View;
-import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;

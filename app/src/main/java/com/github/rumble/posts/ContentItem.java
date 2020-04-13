@@ -59,8 +59,7 @@ public abstract class ContentItem {
             return (ContentItem) typesMap.get(type)
                     .getMethod("doCreate", JSONObject.class)
                     .invoke(null, contentItem);
-        } catch (NullPointerException |
-                InvocationTargetException |
+        } catch (InvocationTargetException |
                 NoSuchMethodException |
                 IllegalAccessException e) {
             throw new RuntimeException("Add missing type: " + type);

@@ -19,6 +19,8 @@
 package com.github.rumble;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.Intent;
@@ -27,7 +29,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.github.rumble.posts.Posts;
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private TumblrClient client;
     private TumblrAuthenticate authenticator;
     private TextView tv;
+    private Posts.Adapter postsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +53,15 @@ public class MainActivity extends AppCompatActivity {
         client = new TumblrClient(getApplicationContext());
 
         tv = findViewById(R.id.textView);
-        tv.setText("");
+
+        RecyclerView rv = findViewById(R.id.recyclerView);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(
+                this,
+                LinearLayoutManager.VERTICAL,
+                false
+        );
+        layoutManager.scrollToPosition(0);
+        rv.setLayoutManager(layoutManager);
 
         client.setOnLoginListener(new TumblrClient.OnLoginListener() {
             @Override
@@ -65,15 +75,13 @@ public class MainActivity extends AppCompatActivity {
                         Posts.Api.class,
                         "paperogacoibentato",
                         0,
-                        20,
+                        40,
                         new TumblrClient.OnArrayCompletion<Posts.Post>() {
                             @Override
                             public void onSuccess(List<Posts.Post> result, int offset, int limit, int count) {
-                                LinearLayout layout = findViewById(R.id.layoutDashboard);
-
-                                for (Posts.Post post : result) {
-                                    layout.addView(post.render(layout.getContext()));
-                                }
+                                RecyclerView recyclerView = findViewById(R.id.recyclerView);
+                                Posts.Adapter adapter = new Posts.Adapter(result);
+                                recyclerView.setAdapter(adapter);
                             }
                         }
                 );

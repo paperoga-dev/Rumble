@@ -20,14 +20,11 @@ package com.github.rumble.posts.text.formatting;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ClickableSpan;
 import android.view.View;
-
-import androidx.annotation.NonNull;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -49,7 +46,7 @@ public class Link extends Base {
     public void apply(SpannableStringBuilder stringBuilder, final Context context) {
         stringBuilder.setSpan(new ClickableSpan() {
                     @Override
-                    public void onClick(@NonNull View widget) {
+                    public void onClick(View widget) {
                         context.startActivity(
                                 new Intent(
                                         Intent.ACTION_VIEW,

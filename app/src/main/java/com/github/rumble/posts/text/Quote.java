@@ -19,9 +19,7 @@
 package com.github.rumble.posts.text;
 
 import android.content.Context;
-import android.text.SpannableStringBuilder;
 import android.view.View;
-import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;

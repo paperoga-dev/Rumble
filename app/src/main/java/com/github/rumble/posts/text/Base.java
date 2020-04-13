@@ -80,8 +80,7 @@ public abstract class Base extends ContentItem {
                                 .getDeclaredConstructor(JSONObject.class)
                                 .newInstance(formattingItem)
                 );
-            } catch (NullPointerException |
-                    InstantiationException |
+            } catch (InstantiationException |
                     InvocationTargetException |
                     NoSuchMethodException |
                     IllegalAccessException e) {
@@ -97,8 +96,7 @@ public abstract class Base extends ContentItem {
             return typesMap.get(subType)
                             .getDeclaredConstructor(JSONObject.class)
                             .newInstance(textObject);
-        } catch (NullPointerException |
-                InstantiationException |
+        } catch (InstantiationException |
                 InvocationTargetException |
                 NoSuchMethodException |
                 IllegalAccessException e) {

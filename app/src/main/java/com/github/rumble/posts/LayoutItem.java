@@ -40,8 +40,7 @@ public abstract class LayoutItem {
             return (LayoutItem) typesMap.get(type)
                     .getMethod("doCreate", JSONObject.class)
                     .invoke(null, contentItem);
-        } catch (NullPointerException |
-                InvocationTargetException |
+        } catch (InvocationTargetException |
                 NoSuchMethodException |
                 IllegalAccessException e) {
             throw new RuntimeException("Add missing layout: " + type);

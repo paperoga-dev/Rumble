@@ -33,6 +33,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -47,16 +48,15 @@ public class Base extends ContentItem {
     private String feedbackToken;
     private com.github.rumble.posts.attribution.Base attribution;
     private String altText;
+    private FetchTask fetchTask;
 
-    private class FetchTask extends AsyncTask<Void, Void, Bitmap> {
-        private ImageView imageView;
-        private String imageUrl;
+    private static class FetchTask extends AsyncTask<String, Void, Bitmap> {
+        private WeakReference<ImageView> imageView;
 
-        public FetchTask(ImageView imageView, String imageUrl) {
+        public FetchTask(ImageView imageView) {
             super();
 
-            this.imageView = imageView;
-            this.imageUrl = imageUrl;
+            this.imageView = new WeakReference<>(imageView);
         }
 
         @Override
@@ -65,9 +65,9 @@ public class Base extends ContentItem {
         }
 
         @Override
-        protected Bitmap doInBackground(Void... voids) {
+        protected Bitmap doInBackground(String... urls) {
             try {
-                URL url = new URL(imageUrl);
+                URL url = new URL(urls[0]);
                 URLConnection connection = url.openConnection();
                 HttpURLConnection HCon = (HttpURLConnection) connection;
 
@@ -75,8 +75,6 @@ public class Base extends ContentItem {
                     InputStream ins = HCon.getInputStream();
                     return BitmapFactory.decodeStream(ins);
                 }
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -89,13 +87,17 @@ public class Base extends ContentItem {
             if (image == null) {
                 //TODO : set imageView to an "error" image
             } else {
-                imageView.setImageBitmap(image);
+                ImageView iv = imageView.get();
+                if (iv != null)
+                    iv.setImageBitmap(image);
             }
         }
     }
 
     public Base(JSONObject mediaObject) throws JSONException {
         super();
+
+        this.fetchTask = null;
 
         JSONArray media = mediaObject.getJSONArray("media");
         this.media = new ArrayList<>();
@@ -140,21 +142,23 @@ public class Base extends ContentItem {
     @Override
     public View render(Context context) {
         ImageView iv = new ImageView(context);
+        iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
 
         if (getMedia().isEmpty())
             return iv;
 
-        int minArea = getMedia().get(0).getWidth() * getMedia().get(0).getHeight();
-        int minIndex = 0;
+        int maxArea = getMedia().get(0).getWidth() * getMedia().get(0).getHeight();
+        int maxIndex = 0;
         for (int i = 1; i < getMedia().size(); ++i) {
             int currentArea = getMedia().get(i).getWidth() * getMedia().get(i).getHeight();
-            if (currentArea < minArea) {
-                minArea = currentArea;
-                minIndex = i;
+            if (currentArea > maxArea) {
+                maxArea = currentArea;
+                maxIndex = i;
             }
         }
 
-        new FetchTask(iv, getMedia().get(minIndex).getUrl()).execute();
+        fetchTask = new FetchTask(iv);
+        fetchTask.execute(getMedia().get(maxIndex).getUrl());
 
         return iv;
     }

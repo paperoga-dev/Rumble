@@ -37,8 +37,7 @@ public abstract class Base {
             return typesMap.get(attributionType)
                     .getDeclaredConstructor(JSONObject.class)
                     .newInstance(attributionObject);
-        } catch (NullPointerException |
-                InstantiationException |
+        } catch (InstantiationException |
                 InvocationTargetException |
                 NoSuchMethodException |
                 IllegalAccessException e) {

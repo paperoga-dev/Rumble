@@ -21,10 +21,13 @@ package com.github.rumble.posts;
 import android.content.Context;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.github.rumble.BlogInfo;
-import com.github.rumble.R;
 import com.github.rumble.TumblrArray;
 import com.github.rumble.TumblrArrayItem;
 import com.github.rumble.posts.layout.Rows;
@@ -36,7 +39,6 @@ import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -58,7 +60,117 @@ public interface Posts {
         }
     }
 
+    class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
+
+        public static class ViewHolder extends RecyclerView.ViewHolder {
+            public ViewHolder(View view) {
+                super(view);
+            }
+        }
+
+        private final List<Posts.Post> posts;
+
+        public Adapter(List<Posts.Post> posts) {
+            super();
+
+            this.posts = posts;
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            return position;
+        }
+
+        @Override
+        public Adapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            return new ViewHolder(posts.get(viewType).render(parent.getContext()));
+        }
+
+        @Override
+        public void onBindViewHolder(Adapter.ViewHolder viewHolder, int position) {
+        }
+
+        @Override
+        public int getItemCount() {
+            return posts.size();
+        }
+    }
+
     class Post extends Base {
+        static class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
+            public class ViewHolder extends RecyclerView.ViewHolder {
+                public ViewHolder(View view) {
+                    super(view);
+                }
+            }
+
+            private final List<ContentItem> content;
+            private final List<List<Integer>> blocksLayout;
+
+            public Adapter(List<ContentItem> content, List<List<Integer>> blocksLayout) {
+                super();
+
+                this.content = content;
+                this.blocksLayout = blocksLayout;
+            }
+
+            @Override
+            public int getItemViewType(int position) {
+                return position;
+            }
+
+            @Override
+            public Adapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+                List<Integer> item = blocksLayout.get(viewType);
+
+                if (item.size() > 1) {
+                    LinearLayout blockLayout = new LinearLayout(parent.getContext());
+                    blockLayout.setOrientation(LinearLayout.HORIZONTAL);
+                    blockLayout.setPadding(15, 15, 15, 15);
+
+                    LinearLayout.LayoutParams blockLayoutParams = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                    );
+                    blockLayoutParams.setMargins(15, 15, 15, 15);
+                    blockLayout.setLayoutParams(blockLayoutParams);
+
+                    blockLayout.setGravity(Gravity.CENTER);
+
+                    for (Integer index : item) {
+                        View v = content.get(index).render(parent.getContext());
+                        v.setLayoutParams(
+                                new LinearLayout.LayoutParams(
+                                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                                        LinearLayout.LayoutParams.WRAP_CONTENT
+                                )
+                        );
+                        blockLayout.addView(v, blockLayoutParams);
+                    }
+
+                    return new ViewHolder(blockLayout);
+                } else {
+                    View v = content.get(item.get(0)).render(parent.getContext());
+                    v.setLayoutParams(
+                            new LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT
+                            )
+                    );
+                    return new ViewHolder(v);
+                }
+            }
+
+            @Override
+            public void onBindViewHolder(Adapter.ViewHolder viewHolder, int position) {
+            }
+
+            @Override
+            public int getItemCount() {
+                return blocksLayout.size();
+            }
+        }
+
         private BlogInfo.Base blog;
         private List<ContentItem> content;
         private List<LayoutItem> layout;
@@ -96,63 +208,53 @@ public interface Posts {
             return layout;
         }
 
-        public View render(Context context) {
-            LinearLayout mainLayout = new LinearLayout(context);
-
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            );
-            layoutParams.setMargins(15, 15, 15, 15);
-
-            mainLayout.setLayoutParams(layoutParams);
-            mainLayout.setOrientation(LinearLayout.VERTICAL);
-            mainLayout.setPadding(15, 15, 15, 15);
-
+        public List<List<Integer>> getBlocksLayout() {
             SortedSet<Integer> indexes = new TreeSet<>();
 
             for (int i = 0; i < getContent().size(); ++i)
                 indexes.add(i);
 
+            ArrayList<List<Integer>> list = new ArrayList<>();
+
             for (int i = 0; i < getLayout().size(); ++i) {
                 if (getLayout().get(i) instanceof Rows) {
+                    ArrayList<Integer> innerBlock = new ArrayList<>();
+
                     Rows rows = (Rows) getLayout().get(i);
 
                     for (Rows.Blocks blocks : rows.getBlocksList()) {
-                        if (blocks.getIndexes().size() > 1) {
-                            LinearLayout blockLayout = new LinearLayout(context);
-                            blockLayout.setOrientation(LinearLayout.HORIZONTAL);
-                            mainLayout.setPadding(15, 15, 15, 15);
-
-                            LinearLayout.LayoutParams blockLayoutParams = new LinearLayout.LayoutParams(
-                                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                                    LinearLayout.LayoutParams.WRAP_CONTENT
-                            );
-                            blockLayoutParams.setMargins(15, 15, 15, 15);
-                            blockLayout.setLayoutParams(blockLayoutParams);
-
-                            blockLayout.setGravity(Gravity.CENTER);
-
-                            for (Integer index : blocks.getIndexes()) {
-                                blockLayout.addView(getContent().get(index).render(context), blockLayoutParams);
-                                indexes.remove(index);
-                            }
-
-                            mainLayout.addView(blockLayout, blockLayoutParams);
-                        } else if (!blocks.getIndexes().isEmpty()) {
-                            Integer index = blocks.getIndexes().get(0);
-                            mainLayout.addView(getContent().get(index).render(context), layoutParams);
+                        for (Integer index : blocks.getIndexes()) {
+                            innerBlock.add(index);
                             indexes.remove(index);
                         }
                     }
+
+                    list.add(innerBlock);
                 }
             }
 
             for (Integer index : indexes) {
-                mainLayout.addView(getContent().get(index).render(context), layoutParams);
+                ArrayList<Integer> innerBlock = new ArrayList<>();
+                innerBlock.add(index);
+                list.add(innerBlock);
             }
 
-            return mainLayout;
+            return list;
+        }
+
+        public View render(Context context) {
+            RecyclerView lv = new RecyclerView(context);
+            lv.setLayoutManager(new LinearLayoutManager(
+                    context,
+                    LinearLayoutManager.VERTICAL,
+                    false
+            ));
+            lv.setLayoutParams(new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            ));
+            lv.setAdapter(new Adapter(getContent(), getBlocksLayout()));
+            return lv;
         }
     }
 
@@ -182,7 +284,6 @@ public interface Posts {
             return posts;
         }
     }
-
 
     class Api extends TumblrArray<Data> {
 
