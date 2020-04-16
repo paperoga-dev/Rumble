@@ -18,10 +18,6 @@
 
 package com.github.rumble.posts.video;
 
-import android.content.Context;
-import android.view.View;
-import android.widget.TextView;
-
 import com.github.rumble.posts.ContentItem;
 import com.github.rumble.posts.media.Media;
 
@@ -96,10 +92,10 @@ public class Base extends ContentItem {
     }
 
     @Override
-    public View render(Context context) {
-        TextView tv = new TextView(context);
-        tv.setText("This is a video player for " + getUrl());
-
-        return tv;
+    public String render() {
+        if (!getEmbedHtml().isEmpty())
+            return getEmbedHtml();
+        else
+            return "<video controls><source src=\"" + getUrl() + "\">Your browser does not support the video tag.</video>";
     }
 }

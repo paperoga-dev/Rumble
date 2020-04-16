@@ -18,11 +18,10 @@
 
 package com.github.rumble.posts.text;
 
-import android.content.Context;
+import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.RelativeSizeSpan;
-import android.view.View;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,11 +32,11 @@ public class Heading1 extends Base {
     }
 
     @Override
-    public View render(Context context) {
-        SpannableStringBuilder ssb = getFormattedText(context);
+    public String render() {
+        SpannableStringBuilder ssb = getFormattedText();
 
         ssb.setSpan(new RelativeSizeSpan(2.0f), 0, getText().length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-        return createTextView(context, ssb);
+        return Html.toHtml(ssb);
     }
 }

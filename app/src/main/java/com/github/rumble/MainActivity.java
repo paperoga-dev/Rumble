@@ -19,6 +19,7 @@
 package com.github.rumble;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -54,12 +55,13 @@ public class MainActivity extends AppCompatActivity {
 
         tv = findViewById(R.id.textView);
 
-        RecyclerView rv = findViewById(R.id.recyclerView);
         LinearLayoutManager layoutManager = new LinearLayoutManager(
                 this,
                 LinearLayoutManager.VERTICAL,
                 false
         );
+        RecyclerView rv = findViewById(R.id.recyclerView);
+        rv.addItemDecoration(new DividerItemDecoration(rv.getContext(), layoutManager.getOrientation()));
         layoutManager.scrollToPosition(0);
         rv.setLayoutManager(layoutManager);
 

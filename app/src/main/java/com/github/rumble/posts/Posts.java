@@ -19,15 +19,15 @@
 package com.github.rumble.posts;
 
 import android.content.Context;
-import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.webkit.WebView;
 
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.rumble.BlogInfo;
+import com.github.rumble.R;
 import com.github.rumble.TumblrArray;
 import com.github.rumble.TumblrArrayItem;
 import com.github.rumble.posts.layout.Rows;
@@ -49,10 +49,13 @@ public interface Posts {
     class Base {
         private long id;
 
-        public Base(JSONObject postObject) throws JSONException {
+        public Base(JSONObject postObject, boolean isATrail) throws JSONException {
             super();
 
-            this.id = postObject.getLong("id");
+            if (isATrail)
+                this.id = postObject.getJSONObject("post").getLong("id");
+            else
+                this.id = postObject.getLong("id");
         }
 
         public long getId() {
@@ -83,7 +86,19 @@ public interface Posts {
 
         @Override
         public Adapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new ViewHolder(posts.get(viewType).render(parent.getContext()));
+            WebView wv = (WebView) LayoutInflater.from(parent.getContext()).inflate(R.layout.webview_item, null);
+            wv.getSettings().setLoadWithOverviewMode(true);
+            wv.getSettings().setUseWideViewPort(true);
+            wv.getSettings().setGeolocationEnabled(false);
+            wv.getSettings().setNeedInitialFocus(false);
+            wv.getSettings().setSaveFormData(false);
+            wv.getSettings().setDefaultFontSize(40);
+            wv.loadData(
+                    "<html><head><style>#row { display: flex; flex-wrap: nowrap; justify-content: space-between }</style></head><body>" + posts.get(viewType).render() + "</body></html>",
+                    "text/html",
+                    "UTF-8"
+            );
+            return new ViewHolder(wv);
         }
 
         @Override
@@ -97,86 +112,13 @@ public interface Posts {
     }
 
     class Post extends Base {
-        static class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
-            public class ViewHolder extends RecyclerView.ViewHolder {
-                public ViewHolder(View view) {
-                    super(view);
-                }
-            }
-
-            private final List<ContentItem> content;
-            private final List<List<Integer>> blocksLayout;
-
-            public Adapter(List<ContentItem> content, List<List<Integer>> blocksLayout) {
-                super();
-
-                this.content = content;
-                this.blocksLayout = blocksLayout;
-            }
-
-            @Override
-            public int getItemViewType(int position) {
-                return position;
-            }
-
-            @Override
-            public Adapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-                List<Integer> item = blocksLayout.get(viewType);
-
-                if (item.size() > 1) {
-                    LinearLayout blockLayout = new LinearLayout(parent.getContext());
-                    blockLayout.setOrientation(LinearLayout.HORIZONTAL);
-                    blockLayout.setPadding(15, 15, 15, 15);
-
-                    LinearLayout.LayoutParams blockLayoutParams = new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.WRAP_CONTENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT
-                    );
-                    blockLayoutParams.setMargins(15, 15, 15, 15);
-                    blockLayout.setLayoutParams(blockLayoutParams);
-
-                    blockLayout.setGravity(Gravity.CENTER);
-
-                    for (Integer index : item) {
-                        View v = content.get(index).render(parent.getContext());
-                        v.setLayoutParams(
-                                new LinearLayout.LayoutParams(
-                                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                                        LinearLayout.LayoutParams.WRAP_CONTENT
-                                )
-                        );
-                        blockLayout.addView(v, blockLayoutParams);
-                    }
-
-                    return new ViewHolder(blockLayout);
-                } else {
-                    View v = content.get(item.get(0)).render(parent.getContext());
-                    v.setLayoutParams(
-                            new LinearLayout.LayoutParams(
-                                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                                    LinearLayout.LayoutParams.WRAP_CONTENT
-                            )
-                    );
-                    return new ViewHolder(v);
-                }
-            }
-
-            @Override
-            public void onBindViewHolder(Adapter.ViewHolder viewHolder, int position) {
-            }
-
-            @Override
-            public int getItemCount() {
-                return blocksLayout.size();
-            }
-        }
-
         private BlogInfo.Base blog;
         private List<ContentItem> content;
         private List<LayoutItem> layout;
+        private List<Post> trail;
 
-        public Post(JSONObject postObject) throws JSONException {
-            super(postObject);
+        public Post(JSONObject postObject, boolean isATrail) throws JSONException {
+            super(postObject, isATrail);
 
             this.blog = new BlogInfo.Base(postObject.getJSONObject("blog"));
 
@@ -188,11 +130,18 @@ public interface Posts {
 
             this.layout = new ArrayList<>();
             JSONArray layout = postObject.optJSONArray("layout");
-            if (layout == null)
-                return;
+            if (layout != null) {
+                for (int i = 0; i < layout.length(); ++i) {
+                    this.layout.add(LayoutItem.create(layout.getJSONObject(i)));
+                }
+            }
 
-            for (int i = 0; i < layout.length(); ++i) {
-                this.layout.add(LayoutItem.create(layout.getJSONObject(i)));
+            this.trail = new ArrayList<>();
+            JSONArray trail = postObject.optJSONArray("trail");
+            if (trail != null) {
+                for (int i = 0; i < trail.length(); ++i) {
+                    this.trail.add(new Post(trail.getJSONObject(i), true));
+                }
             }
         }
 
@@ -206,6 +155,10 @@ public interface Posts {
 
         public List<LayoutItem> getLayout() {
             return layout;
+        }
+
+        public List<Post> getTrail() {
+            return trail;
         }
 
         public List<List<Integer>> getBlocksLayout() {
@@ -242,19 +195,26 @@ public interface Posts {
             return list;
         }
 
-        public View render(Context context) {
-            RecyclerView lv = new RecyclerView(context);
-            lv.setLayoutManager(new LinearLayoutManager(
-                    context,
-                    LinearLayoutManager.VERTICAL,
-                    false
-            ));
-            lv.setLayoutParams(new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            ));
-            lv.setAdapter(new Adapter(getContent(), getBlocksLayout()));
-            return lv;
+        public String render() {
+            String content = "";
+
+            for (Post post : getTrail()) {
+                content += post.render();
+            }
+
+            List<List<Integer>> rows = getBlocksLayout();
+
+            for (List<Integer> row : rows) {
+                content += "<section id=\"row\">";
+
+                for (Integer item : row) {
+                    content += "<div>" + getContent().get(item).render() + "</div>";
+                }
+
+                content += "</section>";
+            }
+
+            return content;
         }
     }
 
@@ -270,7 +230,7 @@ public interface Posts {
 
             JSONArray posts = postsObject.getJSONArray("posts");
             for (int i = 0; i < posts.length(); ++i) {
-                this.posts.add(new Post(posts.getJSONObject(i)));
+                this.posts.add(new Post(posts.getJSONObject(i), false));
             }
         }
 

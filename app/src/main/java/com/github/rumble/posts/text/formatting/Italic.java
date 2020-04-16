@@ -18,7 +18,6 @@
 
 package com.github.rumble.posts.text.formatting;
 
-import android.content.Context;
 import android.graphics.Typeface;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -32,7 +31,7 @@ public class Italic extends Base {
     }
 
     @Override
-    public void apply(SpannableStringBuilder stringBuilder, final Context context) {
+    public void apply(SpannableStringBuilder stringBuilder) {
         stringBuilder.setSpan(
                 new android.text.style.StyleSpan(Typeface.ITALIC),
                 getStart(),

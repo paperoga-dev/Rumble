@@ -13,7 +13,7 @@ public class Post extends Base {
     public Post(JSONObject attributionObject) throws JSONException {
         super(attributionObject);
 
-        this.post = new Posts.Base(attributionObject.getJSONObject("post"));
+        this.post = new Posts.Base(attributionObject.getJSONObject("post"), false);
         this.blog = new BlogInfo.Base(attributionObject.getJSONObject("blog"));
     }
 

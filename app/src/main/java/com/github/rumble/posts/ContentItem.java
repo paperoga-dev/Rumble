@@ -18,9 +18,6 @@
 
 package com.github.rumble.posts;
 
-import android.content.Context;
-import android.view.View;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -51,7 +48,7 @@ public abstract class ContentItem {
         }
     }
 
-    public abstract View render(Context context);
+    public abstract String render();
 
     static ContentItem create(JSONObject contentItem) throws JSONException {
         String type = contentItem.getString("type");

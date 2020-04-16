@@ -18,7 +18,6 @@
 
 package com.github.rumble.posts.text.formatting;
 
-import android.content.Context;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.UnderlineSpan;
@@ -42,7 +41,7 @@ public class Mention extends Base {
     }
 
     @Override
-    public void apply(SpannableStringBuilder stringBuilder, final Context context) {
+    public void apply(SpannableStringBuilder stringBuilder) {
         stringBuilder.setSpan(
                 new UnderlineSpan(),
                 getStart(),
