@@ -87,6 +87,8 @@ public interface Posts {
         @Override
         public Adapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             WebView wv = (WebView) LayoutInflater.from(parent.getContext()).inflate(R.layout.webview_item, null);
+            wv.getSettings().setJavaScriptEnabled(true);
+            wv.getSettings().setJavaScriptCanOpenWindowsAutomatically(false);
             wv.getSettings().setLoadWithOverviewMode(true);
             wv.getSettings().setUseWideViewPort(true);
             wv.getSettings().setGeolocationEnabled(false);
@@ -94,7 +96,9 @@ public interface Posts {
             wv.getSettings().setSaveFormData(false);
             wv.getSettings().setDefaultFontSize(40);
             wv.loadData(
-                    "<html><head><style>#row { display: flex; flex-wrap: nowrap; justify-content: space-between }</style></head><body>" + posts.get(viewType).render() + "</body></html>",
+                    "<html><head><style>#row { display: flex; flex-wrap: nowrap; justify-content: space-between }</style></head><body>" +
+                            posts.get(viewType).render(parent.getWidth()) +
+                            "</body></html>",
                     "text/html",
                     "UTF-8"
             );
@@ -171,18 +175,18 @@ public interface Posts {
 
             for (int i = 0; i < getLayout().size(); ++i) {
                 if (getLayout().get(i) instanceof Rows) {
-                    ArrayList<Integer> innerBlock = new ArrayList<>();
-
                     Rows rows = (Rows) getLayout().get(i);
 
                     for (Rows.Blocks blocks : rows.getBlocksList()) {
+                        ArrayList<Integer> innerBlock = new ArrayList<>();
+
                         for (Integer index : blocks.getIndexes()) {
                             innerBlock.add(index);
                             indexes.remove(index);
                         }
-                    }
 
-                    list.add(innerBlock);
+                        list.add(innerBlock);
+                    }
                 }
             }
 
@@ -195,11 +199,11 @@ public interface Posts {
             return list;
         }
 
-        public String render() {
+        public String render(int viewWidth) {
             String content = "";
 
             for (Post post : getTrail()) {
-                content += post.render();
+                content += post.render(viewWidth);
             }
 
             List<List<Integer>> rows = getBlocksLayout();
@@ -208,7 +212,7 @@ public interface Posts {
                 content += "<section id=\"row\">";
 
                 for (Integer item : row) {
-                    content += "<div>" + getContent().get(item).render() + "</div>";
+                    content += "<div>" + getContent().get(item).render(viewWidth / row.size()) + "</div>";
                 }
 
                 content += "</section>";

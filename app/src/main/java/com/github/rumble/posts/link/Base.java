@@ -78,7 +78,7 @@ public class Base extends ContentItem {
     }
 
     @Override
-    public String render() {
+    public String render(int itemWidth) {
         return "<a href=\"" + getUrl() + "\" target=\"_blank\">" + getDisplayUrl() + "</a>";
     }
 }

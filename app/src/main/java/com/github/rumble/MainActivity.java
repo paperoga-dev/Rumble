@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
 
                 client.call(
                         Posts.Api.class,
-                        "paperogacoibentato",
+                        "papero-tombo",
                         0,
                         40,
                         new TumblrClient.OnArrayCompletion<Posts.Post>() {

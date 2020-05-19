@@ -92,10 +92,10 @@ public class Base extends ContentItem {
     }
 
     @Override
-    public String render() {
+    public String render(int itemWidth) {
         if (!getEmbedHtml().isEmpty())
             return getEmbedHtml();
         else
-            return "<video controls><source src=\"" + getUrl() + "\">Your browser does not support the video tag.</video>";
+            return "<iframe src='" + getUrl() + "' style='display:block;background-color:transparent;overflow:hidden' scrolling='no' frameBorder='0' data-can-gutter data-can-resize width='" + itemWidth + "' height='" + itemWidth + "' allowfullscreen mozallowfullscreen webkitallowfullscreen></iframe>";
     }
 }

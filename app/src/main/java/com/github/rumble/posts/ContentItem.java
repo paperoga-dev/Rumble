@@ -48,7 +48,7 @@ public abstract class ContentItem {
         }
     }
 
-    public abstract String render();
+    public abstract String render(int itemWidth);
 
     static ContentItem create(JSONObject contentItem) throws JSONException {
         String type = contentItem.getString("type");

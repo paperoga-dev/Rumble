@@ -79,7 +79,7 @@ public class Base extends ContentItem {
     }
 
     @Override
-    public String render() {
+    public String render(int itemWidth) {
         if (getMedia().isEmpty())
             return "";
 
@@ -93,7 +93,7 @@ public class Base extends ContentItem {
             }
         }
 
-        return "<img style=\"width: 100%; object-fit: contain;\" src=\"" + getMedia().get(maxIndex).getUrl() + "\" alt=\"" + getAltText() + "\"></img>";
+        return "<img style=\"width: " + itemWidth +"; object-fit: contain;\" src=\"" + getMedia().get(maxIndex).getUrl() + "\" alt=\"" + getAltText() + "\"></img>";
     }
 
     public static ContentItem doCreate(JSONObject mediaObject) throws JSONException {

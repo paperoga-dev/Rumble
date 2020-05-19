@@ -29,7 +29,7 @@ public class Plain extends Base {
     }
 
     @Override
-    public String render() {
+    public String render(int itemWidth) {
         return Html.toHtml(getFormattedText());
     }
 }

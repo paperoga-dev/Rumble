@@ -32,11 +32,7 @@ public class Heading2 extends Base {
     }
 
     @Override
-    public String render() {
-        SpannableStringBuilder ssb = getFormattedText();
-
-        ssb.setSpan(new RelativeSizeSpan(1.5f), 0, getText().length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-        return Html.toHtml(ssb);
+    public String render(int itemWidth) {
+        return "<h2>" + Html.toHtml(getFormattedText()) + "</h2>";
     }
 }

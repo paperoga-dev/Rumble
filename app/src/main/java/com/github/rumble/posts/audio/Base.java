@@ -99,10 +99,7 @@ public class Base extends ContentItem {
     }
 
     @Override
-    public String render() {
-        if (!getEmbedHtml().isEmpty())
-            return getEmbedHtml();
-        else
-            return "<audio controls><source src=\"" + getUrl() + "\">Your browser does not support the audio element.</audio>";
+    public String render(int itemWidth) {
+        return "<iframe src='" + getEmbedUrl() + "' frameborder='0' width='" + itemWidth + "' height='" + itemWidth + "'></iframe>";
     }
 }

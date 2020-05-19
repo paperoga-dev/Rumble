@@ -29,7 +29,7 @@ public class Indented extends Base {
     }
 
     @Override
-    public String render() {
-        return Html.toHtml(getFormattedText());
+    public String render(int itemWidth) {
+        return "<p style=\"margin-left:10%;\">" + Html.toHtml(getFormattedText()) + "</p>";
     }
 }
