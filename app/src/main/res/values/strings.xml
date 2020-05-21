@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Rumble</string>
+    <string name="post_css">#row { display: flex; flex-wrap: nowrap; justify-content: space-between; } #blog_title { font-weight: bold; } #timestamp { font-style: italic; } #tags { font-style: italic; display: flex; flex-wrap: wrap; }</string>
 </resources>

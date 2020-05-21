@@ -39,6 +39,7 @@ import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -49,13 +50,10 @@ public interface Posts {
     class Base {
         private long id;
 
-        public Base(JSONObject postObject, boolean isATrail) throws JSONException {
+        public Base(JSONObject idObject) throws JSONException {
             super();
 
-            if (isATrail)
-                this.id = postObject.getJSONObject("post").getLong("id");
-            else
-                this.id = postObject.getLong("id");
+            this.id = idObject.getLong("id");
         }
 
         public long getId() {
@@ -95,9 +93,11 @@ public interface Posts {
             wv.getSettings().setNeedInitialFocus(false);
             wv.getSettings().setSaveFormData(false);
             wv.getSettings().setDefaultFontSize(40);
-            wv.loadData(
-                    "<html><head><style>#row { display: flex; flex-wrap: nowrap; justify-content: space-between }</style></head><body>" +
-                            posts.get(viewType).render(parent.getWidth()) +
+
+            Post post = posts.get(viewType);
+
+            wv.loadData("<html><head><style type=\"text/css\">" + parent.getContext().getResources().getString(R.string.post_css) + "</style></head><body>" +
+                            post.render(parent.getWidth()) +
                             "</body></html>",
                     "text/html",
                     "UTF-8"
@@ -115,14 +115,14 @@ public interface Posts {
         }
     }
 
-    class Post extends Base {
+    class Trail extends Base {
         private BlogInfo.Base blog;
         private List<ContentItem> content;
         private List<LayoutItem> layout;
-        private List<Post> trail;
+        private List<Trail> trail;
 
-        public Post(JSONObject postObject, boolean isATrail) throws JSONException {
-            super(postObject, isATrail);
+        public Trail(JSONObject postObject, JSONObject idObject) throws JSONException {
+            super(idObject);
 
             this.blog = new BlogInfo.Base(postObject.getJSONObject("blog"));
 
@@ -144,7 +144,12 @@ public interface Posts {
             JSONArray trail = postObject.optJSONArray("trail");
             if (trail != null) {
                 for (int i = 0; i < trail.length(); ++i) {
-                    this.trail.add(new Post(trail.getJSONObject(i), true));
+                    this.trail.add(
+                            new Trail(
+                                    trail.getJSONObject(i),
+                                    trail.getJSONObject(i).getJSONObject("post")
+                            )
+                    );
                 }
             }
         }
@@ -161,7 +166,7 @@ public interface Posts {
             return layout;
         }
 
-        public List<Post> getTrail() {
+        public List<Trail> getTrail() {
             return trail;
         }
 
@@ -202,9 +207,11 @@ public interface Posts {
         public String render(int viewWidth) {
             String content = "";
 
-            for (Post post : getTrail()) {
-                content += post.render(viewWidth);
+            for (Trail trail : getTrail()) {
+                content += trail.render(viewWidth);
             }
+
+            content += "<section id=\"blog_title\"><div>" + getBlog().getName() + "</div></section>";
 
             List<List<Integer>> rows = getBlocksLayout();
 
@@ -212,9 +219,65 @@ public interface Posts {
                 content += "<section id=\"row\">";
 
                 for (Integer item : row) {
-                    content += "<div>" + getContent().get(item).render(viewWidth / row.size()) + "</div>";
+                    content += "<div>" + getContent().get(item).render(viewWidth / row.size()) + "</div><div>&nbsp;</div>";
                 }
 
+                content += "</section><section id=\"row\"><div>&nbsp;</div></section>";
+            }
+
+            return content;
+        }
+    }
+
+    class Post extends Trail {
+        private Date timestamp;
+        private List<String> tags;
+        private String url;
+        private String shortUrl;
+
+
+        public Post(JSONObject postObject) throws JSONException {
+            super(postObject, postObject);
+
+            this.timestamp = new Date(postObject.getLong("timestamp") * 1000L);
+            this.url = postObject.getString("post_url");
+            this.shortUrl = postObject.getString("short_url");
+
+            this.tags = new ArrayList<>();
+            JSONArray tags = postObject.optJSONArray("tags");
+            if (tags != null) {
+                for (int i = 0; i < tags.length(); ++i) {
+                    this.tags.add(tags.getString(i));
+                }
+            }
+        }
+
+        public Date getTimestamp() {
+            return timestamp;
+        }
+
+        public List<String> getTags() {
+            return tags;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public String getShortUrl() {
+            return shortUrl;
+        }
+
+        public String render(int viewWidth) {
+            String content = super.render(viewWidth);
+
+            content += "<section id=\"timestamp\"><div>" + getTimestamp().toString() + "</div></section>";
+
+            if (getTags() != null) {
+                content += "<section id=\"tags\">";
+                for (String tag : getTags()) {
+                    content += "<div>#" + tag + "</div><div>&nbsp;</div>";
+                }
                 content += "</section>";
             }
 
@@ -234,7 +297,7 @@ public interface Posts {
 
             JSONArray posts = postsObject.getJSONArray("posts");
             for (int i = 0; i < posts.length(); ++i) {
-                this.posts.add(new Post(posts.getJSONObject(i), false));
+                this.posts.add(new Post(posts.getJSONObject(i)));
             }
         }
 
