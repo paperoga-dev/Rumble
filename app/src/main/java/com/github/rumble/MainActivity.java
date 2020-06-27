@@ -34,7 +34,6 @@ import android.widget.TextView;
 
 import com.github.rumble.api.Authenticate;
 import com.github.rumble.api.array.CompletionInterface;
-import com.github.rumble.blog.array.ApiInterface;
 import com.github.rumble.exception.BaseException;
 import com.github.rumble.blog.array.Posts;
 import com.github.rumble.exception.NetworkException;

@@ -26,7 +26,7 @@ import com.github.rumble.api.array.ContentInterface;
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
-public abstract class Id<T, W extends ContentInterface<T>> extends Api<T, W> {
+public abstract class Id<T, W extends ContentInterface<T>> extends Api<T, W> implements ApiInterface<T, W> {
     private final String blogId;
 
     protected Id(
@@ -52,6 +52,7 @@ public abstract class Id<T, W extends ContentInterface<T>> extends Api<T, W> {
         return "/blog/" + getBlogId() + ".tumblr.com";
     }
 
+    @Override
     public String getBlogId() {
         return blogId;
     }
