@@ -16,46 +16,51 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.rumble;
+package com.github.rumble.blog.array;
 
 import android.content.Context;
 
+import com.github.rumble.api.array.ContentInterface;
+import com.github.rumble.blog.simple.Info;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public interface Likes {
-    class Post {
+public interface Following {
+    class Data implements ContentInterface<Info.Base>
+    {
+        private List<Info.Base> blogs;
+        private int totalBlogs;
 
-    }
-
-    class Data implements TumblrArrayItem<Post> {
-        private List<Post> likedPosts;
-        private int likedCount;
-
-        Data(JSONObject likesObject) throws JSONException {
+        Data(JSONObject followingObject) throws JSONException {
             super();
 
-            // TODO: Post
-            // this.likedPosts = ...;
-            this.likedCount = likesObject.getInt("liked_count");
-        }
+            this.totalBlogs = followingObject.getInt("total_blogs");
 
-        @Override
-        public List<Post> getItems() {
-            return likedPosts;
+            this.blogs = new ArrayList<>();
+            JSONArray blogs = followingObject.getJSONArray("blogs");
+            for (int i = 0; i < blogs.length(); ++i)
+                this.blogs.add(new Info.Base(blogs.getJSONObject(i)));
         }
 
         @Override
         public int getCount() {
-            return likedCount;
+            return totalBlogs;
+        }
+
+        @Override
+        public List<Info.Base> getItems() {
+            return blogs;
         }
     }
 
-    class Api extends TumblrArray<Data> {
+    class Api extends Id<Info.Base, Data> {
 
         public Api(
                 Context context,
@@ -63,13 +68,20 @@ public interface Likes {
                 Token authToken,
                 String appId,
                 String appVersion,
-                String[] additionalArgs) {
-            super(context, service, authToken, appId, appVersion, additionalArgs);
+                Integer offset,
+                Integer limit,
+                String blogId) {
+            super(context, service, authToken, appId, appVersion, offset, limit, blogId);
         }
 
         @Override
         protected String getPath() {
-            return super.getPath() + "/likes";
+            return super.getPath() + "/following";
+        }
+
+        @Override
+        protected boolean requiresApiKey() {
+            return false;
         }
 
         @Override

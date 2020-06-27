@@ -16,11 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.rumble;
+package com.github.rumble.exception;
 
-import java.util.List;
+public class ResponseException extends BaseException {
+    private int responseCode;
+    private String responseMessage;
 
-public interface TumblrArrayItem<T> {
-    int getCount();
-    List<T> getItems();
+    public ResponseException(int responseCode, String responseMessage) {
+        super(responseMessage);
+    }
+
+    public int getResponseCode() {
+        return responseCode;
+    }
+
+    public String getResponseMessage() {
+        return responseMessage;
+    }
 }

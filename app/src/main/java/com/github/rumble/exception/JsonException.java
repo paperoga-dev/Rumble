@@ -16,20 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.rumble;
+package com.github.rumble.exception;
 
-import org.scribe.exceptions.OAuthException;
+import org.json.JSONException;
 
-class TumblrNetworkException extends TumblrException {
-    private final OAuthException e;
+public class JsonException extends BaseException {
+    private JSONException e;
 
-    public TumblrNetworkException(OAuthException e) {
+    public JsonException(JSONException e) {
         super(e.getMessage());
-
-        this.e = e;
     }
 
-    public OAuthException getException() {
+    public JSONException getException() {
         return e;
     }
 }

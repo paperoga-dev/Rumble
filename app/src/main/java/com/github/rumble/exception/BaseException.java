@@ -16,18 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.rumble;
+package com.github.rumble.exception;
 
-import org.json.JSONException;
-
-class TumblrJsonException extends TumblrException {
-    private JSONException e;
-
-    public TumblrJsonException(JSONException e) {
-        super(e.getMessage());
-    }
-
-    public JSONException getException() {
-        return e;
+abstract public class BaseException extends java.lang.Exception {
+    BaseException(String message) {
+        super(message);
     }
 }

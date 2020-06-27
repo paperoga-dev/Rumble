@@ -16,9 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.rumble;
+package com.github.rumble.blog.simple;
 
 import android.content.Context;
+
+import com.github.rumble.blog.simple.Avatar;
+import com.github.rumble.blog.simple.Id;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,7 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public interface BlogInfo {
+public interface Info {
 
     class Reference {
         private String name;                      // String - Blog name
@@ -373,7 +376,7 @@ public interface BlogInfo {
         }
     }
 
-    class Api extends TumblrBlogId<Data> {
+    class Api extends Id<Data> {
 
         /*
         "response": {
@@ -432,8 +435,8 @@ public interface BlogInfo {
                 Token authToken,
                 String appId,
                 String appVersion,
-                String[] additionalArgs) {
-            super(context, service, authToken, appId, appVersion, additionalArgs);
+                String blogId) {
+            super(context, service, authToken, appId, appVersion, blogId);
         }
 
         @Override

@@ -16,10 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.rumble;
+package com.github.rumble.api.array;
 
-abstract class TumblrException extends Exception {
-    TumblrException(String message) {
-        super(message);
-    }
+import java.util.List;
+
+public interface ContentInterface<T> {
+    int getCount();
+    List<T> getItems();
 }

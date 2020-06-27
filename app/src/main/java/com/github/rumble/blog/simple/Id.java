@@ -16,26 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.rumble;
+package com.github.rumble.blog.simple;
 
 import android.content.Context;
+
+import com.github.rumble.api.simple.Api;
 
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
-public abstract class TumblrBlogId<T> extends TumblrApi<T> {
+public abstract class Id<T> extends Api<T> {
     private final String blogId;
 
-    TumblrBlogId(
+    protected Id(
             Context context,
             OAuthService service,
             Token authToken,
             String appId,
             String appVersion,
-            String[] additionalArgs) {
+            String blogId) {
         super(context, service, authToken, appId, appVersion);
 
-        this.blogId = additionalArgs[0];
+        this.blogId = blogId;
     }
 
     @Override

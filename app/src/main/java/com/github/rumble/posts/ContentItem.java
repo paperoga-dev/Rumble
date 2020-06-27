@@ -50,7 +50,7 @@ public abstract class ContentItem {
 
     public abstract String render(int itemWidth);
 
-    static ContentItem create(JSONObject contentItem) throws JSONException {
+    static public ContentItem create(JSONObject contentItem) throws JSONException {
         String type = contentItem.getString("type");
         try {
             return (ContentItem) typesMap.get(type)

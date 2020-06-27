@@ -16,51 +16,43 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.rumble;
+package com.github.rumble.blog.array;
 
 import android.content.Context;
+
+import com.github.rumble.api.array.Api;
+import com.github.rumble.api.array.ContentInterface;
 
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
-import java.util.Map;
+public abstract class Id<T, W extends ContentInterface<T>> extends Api<T, W> {
+    private final String blogId;
 
-public abstract class TumblrArray<T extends TumblrArrayItem> extends TumblrBlogId<T> {
-    private final int offset;
-    private final int limit;
-
-    protected TumblrArray(
+    protected Id(
             Context context,
             OAuthService service,
             Token authToken,
             String appId,
             String appVersion,
-            String[] additionalArgs) {
-        super(context, service, authToken, appId, appVersion, additionalArgs);
+            Integer offset,
+            Integer limit,
+            String blogId) {
+        super(context, service, authToken, appId, appVersion, offset, limit);
 
-        this.offset = Integer.parseInt(additionalArgs[1]);
-        this.limit = Integer.parseInt(additionalArgs[2]);
+        this.blogId = blogId;
     }
 
     @Override
-    protected Map<String, String> defaultParams() {
-        Map<String, String> m = super.defaultParams();
-
+    protected String getPath() {
         /*
-        limit            Number  The number of results to return: 1–20, inclusive  default: 20
-        offset           Number  Result to start at                                default: 0
+        blog-identifier  String  Any blog identifier
         */
-        m.put("limit", String.valueOf(limit));
-        m.put("offset", String.valueOf(offset));
 
-        return m;
+        return "/blog/" + getBlogId() + ".tumblr.com";
     }
 
-    public int getLimit() {
-        return limit;
-    }
-
-    public int getOffset() {
-        return offset;
+    public String getBlogId() {
+        return blogId;
     }
 }

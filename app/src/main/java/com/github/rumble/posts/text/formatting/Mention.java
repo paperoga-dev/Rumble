@@ -22,21 +22,21 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.UnderlineSpan;
 
-import com.github.rumble.BlogInfo;
+import com.github.rumble.blog.simple.Info;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Mention extends Base {
-    private BlogInfo.Reference blog;
+    private Info.Reference blog;
 
     public Mention(JSONObject formattingObject) throws JSONException {
         super(formattingObject);
 
-        this.blog = new BlogInfo.Reference(formattingObject.getJSONObject("blog"));
+        this.blog = new Info.Reference(formattingObject.getJSONObject("blog"));
     }
 
-    public BlogInfo.Reference getBlog() {
+    public Info.Reference getBlog() {
         return blog;
     }
 

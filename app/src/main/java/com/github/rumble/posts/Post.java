@@ -18,34 +18,30 @@
 
 package com.github.rumble.posts;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.github.rumble.BlogInfo;
 import com.github.rumble.R;
-import com.github.rumble.TumblrArray;
-import com.github.rumble.TumblrArrayItem;
+import com.github.rumble.api.array.ContentInterface;
+import com.github.rumble.blog.simple.Info;
 import com.github.rumble.posts.layout.Rows;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.scribe.model.Token;
-import org.scribe.oauth.OAuthService;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-public interface Posts {
+public interface Post {
 
     class Base {
         private long id;
@@ -69,9 +65,9 @@ public interface Posts {
             }
         }
 
-        private final List<Posts.Post> posts;
+        private final List<Item> posts;
 
-        public Adapter(List<Posts.Post> posts) {
+        public Adapter(List<Item> posts) {
             super();
 
             this.posts = posts;
@@ -93,8 +89,11 @@ public interface Posts {
             wv.getSettings().setNeedInitialFocus(false);
             wv.getSettings().setSaveFormData(false);
             wv.getSettings().setDefaultFontSize(40);
+            wv.getSettings().setAppCacheEnabled(true);
+            wv.getSettings().setAppCachePath(parent.getContext().getCacheDir().getPath());
+            wv.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
 
-            Post post = posts.get(viewType);
+            Item post = posts.get(viewType);
 
             wv.loadData("<html><head><style type=\"text/css\">" + parent.getContext().getResources().getString(R.string.post_css) + "</style></head><body>" +
                             post.render(parent.getWidth()) +
@@ -116,7 +115,7 @@ public interface Posts {
     }
 
     class Trail extends Base {
-        private BlogInfo.Base blog;
+        private Info.Base blog;
         private List<ContentItem> content;
         private List<LayoutItem> layout;
         private List<Trail> trail;
@@ -124,7 +123,7 @@ public interface Posts {
         public Trail(JSONObject postObject, JSONObject idObject) throws JSONException {
             super(idObject);
 
-            this.blog = new BlogInfo.Base(postObject.getJSONObject("blog"));
+            this.blog = new Info.Base(postObject.getJSONObject("blog"));
 
             this.content = new ArrayList<>();
             JSONArray content = postObject.getJSONArray("content");
@@ -154,7 +153,7 @@ public interface Posts {
             }
         }
 
-        public BlogInfo.Base getBlog() {
+        public Info.Base getBlog() {
             return blog;
         }
 
@@ -229,14 +228,14 @@ public interface Posts {
         }
     }
 
-    class Post extends Trail {
+    class Item extends Trail {
         private Date timestamp;
         private List<String> tags;
         private String url;
         private String shortUrl;
 
 
-        public Post(JSONObject postObject) throws JSONException {
+        public Item(JSONObject postObject) throws JSONException {
             super(postObject, postObject);
 
             this.timestamp = new Date(postObject.getLong("timestamp") * 1000L);
@@ -285,11 +284,11 @@ public interface Posts {
         }
     }
 
-    class Data implements TumblrArrayItem<Post> {
+    class Data implements ContentInterface<Item> {
         private int totalPosts;
-        private List<Post> posts;
+        private List<Item> posts;
 
-        Data(JSONObject postsObject) throws JSONException {
+        public Data(JSONObject postsObject) throws JSONException {
             super();
 
             this.totalPosts = postsObject.getInt("total_posts");
@@ -297,7 +296,7 @@ public interface Posts {
 
             JSONArray posts = postsObject.getJSONArray("posts");
             for (int i = 0; i < posts.length(); ++i) {
-                this.posts.add(new Post(posts.getJSONObject(i)));
+                this.posts.add(new Item(posts.getJSONObject(i)));
             }
         }
 
@@ -307,40 +306,8 @@ public interface Posts {
         }
 
         @Override
-        public List<Post> getItems() {
+        public List<Item> getItems() {
             return posts;
-        }
-    }
-
-    class Api extends TumblrArray<Data> {
-
-        public Api(
-                Context context,
-                OAuthService service,
-                Token authToken,
-                String appId,
-                String appVersion,
-                String[] additionalArgs) {
-            super(context, service, authToken, appId, appVersion, additionalArgs);
-        }
-
-        @Override
-        protected String getPath() {
-            return super.getPath() + "/posts";
-        }
-
-        @Override
-        public Map<String, String> defaultParams() {
-            Map<String, String> m = super.defaultParams();
-
-            m.put("npf", "true");
-
-            return m;
-        }
-
-        @Override
-        protected Data readData(JSONObject jsonObject) throws JSONException {
-            return new Data(jsonObject);
         }
     }
 }

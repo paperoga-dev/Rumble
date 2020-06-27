@@ -19,9 +19,6 @@
 package com.github.rumble.posts.text;
 
 import android.text.Html;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
-import android.text.style.RelativeSizeSpan;
 
 import org.json.JSONException;
 import org.json.JSONObject;
