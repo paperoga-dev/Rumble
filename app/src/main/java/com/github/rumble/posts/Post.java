@@ -18,6 +18,8 @@
 
 package com.github.rumble.posts;
 
+import android.content.Context;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +37,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -66,10 +69,12 @@ public interface Post {
         }
 
         private final List<Item> posts;
+        private final Context context;
 
-        public Adapter(List<Item> posts) {
+        public Adapter(Context context, List<Item> posts) {
             super();
 
+            this.context = context;
             this.posts = posts;
         }
 
@@ -80,7 +85,7 @@ public interface Post {
 
         @Override
         public Adapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            WebView wv = (WebView) LayoutInflater.from(parent.getContext()).inflate(R.layout.webview_item, null);
+            WebView wv = (WebView) LayoutInflater.from(parent.getContext()).inflate(R.layout.webview_item, parent, false);
             wv.getSettings().setJavaScriptEnabled(true);
             wv.getSettings().setJavaScriptCanOpenWindowsAutomatically(false);
             wv.getSettings().setLoadWithOverviewMode(true);
@@ -93,19 +98,21 @@ public interface Post {
             wv.getSettings().setAppCachePath(parent.getContext().getCacheDir().getPath());
             wv.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
 
-            Item post = posts.get(viewType);
-
-            wv.loadData("<html><head><style type=\"text/css\">" + parent.getContext().getResources().getString(R.string.post_css) + "</style></head><body>" +
-                            post.render(parent.getWidth()) +
-                            "</body></html>",
-                    "text/html",
-                    "UTF-8"
-            );
             return new ViewHolder(wv);
         }
 
         @Override
         public void onBindViewHolder(Adapter.ViewHolder viewHolder, int position) {
+            String htmlCode = posts.get(position).render(viewHolder.itemView.getWidth());
+            String cssCode = context.getResources().getString(R.string.post_css);
+
+            ((WebView) (WebView) viewHolder.itemView).loadDataWithBaseURL(
+                    null,
+                    "<html><head><style type=\"text/css\">" + cssCode + "</style></head><body>" + htmlCode + "</body></html>",
+                    "text/html; charset=utf-8",
+                    "UTF-8",
+                    null
+            );
         }
 
         @Override

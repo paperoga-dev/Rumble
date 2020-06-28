@@ -30,6 +30,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.TextView;
 
 import com.github.rumble.api.Authenticate;
@@ -55,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        WebView.setWebContentsDebuggingEnabled(true);
+
         client = new TumblrClient(getApplicationContext());
 
         tv = findViewById(R.id.textView);
@@ -64,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
                 LinearLayoutManager.VERTICAL,
                 false
         );
-        RecyclerView rv = findViewById(R.id.recyclerView);
+        final RecyclerView rv = findViewById(R.id.recyclerView);
         rv.addItemDecoration(new DividerItemDecoration(rv.getContext(), layoutManager.getOrientation()));
         layoutManager.scrollToPosition(0);
         rv.setLayoutManager(layoutManager);
@@ -86,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess(List<Post.Item> result, int offset, int limit, int count) {
                                 RecyclerView recyclerView = findViewById(R.id.recyclerView);
-                                Post.Adapter adapter = new Post.Adapter(result);
+                                Post.Adapter adapter = new Post.Adapter(rv.getContext(), result);
                                 recyclerView.setAdapter(adapter);
                             }
 

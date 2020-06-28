@@ -211,7 +211,7 @@ final class TumblrClient {
             final Map<String, String> queryParams,
             final com.github.rumble.api.array.CompletionInterface<T, W> onCompletion) {
 
-        int newLimit = (limit == -1)? 20 : limit;
+        int newLimit = (limit == -1)? 20 : Math.min(20, limit);
 
         executorService.submit(
                 obj.call(
