@@ -18,7 +18,12 @@
 
 package com.github.rumble.posts.video;
 
+import android.content.Context;
+import android.view.View;
+import android.webkit.WebView;
+
 import com.github.rumble.posts.ContentItem;
+import com.github.rumble.posts.WebViewItem;
 import com.github.rumble.posts.media.Media;
 
 import org.json.JSONException;
@@ -92,10 +97,17 @@ public class Base extends ContentItem {
     }
 
     @Override
-    public String render(int itemWidth) {
-        if (!getEmbedHtml().isEmpty())
-            return getEmbedHtml();
-        else
-            return "<iframe src='" + getUrl() + "' style='display:block;background-color:transparent;overflow:hidden' scrolling='no' frameBorder='0' data-can-gutter data-can-resize width='" + itemWidth + "' height='" + itemWidth + "' allowfullscreen mozallowfullscreen webkitallowfullscreen></iframe>";
+    public View render(Context context, int itemWidth) {
+        WebView wv = new WebViewItem(context);
+
+        wv.loadDataWithBaseURL(
+                null,
+                "<html><head></head><body><iframe src='\"" + getUrl() + "\"' style='display:block;background-color:transparent;overflow:hidden' scrolling='no' frameBorder='0' data-can-gutter data-can-resize width='\"" + itemWidth + "\"' height='\"" + itemWidth + "\"' allowfullscreen mozallowfullscreen webkitallowfullscreen></iframe>\"</body></html>",
+                "text/html; charset=utf-8",
+                "UTF-8",
+                null
+        );
+
+        return wv;
     }
 }

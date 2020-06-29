@@ -18,6 +18,11 @@
 
 package com.github.rumble.posts.link;
 
+import android.content.Context;
+import android.text.method.LinkMovementMethod;
+import android.view.View;
+import android.widget.TextView;
+
 import com.github.rumble.posts.ContentItem;
 import com.github.rumble.posts.media.Media;
 
@@ -78,7 +83,11 @@ public class Base extends ContentItem {
     }
 
     @Override
-    public String render(int itemWidth) {
-        return "<a href=\"" + getUrl() + "\" target=\"_blank\">" + getDisplayUrl() + "</a>";
+    public View render(Context context, int itemWidth) {
+        TextView tv = new TextView(context);
+
+        tv.setMovementMethod(LinkMovementMethod.getInstance());
+        tv.setText("<a href=\"" + getUrl() + "\" target=\"_blank\">" + getDisplayUrl() + "</a>");
+        return tv;
     }
 }

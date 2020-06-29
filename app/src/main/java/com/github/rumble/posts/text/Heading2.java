@@ -18,7 +18,9 @@
 
 package com.github.rumble.posts.text;
 
-import android.text.Html;
+import android.content.Context;
+import android.view.View;
+import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,7 +31,10 @@ public class Heading2 extends Base {
     }
 
     @Override
-    public String render(int itemWidth) {
-        return "<h2>" + Html.toHtml(getFormattedText()) + "</h2>";
+    public View render(Context context, int itemWidth) {
+        TextView tv = new TextView(context);
+        tv.setText(getFormattedText());
+
+        return tv;
     }
 }

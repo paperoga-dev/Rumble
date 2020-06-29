@@ -18,6 +18,11 @@
 
 package com.github.rumble.posts.media;
 
+import android.content.Context;
+import android.view.View;
+import android.widget.ImageView;
+
+import com.bumptech.glide.Glide;
 import com.github.rumble.posts.ContentItem;
 
 import org.json.JSONArray;
@@ -79,9 +84,11 @@ public class Base extends ContentItem {
     }
 
     @Override
-    public String render(int itemWidth) {
+    public View render(Context context, int itemWidth) {
+        ImageView im = new ImageView(context);
+
         if (getMedia().isEmpty())
-            return "";
+            return im;
 
         int maxArea = getMedia().get(0).getWidth() * getMedia().get(0).getHeight();
         int maxIndex = 0;
@@ -93,7 +100,9 @@ public class Base extends ContentItem {
             }
         }
 
-        return "<img style=\"width: " + itemWidth +"; object-fit: contain;\" src=\"" + getMedia().get(maxIndex).getUrl() + "\" alt=\"" + getAltText() + "\"></img>";
+        Glide.with(context).load(getMedia().get(maxIndex).getUrl()).override(itemWidth).into(im);
+
+        return im;
     }
 
     public static ContentItem doCreate(JSONObject mediaObject) throws JSONException {

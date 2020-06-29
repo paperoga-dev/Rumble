@@ -18,10 +18,12 @@
 
 package com.github.rumble.posts.text;
 
+import android.content.Context;
 import android.graphics.Typeface;
-import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.view.View;
+import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,7 +34,9 @@ public class Quirky extends Base {
     }
 
     @Override
-    public String render(int itemWidth) {
+    public View render(Context context, int itemWidth) {
+        TextView tv = new TextView(context);
+
         SpannableStringBuilder ssb = getFormattedText();
 
         ssb.setSpan(
@@ -42,6 +46,7 @@ public class Quirky extends Base {
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
         );
 
-        return Html.toHtml(ssb);
+        tv.setText(ssb);
+        return tv;
     }
 }

@@ -18,7 +18,11 @@
 
 package com.github.rumble.posts.text;
 
-import android.text.Html;
+import android.content.Context;
+import android.text.SpannableString;
+import android.text.style.LeadingMarginSpan;
+import android.view.View;
+import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,7 +33,11 @@ public class Indented extends Base {
     }
 
     @Override
-    public String render(int itemWidth) {
-        return "<p style=\"margin-left:10%;\">" + Html.toHtml(getFormattedText()) + "</p>";
+    public View render(Context context, int itemWidth) {
+        TextView tv = new TextView(context);
+        SpannableString ss = new SpannableString(getFormattedText());
+        ss.setSpan(new LeadingMarginSpan.Standard(10, 10),0, getText().length(),0);
+        tv.setText(ss);
+        return tv;
     }
 }

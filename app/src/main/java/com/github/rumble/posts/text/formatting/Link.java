@@ -38,6 +38,11 @@ public class Link extends Base {
 
     @Override
     public void apply(SpannableStringBuilder stringBuilder) {
-        stringBuilder.append("<a href=\"" + getUrl() + "\"> target=\"_blank\">" + getUrl() + "</a>");
+        stringBuilder
+                .append("<a href=\"")
+                .append(getUrl())
+                .append("\"> target=\"_blank\">")
+                .append(getUrl())
+                .append("</a>");
     }
 }

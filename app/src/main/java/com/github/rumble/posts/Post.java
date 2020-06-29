@@ -19,25 +19,27 @@
 package com.github.rumble.posts;
 
 import android.content.Context;
-import android.util.Base64;
+import android.graphics.Typeface;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
+import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.rumble.R;
 import com.github.rumble.api.array.ContentInterface;
 import com.github.rumble.blog.simple.Info;
 import com.github.rumble.posts.layout.Rows;
+import com.google.android.flexbox.FlexboxLayout;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -69,12 +71,10 @@ public interface Post {
         }
 
         private final List<Item> posts;
-        private final Context context;
 
-        public Adapter(Context context, List<Item> posts) {
+        public Adapter(List<Item> posts) {
             super();
 
-            this.context = context;
             this.posts = posts;
         }
 
@@ -83,36 +83,16 @@ public interface Post {
             return position;
         }
 
+        @NonNull
         @Override
         public Adapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            WebView wv = (WebView) LayoutInflater.from(parent.getContext()).inflate(R.layout.webview_item, parent, false);
-            wv.getSettings().setJavaScriptEnabled(true);
-            wv.getSettings().setJavaScriptCanOpenWindowsAutomatically(false);
-            wv.getSettings().setLoadWithOverviewMode(true);
-            wv.getSettings().setUseWideViewPort(true);
-            wv.getSettings().setGeolocationEnabled(false);
-            wv.getSettings().setNeedInitialFocus(false);
-            wv.getSettings().setSaveFormData(false);
-            wv.getSettings().setDefaultFontSize(40);
-            wv.getSettings().setAppCacheEnabled(true);
-            wv.getSettings().setAppCachePath(parent.getContext().getCacheDir().getPath());
-            wv.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
-
-            return new ViewHolder(wv);
+            FlexboxLayout fbl = (FlexboxLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.post_item, parent, false);
+            posts.get(viewType).render(parent.getContext(), fbl, parent.getWidth());
+            return new ViewHolder(fbl);
         }
 
         @Override
-        public void onBindViewHolder(Adapter.ViewHolder viewHolder, int position) {
-            String htmlCode = posts.get(position).render(viewHolder.itemView.getWidth());
-            String cssCode = context.getResources().getString(R.string.post_css);
-
-            ((WebView) (WebView) viewHolder.itemView).loadDataWithBaseURL(
-                    null,
-                    "<html><head><style type=\"text/css\">" + cssCode + "</style></head><body>" + htmlCode + "</body></html>",
-                    "text/html; charset=utf-8",
-                    "UTF-8",
-                    null
-            );
+        public void onBindViewHolder(@NonNull Adapter.ViewHolder viewHolder, int position) {
         }
 
         @Override
@@ -210,28 +190,43 @@ public interface Post {
             return list;
         }
 
-        public String render(int viewWidth) {
-            String content = "";
-
+        public void render(Context context, FlexboxLayout flexLayout, int viewWidth) {
             for (Trail trail : getTrail()) {
-                content += trail.render(viewWidth);
+                trail.render(context, flexLayout, viewWidth);
             }
 
-            content += "<section id=\"blog_title\"><div>" + getBlog().getName() + "</div></section>";
+            FlexboxLayout.LayoutParams lpItem = new FlexboxLayout.LayoutParams(flexLayout.getLayoutParams());
+            lpItem.setWidth(FlexboxLayout.LayoutParams.WRAP_CONTENT);
+            lpItem.setHeight(FlexboxLayout.LayoutParams.WRAP_CONTENT);
+
+            FlexboxLayout.LayoutParams lpFirstItem = new FlexboxLayout.LayoutParams(lpItem);
+            lpFirstItem.setWrapBefore(true);
+
+            TextView tvTitle = new TextView(context);
+            SpannableStringBuilder ssbTitle = new SpannableStringBuilder(getBlog().getName());
+            ssbTitle.setSpan(
+                    new android.text.style.StyleSpan(Typeface.BOLD),
+                    0,
+                    getBlog().getName().length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            );
+            tvTitle.setText(ssbTitle);
+            flexLayout.addView(tvTitle, lpFirstItem);
 
             List<List<Integer>> rows = getBlocksLayout();
 
             for (List<Integer> row : rows) {
-                content += "<section id=\"row\">";
+                boolean isFirst = true;
 
                 for (Integer item : row) {
-                    content += "<div>" + getContent().get(item).render(viewWidth / row.size()) + "</div><div>&nbsp;</div>";
+                    View itemView = getContent().get(item).render(context, viewWidth / row.size());
+                    if (isFirst)
+                        flexLayout.addView(itemView, lpFirstItem);
+                    else
+                        flexLayout.addView(itemView, lpItem);
+                    isFirst = false;
                 }
-
-                content += "</section><section id=\"row\"><div>&nbsp;</div></section>";
             }
-
-            return content;
         }
     }
 
@@ -240,7 +235,6 @@ public interface Post {
         private List<String> tags;
         private String url;
         private String shortUrl;
-
 
         public Item(JSONObject postObject) throws JSONException {
             super(postObject, postObject);
@@ -274,20 +268,32 @@ public interface Post {
             return shortUrl;
         }
 
-        public String render(int viewWidth) {
-            String content = super.render(viewWidth);
+        public void render(Context context, FlexboxLayout flexLayout, int viewWidth) {
+            super.render(context, flexLayout, viewWidth);
 
-            content += "<section id=\"timestamp\"><div>" + getTimestamp().toString() + "</div></section>";
+            FlexboxLayout.LayoutParams lpItem = new FlexboxLayout.LayoutParams(flexLayout.getLayoutParams());
+            lpItem.setWidth(FlexboxLayout.LayoutParams.WRAP_CONTENT);
+            lpItem.setHeight(FlexboxLayout.LayoutParams.WRAP_CONTENT);
 
-            if (getTags() != null) {
-                content += "<section id=\"tags\">";
-                for (String tag : getTags()) {
-                    content += "<div>#" + tag + "</div><div>&nbsp;</div>";
-                }
-                content += "</section>";
+            FlexboxLayout.LayoutParams lpFirstItem = new FlexboxLayout.LayoutParams(lpItem);
+            lpFirstItem.setWrapBefore(true);
+
+            TextView tvTimestamp = new TextView(context);
+            tvTimestamp.setText(getTimestamp().toString());
+            flexLayout.addView(tvTimestamp, lpFirstItem);
+
+            boolean isFirst = true;
+            for (String tag : getTags()) {
+                TextView tvTag = new TextView(context);
+                tvTag.setText("#" + tag);
+
+                if (isFirst)
+                    flexLayout.addView(tvTag, lpFirstItem);
+                else
+                    flexLayout.addView(tvTag, lpItem);
+
+                isFirst = false;
             }
-
-            return content;
         }
     }
 

@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
                 LinearLayoutManager.VERTICAL,
                 false
         );
-        final RecyclerView rv = findViewById(R.id.recyclerView);
+        RecyclerView rv = findViewById(R.id.recyclerView);
         rv.addItemDecoration(new DividerItemDecoration(rv.getContext(), layoutManager.getOrientation()));
         layoutManager.scrollToPosition(0);
         rv.setLayoutManager(layoutManager);
@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess(List<Post.Item> result, int offset, int limit, int count) {
                                 RecyclerView recyclerView = findViewById(R.id.recyclerView);
-                                Post.Adapter adapter = new Post.Adapter(rv.getContext(), result);
+                                Post.Adapter adapter = new Post.Adapter(result);
                                 recyclerView.setAdapter(adapter);
                             }
 
