@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.rumble;
+package com.github.rumble.user.simple;
 
 import android.content.Context;
 
@@ -29,7 +29,7 @@ import org.scribe.oauth.OAuthService;
 import java.util.ArrayList;
 import java.util.List;
 
-public interface UserInfo {
+public interface Info {
     enum PostFormat {
         Html,
         MarkDown,
@@ -41,7 +41,7 @@ public interface UserInfo {
         private int likes;                    // Number - The total count of the user's likes
         private int following;                // Number - The number of blogs the user is following
         private PostFormat defaultPostFormat; // String - The default posting format - html, markdown, or raw
-        private List<BlogInfo.Data> blogs;    // Array - Each item is a blog the user has permissions to post to
+        private List<com.github.rumble.blog.simple.Info.Data> blogs;    // Array - Each item is a blog the user has permissions to post to
 
         Data(JSONObject userObject) throws JSONException {
             this.name = userObject.getString("name");
@@ -60,7 +60,7 @@ public interface UserInfo {
             JSONArray blogs = userObject.getJSONArray("blogs");
             this.blogs = new ArrayList<>();
             for (int i = 0; i < blogs.length(); ++i) {
-                this.blogs.add(new BlogInfo.Data(blogs.getJSONObject(i)));
+                this.blogs.add(new com.github.rumble.blog.simple.Info.Data(blogs.getJSONObject(i)));
             }
         }
 
@@ -80,12 +80,12 @@ public interface UserInfo {
             return defaultPostFormat;
         }
 
-        public List<BlogInfo.Data> getBlogs() {
+        public List<com.github.rumble.blog.simple.Info.Data> getBlogs() {
             return blogs;
         }
     }
 
-    class Api extends TumblrApi<Data> {
+    class Api extends com.github.rumble.api.simple.Api<Data> {
 
         /*
         "response": {
@@ -106,8 +106,7 @@ public interface UserInfo {
                 OAuthService service,
                 Token authToken,
                 String appId,
-                String appVersion,
-                String[] additionalArgs) {
+                String appVersion) {
             super(context, service, authToken, appId, appVersion);
         }
 

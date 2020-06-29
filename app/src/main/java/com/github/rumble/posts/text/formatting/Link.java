@@ -18,13 +18,7 @@
 
 package com.github.rumble.posts.text.formatting;
 
-import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
-import android.text.Spannable;
 import android.text.SpannableStringBuilder;
-import android.text.style.ClickableSpan;
-import android.view.View;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,21 +37,7 @@ public class Link extends Base {
     }
 
     @Override
-    public void apply(SpannableStringBuilder stringBuilder, final Context context) {
-        stringBuilder.setSpan(new ClickableSpan() {
-                    @Override
-                    public void onClick(View widget) {
-                        context.startActivity(
-                                new Intent(
-                                        Intent.ACTION_VIEW,
-                                        Uri.parse(getUrl())
-                                )
-                        );
-                    }
-                },
-                getStart(),
-                getEnd(),
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-        );
+    public void apply(SpannableStringBuilder stringBuilder) {
+        stringBuilder.append("<a href=\"" + getUrl() + "\"> target=\"_blank\">" + getUrl() + "</a>");
     }
 }

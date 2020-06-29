@@ -18,7 +18,6 @@
 
 package com.github.rumble.posts.text.formatting;
 
-import android.content.Context;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.StrikethroughSpan;
@@ -32,7 +31,7 @@ public class Strikethrough extends Base {
     }
 
     @Override
-    public void apply(SpannableStringBuilder stringBuilder, final Context context) {
+    public void apply(SpannableStringBuilder stringBuilder) {
         stringBuilder.setSpan(
                 new StrikethroughSpan(),
                 getStart(),

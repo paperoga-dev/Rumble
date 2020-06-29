@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.rumble;
+package com.github.rumble.blog.simple;
 
 import android.content.Context;
 
@@ -64,7 +64,7 @@ public interface Avatar {
         }
     }
 
-    class Api extends TumblrBlogId<Data> {
+    class Api extends Id<Data> {
 
         private final int size;
 
@@ -74,10 +74,11 @@ public interface Avatar {
                 Token authToken,
                 String appId,
                 String appVersion,
-                String[] additionalArgs) {
-            super(context, service, authToken, appId, appVersion, additionalArgs);
+                String blogId,
+                int size) {
+            super(context, service, authToken, appId, appVersion, blogId);
 
-            this.size = Integer.parseInt(additionalArgs[1]);
+            this.size = size;
         }
 
         @Override

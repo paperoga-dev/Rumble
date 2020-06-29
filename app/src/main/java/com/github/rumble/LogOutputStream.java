@@ -23,7 +23,7 @@ import android.util.Log;
 import java.io.IOException;
 import java.io.OutputStream;
 
-class LogOutputStream extends OutputStream {
+public class LogOutputStream extends OutputStream {
     private final String appId;
     private String mem;
 

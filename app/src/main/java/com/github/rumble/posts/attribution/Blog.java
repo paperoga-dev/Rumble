@@ -1,20 +1,20 @@
 package com.github.rumble.posts.attribution;
 
-import com.github.rumble.BlogInfo;
+import com.github.rumble.blog.simple.Info;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Blog extends Base {
-    private BlogInfo.Base blog;
+    private Info.Base blog;
 
     public Blog(JSONObject attributionObject) throws JSONException {
         super(attributionObject);
 
-        this.blog = new BlogInfo.Base(attributionObject.getJSONObject("blog"));
+        this.blog = new Info.Base(attributionObject.getJSONObject("blog"));
     }
 
-    public BlogInfo.Base getBlog() {
+    public Info.Base getBlog() {
         return blog;
     }
 

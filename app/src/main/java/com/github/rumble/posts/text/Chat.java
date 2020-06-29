@@ -18,11 +18,10 @@
 
 package com.github.rumble.posts.text;
 
-import android.content.Context;
 import android.graphics.Typeface;
+import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
-import android.view.View;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,8 +32,8 @@ public class Chat extends Base {
     }
 
     @Override
-    public View render(Context context) {
-        SpannableStringBuilder ssb = getFormattedText(context);
+    public String render(int itemWidth) {
+        SpannableStringBuilder ssb = getFormattedText();
 
         ssb.setSpan(
                 Typeface.create(Typeface.MONOSPACE, Typeface.NORMAL),
@@ -43,6 +42,6 @@ public class Chat extends Base {
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
         );
 
-        return createTextView(context, ssb);
+        return Html.toHtml(ssb);
     }
 }

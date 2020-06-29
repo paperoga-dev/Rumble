@@ -18,26 +18,12 @@
 
 package com.github.rumble.posts.media;
 
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
-import android.view.View;
-import android.widget.ImageView;
-
 import com.github.rumble.posts.ContentItem;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.ref.WeakReference;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -48,56 +34,9 @@ public class Base extends ContentItem {
     private String feedbackToken;
     private com.github.rumble.posts.attribution.Base attribution;
     private String altText;
-    private FetchTask fetchTask;
-
-    private static class FetchTask extends AsyncTask<String, Void, Bitmap> {
-        private WeakReference<ImageView> imageView;
-
-        public FetchTask(ImageView imageView) {
-            super();
-
-            this.imageView = new WeakReference<>(imageView);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            //TODO : set imageView to a "pending" image
-        }
-
-        @Override
-        protected Bitmap doInBackground(String... urls) {
-            try {
-                URL url = new URL(urls[0]);
-                URLConnection connection = url.openConnection();
-                HttpURLConnection HCon = (HttpURLConnection) connection;
-
-                if (HCon.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    InputStream ins = HCon.getInputStream();
-                    return BitmapFactory.decodeStream(ins);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Bitmap image) {
-            if (image == null) {
-                //TODO : set imageView to an "error" image
-            } else {
-                ImageView iv = imageView.get();
-                if (iv != null)
-                    iv.setImageBitmap(image);
-            }
-        }
-    }
 
     public Base(JSONObject mediaObject) throws JSONException {
         super();
-
-        this.fetchTask = null;
 
         JSONArray media = mediaObject.getJSONArray("media");
         this.media = new ArrayList<>();
@@ -140,12 +79,9 @@ public class Base extends ContentItem {
     }
 
     @Override
-    public View render(Context context) {
-        ImageView iv = new ImageView(context);
-        iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
-
+    public String render(int itemWidth) {
         if (getMedia().isEmpty())
-            return iv;
+            return "";
 
         int maxArea = getMedia().get(0).getWidth() * getMedia().get(0).getHeight();
         int maxIndex = 0;
@@ -157,10 +93,7 @@ public class Base extends ContentItem {
             }
         }
 
-        fetchTask = new FetchTask(iv);
-        fetchTask.execute(getMedia().get(maxIndex).getUrl());
-
-        return iv;
+        return "<img style=\"width: " + itemWidth +"; object-fit: contain;\" src=\"" + getMedia().get(maxIndex).getUrl() + "\" alt=\"" + getAltText() + "\"></img>";
     }
 
     public static ContentItem doCreate(JSONObject mediaObject) throws JSONException {

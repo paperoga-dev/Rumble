@@ -18,8 +18,7 @@
 
 package com.github.rumble.posts.text;
 
-import android.content.Context;
-import android.view.View;
+import android.text.Html;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,7 +29,7 @@ public class Quote extends Base {
     }
 
     @Override
-    public View render(Context context) {
-        return createTextView(context, getFormattedText(context));
+    public String render(int itemWidth) {
+        return Html.toHtml(getFormattedText());
     }
 }

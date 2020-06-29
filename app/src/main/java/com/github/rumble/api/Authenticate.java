@@ -16,12 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.rumble;
+package com.github.rumble.api;
 
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+
+import com.github.rumble.Constants;
+import com.github.rumble.LogOutputStream;
+import com.github.rumble.R;
 
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.exceptions.OAuthException;
@@ -29,11 +33,11 @@ import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 
-class TumblrAuthenticate {
+public class Authenticate {
 
     public interface OnAuthenticationListener {
         void onAuthenticationRequest(
-                TumblrAuthenticate authenticator,
+                Authenticate authenticator,
                 Token requestToken,
                 String authenticationUrl
         );
@@ -42,12 +46,12 @@ class TumblrAuthenticate {
     }
 
     private static class RequestTokenTask implements Runnable {
-        private final TumblrAuthenticate authenticator;
+        private final Authenticate authenticator;
         private final OAuthService oAuthService;
         private final OnAuthenticationListener onAuthenticationListener;
 
         RequestTokenTask(
-                TumblrAuthenticate authenticator,
+                Authenticate authenticator,
                 OAuthService oAuthService,
                 OnAuthenticationListener onAuthenticationListener) {
             super();
@@ -150,13 +154,13 @@ class TumblrAuthenticate {
     private final Context context;
     private OnAuthenticationListener onAuthenticationListener;
 
-    TumblrAuthenticate(String appId, Context context) {
+    public Authenticate(String appId, Context context) {
         super();
 
         this.oAuthService = new ServiceBuilder()
                 .apiKey(context.getString(R.string.consumer_key))
                 .apiSecret(context.getString(R.string.consumer_secret))
-                .provider(OAuthTumblrApi.class)
+                .provider(OAuthApi.class)
                 .callback(Constants.CALLBACK_URL)
                 .debugStream(new LogOutputStream(appId))
                 .build();
@@ -164,14 +168,14 @@ class TumblrAuthenticate {
         this.onAuthenticationListener = null;
     }
 
-    void request() {
+    public void request() {
         if (onAuthenticationListener == null)
             return;
 
         new Thread(new RequestTokenTask(this, oAuthService, onAuthenticationListener)).start();
     }
 
-    void verify(Token requestToken, String authVerifier) {
+    public void verify(Token requestToken, String authVerifier) {
         Log.v(Constants.APP_NAME, "Verify: requestToken = " + requestToken.toString());
         Log.v(Constants.APP_NAME, "Verify: authVerifier = " + authVerifier);
 
@@ -185,7 +189,7 @@ class TumblrAuthenticate {
         ).start();
     }
 
-    void setOnAuthenticationListener(OnAuthenticationListener onAuthenticationListener) {
+    public void setOnAuthenticationListener(OnAuthenticationListener onAuthenticationListener) {
         this.onAuthenticationListener = onAuthenticationListener;
     }
 }

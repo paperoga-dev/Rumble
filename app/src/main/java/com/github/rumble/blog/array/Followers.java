@@ -16,9 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.rumble;
+package com.github.rumble.blog.array;
 
 import android.content.Context;
+
+import com.github.rumble.api.array.ContentInterface;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -63,7 +65,7 @@ public interface Followers {
         }
     }
 
-    class Data implements TumblrArrayItem<User> {
+    class Data implements ContentInterface<User> {
         private int totalUsers;
         private List<User> users;
 
@@ -90,7 +92,7 @@ public interface Followers {
         }
     }
 
-    class Api extends TumblrArray<Data> {
+    class Api extends Id<User, Data> {
 
         public Api(
                 Context context,
@@ -98,8 +100,10 @@ public interface Followers {
                 Token authToken,
                 String appId,
                 String appVersion,
-                String[] additionalArgs) {
-            super(context, service, authToken, appId, appVersion, additionalArgs);
+                Integer offset,
+                Integer limit,
+                String blogId) {
+            super(context, service, authToken, appId, appVersion, offset, limit, blogId);
         }
 
         @Override

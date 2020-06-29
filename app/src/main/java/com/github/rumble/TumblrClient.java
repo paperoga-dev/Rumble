@@ -24,6 +24,14 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
+import com.github.rumble.api.OAuthApi;
+import com.github.rumble.api.array.ContentInterface;
+import com.github.rumble.api.Authenticate;
+import com.github.rumble.api.simple.CompletionInterface;
+import com.github.rumble.exception.BaseException;
+import com.github.rumble.exception.NetworkException;
+import com.github.rumble.user.simple.Info;
+
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.exceptions.OAuthException;
 import org.scribe.model.Token;
@@ -31,6 +39,7 @@ import org.scribe.oauth.OAuthService;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -40,26 +49,14 @@ import java.util.concurrent.TimeUnit;
 
 final class TumblrClient {
 
-    public interface OnCompletion<T> {
-        void onSuccess(T result);
-    }
-
-    public interface OnArrayCompletion<T> {
-        void onSuccess(List<T> result, int offset, int limit, int count);
-    }
-
-    public interface OnFailureListener {
-        void onFailure(TumblrException e);
-        void onNetworkFailure(OAuthException e);
-    }
-
     public interface OnLoginListener {
         void onAccessGranted();
         void onAccessRequest(
-                TumblrAuthenticate authenticator,
+                Authenticate authenticator,
                 Token requestToken,
                 String authenticationUrl);
         void onAccessDenied();
+        void onLoginFailure(BaseException e);
     }
 
     private final Context context;
@@ -69,11 +66,10 @@ final class TumblrClient {
     private Token authToken;
     private final OAuthService oAuthService;
     private OnLoginListener onLoginListener;
-    private OnFailureListener onFailureListener;
 
     private final ExecutorService executorService;
 
-    private UserInfo.Data me;
+    private Info.Data me;
 
     public TumblrClient(Context context) {
         super();
@@ -82,12 +78,11 @@ final class TumblrClient {
 
         authToken = null;
         oAuthService = new ServiceBuilder()
-                .provider(OAuthTumblrApi.class)
+                .provider(OAuthApi.class)
                 .apiKey(context.getString(R.string.consumer_key))
                 .apiSecret(context.getString(R.string.consumer_secret))
                 .build();
         onLoginListener = null;
-        onFailureListener = null;
 
         this.me = null;
 
@@ -109,12 +104,12 @@ final class TumblrClient {
     }
 
     private void doLogin() {
-        final TumblrAuthenticate auth = new TumblrAuthenticate(appName, context);
+        final Authenticate auth = new Authenticate(appName, context);
 
-        auth.setOnAuthenticationListener(new TumblrAuthenticate.OnAuthenticationListener() {
+        auth.setOnAuthenticationListener(new Authenticate.OnAuthenticationListener() {
             @Override
             public void onAuthenticationRequest(
-                    TumblrAuthenticate authenticator,
+                    Authenticate authenticator,
                     Token requestToken,
                     String authenticationUrl) {
                 onLoginListener.onAccessRequest(authenticator, requestToken, authenticationUrl);
@@ -138,10 +133,15 @@ final class TumblrClient {
         this.authToken = authToken;
 
         executorService.submit(
-            new UserInfo.Api(context, oAuthService, authToken, appName, appVersion, null)
-                    .call(new TumblrApi.OnCompletion<UserInfo.Data>() {
+            new Info.Api(
+                    context,
+                    oAuthService,
+                    authToken,
+                    appName,
+                    appVersion)
+                    .call(new HashMap<String, String>(), new CompletionInterface<Info.Data>() {
                         @Override
-                        public void onSuccess(UserInfo.Data result) {
+                        public void onSuccess(Info.Data result) {
                             me = result;
 
                             if (onLoginListener != null)
@@ -149,11 +149,8 @@ final class TumblrClient {
                         }
 
                         @Override
-                        public void onFailure(TumblrException e) {
-                            if (e instanceof TumblrNetworkException) {
-                                // we cannot reach Tumblr, fail but do not remove our tokens
-                                onFailureListener.onNetworkFailure(((TumblrNetworkException) e).getException());
-                            } else {
+                        public void onFailure(BaseException e) {
+                            if (!(e instanceof NetworkException)) {
                                 // we can reach Tumblr, but we cannot access it. So, throw away our tokens, and
                                 // let's ask a new authentication
                                 Log.v(Constants.APP_NAME, "Auth token not valid");
@@ -165,7 +162,11 @@ final class TumblrClient {
                                         .apply();
 
                                 doLogin();
+                                // we cannot reach Tumblr, fail but do not remove our tokens
                             }
+
+                            if (onLoginListener != null)
+                                onLoginListener.onLoginFailure(e);
                         }
                     })
         );
@@ -191,183 +192,323 @@ final class TumblrClient {
         }
     }
 
+    /* **** SINGLE ITEM API CALL **** */
     private <T> void doCall(
-            Class<? extends TumblrApi<T>> clazz,
-            Map<String, ?> queryParams,
-            final OnCompletion<T> onCompletion,
-            String ... additionalArgs) {
+            final com.github.rumble.api.simple.ApiInterface<T> obj,
+            final Map<String, String> queryParams,
+            final com.github.rumble.api.simple.CompletionInterface<T> onCompletion) {
+
+        executorService.submit(obj.call(queryParams, onCompletion));
+    }
+    /* **** SINGLE ITEM API CALL **** */
+
+    /* **** ARRAY BASED API CALL **** */
+    private <T, W extends ContentInterface<T>> void doCall(
+            final List<T> resultList,
+            final com.github.rumble.api.array.ApiInterface<T, W> obj,
+            final Integer offset,
+            final Integer limit,
+            final Map<String, String> queryParams,
+            final com.github.rumble.api.array.CompletionInterface<T, W> onCompletion) {
+
+        int newLimit = (limit == -1)? 20 : Math.min(20, limit);
+
+        executorService.submit(
+                obj.call(
+                        resultList,
+                        queryParams,
+                        offset,
+                        newLimit,
+                        new com.github.rumble.api.array.CompletionInterface<T, W>() {
+
+                            @Override
+                            public void onSuccess(List<T> result, int offset, int limit, int count) {
+                                resultList.addAll(result);
+
+                                int newOffset = offset + result.size();
+                                int newLimit;
+
+                                if (count == -1) {
+                                    // cannot get the end of the list
+
+                                    if (obj.getLimit() == -1) {
+                                        // the caller did not specify a limit, so the first content
+                                        // is fine, we're done
+                                        if (onCompletion != null)
+                                            onCompletion.onSuccess(resultList, offset, obj.getLimit(), count);
+                                        return;
+                                    } else {
+                                        if (resultList.size() >= obj.getLimit()) {
+                                            // fetched enough content, we're done
+                                            if (onCompletion != null)
+                                                onCompletion.onSuccess(resultList, offset, obj.getLimit(), count);
+                                            return;
+                                        }
+
+                                        newLimit = obj.getLimit() - resultList.size();
+                                    }
+
+                                } else {
+
+                                    newLimit = ((obj.getLimit() == -1)? count : obj.getLimit()) - resultList.size();
+
+                                    if (newLimit <= 0) {
+                                        // fetched enough content, we're done
+                                        if (onCompletion != null)
+                                            onCompletion.onSuccess(resultList, obj.getOffset(), obj.getLimit(), count);
+                                        return;
+                                    }
+                                }
+
+                                doCall(resultList,
+                                        obj,
+                                        newOffset,
+                                        newLimit,
+                                        queryParams,
+                                        onCompletion);
+                            }
+
+                            @Override
+                            public void onFailure(BaseException e) {
+                                onCompletion.onFailure(e);
+                            }
+                        }
+                )
+        );
+    }
+    /* **** ARRAY BASED API CALL **** */
+
+    /* **** USER BASED API CALLS **** */
+    public <T> void call(
+            final Class<? extends com.github.rumble.api.simple.ApiInterface<T>> clazz,
+            final Map<String, String> queryParams,
+            final com.github.rumble.api.simple.CompletionInterface<T> onCompletion) {
+
+        Class<?>[] cArg = new Class<?>[] {
+                Context.class,
+                OAuthService.class,
+                Token.class,
+                String.class,
+                String.class
+        };
 
         try {
-            Class[] cArg = new Class[] {
-                    Context.class,
-                    OAuthService.class,
-                    Token.class,
-                    String.class,
-                    String.class,
-                    String[].class
-            };
-
-            executorService.submit(
-                clazz.getDeclaredConstructor(cArg)
-                        .newInstance(
-                                context,
-                                oAuthService,
-                                authToken,
-                                appName,
-                                appVersion,
-                                additionalArgs)
-                        .call(queryParams, new TumblrApi.OnCompletion<T>() {
-                            @Override
-                            public void onSuccess(T result) {
-                                if (onCompletion != null)
-                                    onCompletion.onSuccess(result);
-                            }
-
-                            @Override
-                            public void onFailure(TumblrException e) {
-                                if (onFailureListener != null)
-                                    onFailureListener.onFailure(e);
-                            }
-                        })
+            doCall(
+                    clazz.getDeclaredConstructor(cArg)
+                            .newInstance(
+                                    context,
+                                    oAuthService,
+                                    authToken,
+                                    appName,
+                                    appVersion
+                            ),
+                    queryParams,
+                    onCompletion
             );
         } catch (IllegalAccessException |
-                NoSuchMethodException |
+                InstantiationException |
                 InvocationTargetException |
-                InstantiationException e) {
+                NoSuchMethodException e) {
             e.printStackTrace();
         }
     }
 
     public <T> void call(
-            Class<? extends TumblrApi<T>> clazz,
-            Map<String, ?> queryParams,
-            final OnCompletion<T> onCompletion,
-            String ... additionalArgs) {
-        doCall(clazz, queryParams, onCompletion, additionalArgs);
+            final Class<? extends com.github.rumble.api.simple.ApiInterface<T>> clazz,
+            final CompletionInterface<T> onCompletion) {
+        call(clazz, new HashMap<String, String>(), onCompletion);
     }
 
-    public <T> void call(Class<? extends TumblrApi<T>> clazz,
-                         OnCompletion<T> onCompletion,
-                         String ... additionalArgs) {
-        doCall(clazz, null, onCompletion, additionalArgs);
-    }
-
-    private <T, W extends TumblrArrayItem<T>> void call(
-            final List<T> resultList,
-            final Class<? extends TumblrApi<W>> clazz,
-            final String blogId,
-            final int sourceOffset,
-            final int currentOffset,
-            final int sourceLimit,
-            final int currentLimit,
-            final Map<String, ?> queryParams,
-            final OnArrayCompletion<T> onCompletion,
-            final String ... additionalArgs) {
-        String[] aArgs = new String[additionalArgs.length + 3];
-        aArgs[0] = blogId;
-        aArgs[1] = String.valueOf(currentOffset);
-        aArgs[2] = String.valueOf((currentLimit == -1)? 20 : Math.min(currentLimit, 20));
-
-        System.arraycopy(additionalArgs, 0, aArgs, 3, additionalArgs.length);
-
-        doCall(
-                clazz,
-                queryParams,
-                new TumblrClient.OnCompletion<W>() {
-                    @Override
-                    public void onSuccess(W result) {
-                        resultList.addAll(result.getItems());
-
-                        int newOffset = currentOffset + result.getItems().size();
-
-                        int newLimit = Math.min(
-                                20,
-                                ((sourceLimit == -1)? result.getCount() : sourceLimit) - resultList.size()
-                        );
-
-                        if ((newLimit <= 0) || result.getItems().isEmpty()) {
-                            if (onCompletion != null)
-                                onCompletion.onSuccess(resultList, sourceOffset, sourceLimit, result.getCount());
-                        } else {
-                            call(
-                                    resultList,
-                                    clazz,
-                                    blogId,
-                                    sourceOffset,
-                                    newOffset,
-                                    sourceLimit,
-                                    newLimit,
-                                    queryParams,
-                                    onCompletion,
-                                    additionalArgs
-                            );
-                        }
-                    }
-                },
-                aArgs
-        );
-    }
-
-    public <T, W extends TumblrArrayItem<T>> void call(
-            Class<? extends TumblrApi<W>> clazz,
-            String blogId,
+    public <T, W extends ContentInterface<T>> void call(
+            final Class<? extends com.github.rumble.api.array.ApiInterface<T, W>> clazz,
             final int offset,
             final int limit,
-            final Map<String, ?> queryParams,
-            final OnArrayCompletion<T> onCompletion,
-            String ... additionalArgs) {
-        call(
-                new ArrayList<T>(),
-                clazz,
-                blogId,
-                offset,
-                offset,
-                limit,
-                limit,
-                queryParams,
-                onCompletion,
-                additionalArgs
-        );
+            final Map<String, String> queryParams,
+            final com.github.rumble.api.array.CompletionInterface<T, W> onCompletion) {
+
+        Class<?>[] cArg = new Class<?>[] {
+                Context.class,
+                OAuthService.class,
+                Token.class,
+                String.class,
+                String.class,
+                Integer.class,
+                Integer.class
+        };
+
+        try {
+            doCall(
+                    new ArrayList<T>(),
+                    clazz.getDeclaredConstructor(cArg)
+                            .newInstance(
+                                    context,
+                                    oAuthService,
+                                    authToken,
+                                    appName,
+                                    appVersion,
+                                    offset,
+                                    limit
+                            ),
+                    offset,
+                    limit,
+                    queryParams,
+                    onCompletion
+            );
+        } catch (IllegalAccessException |
+                InstantiationException |
+                InvocationTargetException |
+                NoSuchMethodException e) {
+            e.printStackTrace();
+        }
     }
 
-    public <T, W extends TumblrArrayItem<T>> void call(
-            Class<? extends TumblrApi<W>> clazz,
-            String blogId,
-            int offset,
-            int limit,
-            OnArrayCompletion<T> onCompletion,
-            String ... additionalArgs) {
-        call(clazz, blogId, offset, limit, null, onCompletion, additionalArgs);
+    public <T, W extends ContentInterface<T>> void call(
+            final Class<? extends com.github.rumble.api.array.ApiInterface<T, W>> clazz,
+            final int offset,
+            final Map<String, String> queryParams,
+            final com.github.rumble.api.array.CompletionInterface<T, W> onCompletion) {
+        call(clazz, offset, 20, queryParams, onCompletion);
     }
 
-    public <T, W extends TumblrArrayItem<T>> void call(
-            Class<? extends TumblrApi<W>> clazz,
-            String blogId,
-            int offset,
-            Map<String, ?> queryParams,
-            final OnArrayCompletion<T> onCompletion,
-            String ... additionalArgs) {
-        call(clazz, blogId, offset, 20, queryParams, onCompletion, additionalArgs);
+    public <T, W extends ContentInterface<T>> void call(
+            final Class<? extends com.github.rumble.api.array.ApiInterface<T, W>> clazz,
+            final int offset,
+            final int limit,
+            final com.github.rumble.api.array.CompletionInterface<T, W> onCompletion) {
+        call(clazz, offset, limit, new HashMap<String, String>(), onCompletion);
     }
 
-    public <T, W extends TumblrArrayItem<T>> void call(
-            Class<? extends TumblrApi<W>> clazz,
-            String blogId,
-            int offset,
-            OnArrayCompletion<T> onCompletion,
-            String ... additionalArgs) {
-        call(clazz, blogId, offset, 20, null, onCompletion, additionalArgs);
+    public <T, W extends ContentInterface<T>> void call(
+            final Class<? extends com.github.rumble.api.array.ApiInterface<T, W>> clazz,
+            final int offset,
+            final com.github.rumble.api.array.CompletionInterface<T, W> onCompletion) {
+        call(clazz, offset, 20, new HashMap<String, String>(), onCompletion);
     }
+    /* **** USER BASED API CALLS **** */
+
+    /* **** BLOG BASED API CALLS **** */
+    public <T> void call(
+            final Class<? extends com.github.rumble.blog.simple.ApiInterface<T>> clazz,
+            final String blogId,
+            final Map<String, String> queryParams,
+            final CompletionInterface<T> onCompletion) {
+
+        Class<?>[] cArg = new Class<?>[] {
+                Context.class,
+                OAuthService.class,
+                Token.class,
+                String.class,
+                String.class,
+                String.class
+        };
+
+        try {
+            doCall(
+                    clazz.getDeclaredConstructor(cArg)
+                            .newInstance(
+                                    context,
+                                    oAuthService,
+                                    authToken,
+                                    appName,
+                                    appVersion,
+                                    blogId
+                            ),
+                    queryParams,
+                    onCompletion
+            );
+        } catch (IllegalAccessException |
+                InstantiationException |
+                InvocationTargetException |
+                NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public <T> void call(
+            final Class<? extends com.github.rumble.blog.simple.ApiInterface<T>> clazz,
+            final String blogId,
+            final CompletionInterface<T> onCompletion) {
+        call(clazz, blogId, new HashMap<String, String>(), onCompletion);
+    }
+
+    public <T, W extends ContentInterface<T>> void call(
+            final Class<? extends com.github.rumble.blog.array.ApiInterface<T, W>> clazz,
+            final String blogId,
+            final int offset,
+            final int limit,
+            final Map<String, String> queryParams,
+            final com.github.rumble.api.array.CompletionInterface<T, W> onCompletion) {
+
+        Class<?>[] cArg = new Class<?>[] {
+                Context.class,
+                OAuthService.class,
+                Token.class,
+                String.class,
+                String.class,
+                Integer.class,
+                Integer.class,
+                String.class
+        };
+
+        try {
+            doCall(
+                    new ArrayList<T>(),
+                    clazz.getDeclaredConstructor(cArg)
+                            .newInstance(
+                                    context,
+                                    oAuthService,
+                                    authToken,
+                                    appName,
+                                    appVersion,
+                                    offset,
+                                    limit,
+                                    blogId
+                            ),
+                    offset,
+                    limit,
+                    queryParams,
+                    onCompletion
+            );
+        } catch (IllegalAccessException |
+                InstantiationException |
+                InvocationTargetException |
+                NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public <T, W extends ContentInterface<T>> void call(
+            final Class<? extends com.github.rumble.blog.array.ApiInterface<T, W>> clazz,
+            final String blogId,
+            final int offset,
+            final Map<String, String> queryParams,
+            final com.github.rumble.api.array.CompletionInterface<T, W> onCompletion) {
+        call(clazz, blogId, offset, 20, queryParams, onCompletion);
+    }
+
+    public <T, W extends ContentInterface<T>> void call(
+            final Class<? extends com.github.rumble.blog.array.ApiInterface<T, W>> clazz,
+            final String blogId,
+            final int offset,
+            final int limit,
+            final com.github.rumble.api.array.CompletionInterface<T, W> onCompletion) {
+        call(clazz, blogId, offset, limit, new HashMap<String, String>(), onCompletion);
+    }
+
+    public <T, W extends ContentInterface<T>> void call(
+            final Class<? extends com.github.rumble.blog.array.ApiInterface<T, W>> clazz,
+            final String blogId,
+            final int offset,
+            final com.github.rumble.api.array.CompletionInterface<T, W> onCompletion) {
+        call(clazz, blogId, offset, 20, new HashMap<String, String>(), onCompletion);
+    }
+    /* **** BLOG BASED API CALLS **** */
 
     public void setOnLoginListener(OnLoginListener onLoginListener) {
         this.onLoginListener = onLoginListener;
     }
 
-    public void setOnFailureListener(OnFailureListener onFailureListener) {
-        this.onFailureListener = onFailureListener;
-    }
-
-    public UserInfo.Data getMe() {
+    public Info.Data getMe() {
         return me;
     }
 }

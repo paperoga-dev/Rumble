@@ -19,6 +19,7 @@
 package com.github.rumble;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -29,11 +30,16 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.TextView;
 
-import com.github.rumble.posts.Posts;
+import com.github.rumble.api.Authenticate;
+import com.github.rumble.api.array.CompletionInterface;
+import com.github.rumble.exception.BaseException;
+import com.github.rumble.blog.array.Posts;
+import com.github.rumble.exception.NetworkException;
+import com.github.rumble.posts.Post;
 
-import org.scribe.exceptions.OAuthException;
 import org.scribe.model.Token;
 
 import java.util.List;
@@ -41,25 +47,28 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private TumblrClient client;
-    private TumblrAuthenticate authenticator;
+    private Authenticate authenticator;
     private TextView tv;
-    private Posts.Adapter postsAdapter;
+    private Post.Adapter postsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        WebView.setWebContentsDebuggingEnabled(true);
+
         client = new TumblrClient(getApplicationContext());
 
         tv = findViewById(R.id.textView);
 
-        RecyclerView rv = findViewById(R.id.recyclerView);
         LinearLayoutManager layoutManager = new LinearLayoutManager(
                 this,
                 LinearLayoutManager.VERTICAL,
                 false
         );
+        final RecyclerView rv = findViewById(R.id.recyclerView);
+        rv.addItemDecoration(new DividerItemDecoration(rv.getContext(), layoutManager.getOrientation()));
         layoutManager.scrollToPosition(0);
         rv.setLayoutManager(layoutManager);
 
@@ -73,15 +82,20 @@ public class MainActivity extends AppCompatActivity {
 
                 client.call(
                         Posts.Api.class,
-                        "paperogacoibentato",
+                        "papero-tombo",
                         0,
                         40,
-                        new TumblrClient.OnArrayCompletion<Posts.Post>() {
+                        new CompletionInterface<Post.Item, Post.Data>() {
                             @Override
-                            public void onSuccess(List<Posts.Post> result, int offset, int limit, int count) {
+                            public void onSuccess(List<Post.Item> result, int offset, int limit, int count) {
                                 RecyclerView recyclerView = findViewById(R.id.recyclerView);
-                                Posts.Adapter adapter = new Posts.Adapter(result);
+                                Post.Adapter adapter = new Post.Adapter(rv.getContext(), result);
                                 recyclerView.setAdapter(adapter);
+                            }
+
+                            @Override
+                            public void onFailure(BaseException e) {
+                                tv.append("Post retrieve failure!\n");
                             }
                         }
                 );
@@ -160,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onAccessRequest(
-                    TumblrAuthenticate authenticator,
+                    Authenticate authenticator,
                     Token requestToken,
                     String authenticationUrl) {
 
@@ -176,17 +190,13 @@ public class MainActivity extends AppCompatActivity {
             public void onAccessDenied() {
                 tv.append("Login failed\n");
             }
-        });
-
-        client.setOnFailureListener(new TumblrClient.OnFailureListener() {
-            @Override
-            public void onFailure(TumblrException e) {
-                tv.append("Command failure\n" + e.getMessage() + "\n");
-            }
 
             @Override
-            public void onNetworkFailure(OAuthException e) {
-                tv.append("Network error\n");
+            public void onLoginFailure(BaseException e) {
+                if (e instanceof NetworkException)
+                    tv.append("Network error\n");
+                else
+                    tv.append("Error\n");
             }
         });
 
@@ -208,7 +218,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void setAuthenticator(TumblrAuthenticate authenticator) {
+    private void setAuthenticator(Authenticate authenticator) {
         this.authenticator = authenticator;
     }
 

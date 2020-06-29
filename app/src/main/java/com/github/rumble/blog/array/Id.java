@@ -16,26 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.rumble;
+package com.github.rumble.blog.array;
 
 import android.content.Context;
+
+import com.github.rumble.api.array.Api;
+import com.github.rumble.api.array.ContentInterface;
 
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
-public abstract class TumblrBlogId<T> extends TumblrApi<T> {
+public abstract class Id<T, W extends ContentInterface<T>> extends Api<T, W> implements ApiInterface<T, W> {
     private final String blogId;
 
-    TumblrBlogId(
+    protected Id(
             Context context,
             OAuthService service,
             Token authToken,
             String appId,
             String appVersion,
-            String[] additionalArgs) {
-        super(context, service, authToken, appId, appVersion);
+            Integer offset,
+            Integer limit,
+            String blogId) {
+        super(context, service, authToken, appId, appVersion, offset, limit);
 
-        this.blogId = additionalArgs[0];
+        this.blogId = blogId;
     }
 
     @Override
@@ -47,6 +52,7 @@ public abstract class TumblrBlogId<T> extends TumblrApi<T> {
         return "/blog/" + getBlogId() + ".tumblr.com";
     }
 
+    @Override
     public String getBlogId() {
         return blogId;
     }

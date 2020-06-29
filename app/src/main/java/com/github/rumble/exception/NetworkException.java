@@ -16,21 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.rumble;
+package com.github.rumble.exception;
 
-class TumblrResponseException extends TumblrException {
-    private int responseCode;
-    private String responseMessage;
+import org.scribe.exceptions.OAuthException;
 
-    public TumblrResponseException(int responseCode, String responseMessage) {
-        super(responseMessage);
+public class NetworkException extends BaseException {
+    private final OAuthException e;
+
+    public NetworkException(OAuthException e) {
+        super(e.getMessage());
+
+        this.e = e;
     }
 
-    public int getResponseCode() {
-        return responseCode;
-    }
-
-    public String getResponseMessage() {
-        return responseMessage;
+    public OAuthException getException() {
+        return e;
     }
 }

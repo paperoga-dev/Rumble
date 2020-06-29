@@ -18,7 +18,6 @@
 
 package com.github.rumble.posts.text.formatting;
 
-import android.content.Context;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
@@ -32,7 +31,7 @@ public class Color extends Base {
     public Color(JSONObject formattingObject) throws JSONException {
         super(formattingObject);
 
-        this.color = android.graphics.Color.parseColor(formattingObject.getString("color"));
+        this.color = android.graphics.Color.parseColor(formattingObject.getString("hex"));
     }
 
     public int getColor() {
@@ -40,7 +39,7 @@ public class Color extends Base {
     }
 
     @Override
-    public void apply(SpannableStringBuilder stringBuilder, final Context context) {
+    public void apply(SpannableStringBuilder stringBuilder) {
         stringBuilder.setSpan(
                 new ForegroundColorSpan(getColor()),
                 getStart(),
