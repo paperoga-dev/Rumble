@@ -32,7 +32,7 @@ public class Quote extends Base {
 
     @Override
     public View render(Context context, int itemWidth) {
-        TextView tv = new TextView(context);
+        TextView tv = createTextView(context);
         tv.setText(getFormattedText());
 
         return tv;

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.rumble;
+package com.github.rumble.activities;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -30,9 +30,12 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.github.rumble.Constants;
+import com.github.rumble.R;
+
 import org.scribe.model.Token;
 
-public class LoginActivity extends Activity {
+public class Login extends Activity {
 
     class CustomWebViewClient extends WebViewClient {
         private final Token token;

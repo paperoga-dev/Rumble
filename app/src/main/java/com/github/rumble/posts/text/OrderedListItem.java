@@ -19,6 +19,8 @@
 package com.github.rumble.posts.text;
 
 import android.content.Context;
+import android.text.SpannableString;
+import android.text.style.LeadingMarginSpan;
 import android.view.View;
 import android.widget.TextView;
 
@@ -26,14 +28,21 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class OrderedListItem extends Base {
+    private int orderNumber;
+
     public OrderedListItem(JSONObject textObject) throws JSONException {
         super(textObject);
+
+        this.orderNumber = Base.getOrderedListCounter();
     }
 
     @Override
     public View render(Context context, int itemWidth) {
-        TextView tv = new TextView(context);
-        tv.setText(getFormattedText());
+        TextView tv = createTextView(context);
+
+        SpannableString ss = new SpannableString(String.valueOf(orderNumber) + ". " + getFormattedText());
+        ss.setSpan(new LeadingMarginSpan.Standard(10, 10),0, getText().length(),0);
+        tv.setText(ss);
 
         return tv;
     }

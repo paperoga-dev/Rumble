@@ -18,7 +18,10 @@
 
 package com.github.rumble.posts.text;
 
+import android.content.Context;
 import android.text.SpannableStringBuilder;
+import android.text.method.LinkMovementMethod;
+import android.widget.TextView;
 
 import com.github.rumble.posts.ContentItem;
 
@@ -35,6 +38,7 @@ import java.util.Map;
 public abstract class Base extends ContentItem {
     private String text;
     private List<com.github.rumble.posts.text.formatting.Base> formattingItems;
+    private static int orderedListCounter = 0;
 
     private static final Map<String, Class<? extends com.github.rumble.posts.text.formatting.Base>> formattingTypesMap =
             new HashMap<String, Class<? extends com.github.rumble.posts.text.formatting.Base>>() {{
@@ -91,6 +95,11 @@ public abstract class Base extends ContentItem {
         String subType = textObject.optString("subtype", "plain");
 
         try {
+            if (subType.equalsIgnoreCase("ordered-list-item"))
+                ++orderedListCounter;
+            else
+                orderedListCounter = 0;
+
             return typesMap.get(subType)
                             .getDeclaredConstructor(JSONObject.class)
                             .newInstance(textObject);
@@ -118,5 +127,17 @@ public abstract class Base extends ContentItem {
 
     public String getText() {
         return text;
+    }
+
+    protected TextView createTextView(Context context) {
+        TextView tv = new TextView(context);
+        tv.setMovementMethod(LinkMovementMethod.getInstance());
+        tv.setFocusable(true);
+
+        return tv;
+    }
+
+    static protected int getOrderedListCounter() {
+        return orderedListCounter;
     }
 }

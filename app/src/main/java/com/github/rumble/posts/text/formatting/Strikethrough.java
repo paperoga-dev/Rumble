@@ -35,7 +35,7 @@ public class Strikethrough extends Base {
         stringBuilder.setSpan(
                 new StrikethroughSpan(),
                 getStart(),
-                getEnd(),
+                Math.min(getEnd(), stringBuilder.toString().length() - 1),
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
         );
     }

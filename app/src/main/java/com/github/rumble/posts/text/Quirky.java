@@ -35,7 +35,7 @@ public class Quirky extends Base {
 
     @Override
     public View render(Context context, int itemWidth) {
-        TextView tv = new TextView(context);
+        TextView tv = createTextView(context);
 
         SpannableStringBuilder ssb = getFormattedText();
 

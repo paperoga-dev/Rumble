@@ -100,13 +100,22 @@ public class Base extends ContentItem {
     public View render(Context context, int itemWidth) {
         WebView wv = new WebViewItem(context);
 
-        wv.loadDataWithBaseURL(
-                null,
-                "<html><head></head><body><iframe src='\"" + getUrl() + "\"' style='display:block;background-color:transparent;overflow:hidden' scrolling='no' frameBorder='0' data-can-gutter data-can-resize width='\"" + itemWidth + "\"' height='\"" + itemWidth + "\"' allowfullscreen mozallowfullscreen webkitallowfullscreen></iframe>\"</body></html>",
-                "text/html; charset=utf-8",
-                "UTF-8",
-                null
-        );
+        if (!getEmbedHtml().isEmpty())
+            wv.loadDataWithBaseURL(
+                    null,
+                    "<html><head></head><body>" + getEmbedHtml() + "</body></html>",
+                    "text/html; charset=utf-8",
+                    "UTF-8",
+                    null
+            );
+        else
+            wv.loadDataWithBaseURL(
+                    null,
+                    "<html><head></head><body><iframe src=\"" + getUrl() + "&output=embed\" style=\"display:block;background-color:transparent;overflow:hidden\" scrolling=\"no\" frameBorder=\"0\" data-can-gutter data-can-resize width=\"" + itemWidth + "\" height=\"" + itemWidth + "\" allowfullscreen mozallowfullscreen webkitallowfullscreen></iframe></body></html>",
+                    "text/html; charset=utf-8",
+                    "UTF-8",
+                    null
+            );
 
         return wv;
     }

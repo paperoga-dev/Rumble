@@ -125,13 +125,22 @@ public class Base extends ContentItem {
     public View render(Context context, int itemWidth) {
         WebView wv = new WebViewItem(context);
 
-        wv.loadDataWithBaseURL(
-                null,
-                "<html><head></head><body><iframe src='\"" + getEmbedUrl() + "\"' frameborder='0' width='\"" + itemWidth + "\"' height='\"" + itemWidth + "\"'></iframe></body></html>",
-                "text/html; charset=utf-8",
-                "UTF-8",
-                null
-        );
+        if (!getEmbedHtml().isEmpty())
+            wv.loadDataWithBaseURL(
+                    null,
+                    "<html><head></head><body>" + getEmbedHtml() + "</body></html>",
+                    "text/html; charset=utf-8",
+                    "UTF-8",
+                    null
+            );
+        else
+            wv.loadDataWithBaseURL(
+                    null,
+                    "<html><head></head><body><iframe src='\"" + getEmbedUrl() + "\"' frameborder='0' width='\"" + itemWidth + "\"' height='\"" + itemWidth + "\"'></iframe></body></html>",
+                    "text/html; charset=utf-8",
+                    "UTF-8",
+                    null
+            );
 
         return wv;
     }

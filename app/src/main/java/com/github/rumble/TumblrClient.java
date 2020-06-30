@@ -47,7 +47,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-final class TumblrClient {
+public final class TumblrClient {
 
     public interface OnLoginListener {
         void onAccessGranted();

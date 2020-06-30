@@ -19,9 +19,12 @@
 package com.github.rumble.posts;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.util.Linkify;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,6 +54,12 @@ public interface Post {
     class Base {
         private long id;
 
+        public Base() {
+            super();
+
+            this.id = 0;
+        }
+
         public Base(JSONObject idObject) throws JSONException {
             super();
 
@@ -72,10 +81,16 @@ public interface Post {
 
         private final List<Item> posts;
 
-        public Adapter(List<Item> posts) {
+        public Adapter() {
             super();
 
-            this.posts = posts;
+            this.posts = new ArrayList<>();
+        }
+
+        public void addItems(List<Item> items) {
+            int startPosition = items.size();
+            posts.addAll(items);
+            notifyItemRangeInserted(startPosition, items.size());
         }
 
         @Override
@@ -107,11 +122,23 @@ public interface Post {
         private List<LayoutItem> layout;
         private List<Trail> trail;
 
+        public Trail(JSONObject postObject, String brokenBlogName) throws JSONException {
+            super();
+
+            this.blog = new Info.Base(brokenBlogName);
+
+            loadContent(postObject);
+        }
+
         public Trail(JSONObject postObject, JSONObject idObject) throws JSONException {
             super(idObject);
 
             this.blog = new Info.Base(postObject.getJSONObject("blog"));
 
+            loadContent(postObject);
+        }
+
+        private void loadContent(JSONObject postObject) throws JSONException {
             this.content = new ArrayList<>();
             JSONArray content = postObject.getJSONArray("content");
             for (int i = 0; i < content.length(); ++i) {
@@ -130,12 +157,22 @@ public interface Post {
             JSONArray trail = postObject.optJSONArray("trail");
             if (trail != null) {
                 for (int i = 0; i < trail.length(); ++i) {
-                    this.trail.add(
-                            new Trail(
-                                    trail.getJSONObject(i),
-                                    trail.getJSONObject(i).getJSONObject("post")
-                            )
-                    );
+                    String brokenBlogName = trail.getJSONObject(i).optString("broken_blog_name");
+                    if (brokenBlogName != null) {
+                        this.trail.add(
+                                new Trail(
+                                        trail.getJSONObject(i),
+                                        brokenBlogName
+                                )
+                        );
+                    } else {
+                        this.trail.add(
+                                new Trail(
+                                        trail.getJSONObject(i),
+                                        trail.getJSONObject(i).getJSONObject("post")
+                                )
+                        );
+                    }
                 }
             }
         }
@@ -191,16 +228,25 @@ public interface Post {
         }
 
         public void render(Context context, FlexboxLayout flexLayout, int viewWidth) {
-            for (Trail trail : getTrail()) {
-                trail.render(context, flexLayout, viewWidth);
-            }
-
             FlexboxLayout.LayoutParams lpItem = new FlexboxLayout.LayoutParams(flexLayout.getLayoutParams());
             lpItem.setWidth(FlexboxLayout.LayoutParams.WRAP_CONTENT);
             lpItem.setHeight(FlexboxLayout.LayoutParams.WRAP_CONTENT);
 
             FlexboxLayout.LayoutParams lpFirstItem = new FlexboxLayout.LayoutParams(lpItem);
             lpFirstItem.setWrapBefore(true);
+
+            for (Trail trail : getTrail()) {
+                trail.render(context, flexLayout, viewWidth);
+
+                View lineView = new View(context);
+
+                FlexboxLayout.LayoutParams lpLine = new FlexboxLayout.LayoutParams(lpFirstItem);
+                lpLine.setHeight((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, context.getResources().getDisplayMetrics()));
+                lineView.setLayoutParams(lpLine);
+                lineView.setBackgroundColor(Color.parseColor("#77f27123"));
+                flexLayout.addView(lineView);
+            }
+
 
             TextView tvTitle = new TextView(context);
             SpannableStringBuilder ssbTitle = new SpannableStringBuilder(getBlog().getName());
@@ -220,6 +266,9 @@ public interface Post {
 
                 for (Integer item : row) {
                     View itemView = getContent().get(item).render(context, viewWidth / row.size());
+                    if (itemView instanceof TextView)
+                        Linkify.addLinks((TextView) itemView, Linkify.ALL);
+
                     if (isFirst)
                         flexLayout.addView(itemView, lpFirstItem);
                     else

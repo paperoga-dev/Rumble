@@ -44,7 +44,8 @@ public class Chat extends Base {
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
         );
 
-        TextView tv = new TextView(context);
+        TextView tv = createTextView(context);
+
         tv.setText(ssb);
 
         return tv;

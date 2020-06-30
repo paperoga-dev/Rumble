@@ -19,10 +19,13 @@
 package com.github.rumble.posts.media;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.view.View;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.github.rumble.posts.ContentItem;
 
 import org.json.JSONArray;
@@ -90,6 +93,7 @@ public class Base extends ContentItem {
         if (getMedia().isEmpty())
             return im;
 
+        /*
         int maxArea = getMedia().get(0).getWidth() * getMedia().get(0).getHeight();
         int maxIndex = 0;
         for (int i = 1; i < getMedia().size(); ++i) {
@@ -99,8 +103,25 @@ public class Base extends ContentItem {
                 maxIndex = i;
             }
         }
+        */
 
-        Glide.with(context).load(getMedia().get(maxIndex).getUrl()).override(itemWidth).into(im);
+        int nearestIndex = 0;
+        int nearestDiff = Math.abs(getMedia().get(0).getWidth() - itemWidth);
+        for (int i = 1; i < getMedia().size(); ++i) {
+            int currentDiff = Math.abs(getMedia().get(i).getWidth() - itemWidth);
+            if (currentDiff < nearestDiff) {
+                nearestDiff = currentDiff;
+                nearestIndex = i;
+            }
+        }
+
+        Glide.with(im.getContext())
+                .load(getMedia().get(nearestIndex).getUrl())
+                .skipMemoryCache(true)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .override(itemWidth)
+                .placeholder(new ColorDrawable(Color.BLACK))
+                .into(im);
 
         return im;
     }

@@ -42,6 +42,14 @@ public interface Info {
         private String url;                       // String - Blog URL
         private String uuid;                      // String - Blog UUID
 
+        public Reference(String brokenBlogName) {
+            super();
+
+            this.name = brokenBlogName;
+            this.url = "";
+            this.uuid = "";
+        }
+
         public Reference(JSONObject blogObject) throws JSONException {
             super();
 
@@ -67,6 +75,14 @@ public interface Info {
         private String description;               // String - Blog description
         private String title;                     // String - Blog title
         private Date updated;                     // Number - Last updated time (epoch)
+
+        public Base(String brokenBlogName) {
+            super(brokenBlogName);
+
+            this.description = "";
+            this.title = "";
+            this.updated = new Date();
+        }
 
         public Base(JSONObject blogObject) throws JSONException {
             super(blogObject);

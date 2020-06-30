@@ -43,7 +43,7 @@ public class Color extends Base {
         stringBuilder.setSpan(
                 new ForegroundColorSpan(getColor()),
                 getStart(),
-                getEnd(),
+                Math.min(getEnd(), stringBuilder.toString().length() - 1),
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
         );
     }

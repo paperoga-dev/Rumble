@@ -75,7 +75,7 @@ public interface Dashboard {
 
         @Override
         protected String getPath() {
-            return "user/dashboard";
+            return "/user/dashboard";
         }
 
         @Override

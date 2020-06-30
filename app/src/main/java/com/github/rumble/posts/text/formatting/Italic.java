@@ -35,7 +35,7 @@ public class Italic extends Base {
         stringBuilder.setSpan(
                 new android.text.style.StyleSpan(Typeface.ITALIC),
                 getStart(),
-                getEnd(),
+                Math.min(getEnd(), stringBuilder.toString().length() - 1),
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
         );
     }

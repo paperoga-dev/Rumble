@@ -34,7 +34,7 @@ public class Indented extends Base {
 
     @Override
     public View render(Context context, int itemWidth) {
-        TextView tv = new TextView(context);
+        TextView tv = createTextView(context);
         SpannableString ss = new SpannableString(getFormattedText());
         ss.setSpan(new LeadingMarginSpan.Standard(10, 10),0, getText().length(),0);
         tv.setText(ss);

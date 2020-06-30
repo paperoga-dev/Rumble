@@ -45,7 +45,7 @@ public class Mention extends Base {
         stringBuilder.setSpan(
                 new UnderlineSpan(),
                 getStart(),
-                getEnd(),
+                Math.min(getEnd(), stringBuilder.toString().length() - 1),
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
         );
     }

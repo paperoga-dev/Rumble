@@ -52,11 +52,10 @@ public abstract class Base {
 
         String attributionType = attributionObject.getString("type");
         try {
-            return typesMap.get(attributionType)
-                    .getDeclaredConstructor(JSONObject.class)
-                    .newInstance(attributionObject);
-        } catch (InstantiationException |
-                InvocationTargetException |
+            return (Base) typesMap.get(attributionType)
+                    .getMethod("doCreate", JSONObject.class)
+                    .invoke(null, attributionObject);
+        } catch (InvocationTargetException |
                 NoSuchMethodException |
                 IllegalAccessException e) {
             throw new RuntimeException("Add missing attribution type: " + attributionType);
