@@ -123,6 +123,12 @@ public class Base extends ContentItem {
                 .placeholder(new ColorDrawable(Color.BLACK))
                 .into(im);
 
+        /*
+        WebView wv = new WebViewItem(context);
+        wv.loadUrl(getMedia().get(nearestIndex).getUrl());
+        return wv;
+        */
+
         return im;
     }
 

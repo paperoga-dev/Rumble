@@ -237,10 +237,10 @@ public interface Info {
                 this.avatars.add(new Avatar.Data(avatars.getJSONObject(i)));
             }
 
-            this.canChat = blogObject.getBoolean("can_chat");
-            this.canSendFanMail = blogObject.getBoolean("can_send_fan_mail");
-            this.canSubmit = blogObject.getBoolean("can_submit");
-            this.canSubscribe = blogObject.getBoolean("can_subscribe");
+            this.canChat = blogObject.optBoolean("can_chat", false);
+            this.canSendFanMail = blogObject.optBoolean("can_send_fan_mail", false);
+            this.canSubmit = blogObject.optBoolean("can_submit", false);
+            this.canSubscribe = blogObject.optBoolean("can_subscribe", false);
             this.drafts = blogObject.getInt("drafts");
             this.facebook = blogObject.getString("facebook").equalsIgnoreCase("Y");
             this.facebookOpengraphEnabled = blogObject.getString("facebook_opengraph_enabled").equalsIgnoreCase("Y");
@@ -251,10 +251,11 @@ public interface Info {
             this.messages = blogObject.getInt("messages");
             this.posts = blogObject.getInt("posts");
             this.primary = blogObject.getBoolean("primary");
-            this.queue = blogObject.getInt("queue");
+            this.queue = blogObject.optInt("queue", 0);
             this.shareLikes = blogObject.getBoolean("share_likes");
-            this.submissionPageTitle = blogObject.getString("submission_page_title");
-            this.submissionTerms = new SubmissionTerms(blogObject.getJSONObject("submission_terms"));
+            this.submissionPageTitle = blogObject.optString("submission_page_title", "");
+            JSONObject submissionJSONObject = blogObject.optJSONObject("submission_terms");
+            this.submissionTerms = (submissionJSONObject != null)? new SubmissionTerms(submissionJSONObject) : null;
             this.subscribed = blogObject.getBoolean("subscribed");
             this.totalPosts = blogObject.getInt("total_posts");
 
