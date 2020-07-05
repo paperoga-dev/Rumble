@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Layout_Demo</string>
+    <string name="add_column">Add Column</string>
+    <string name="add_row">Add Row</string>
+</resources>
