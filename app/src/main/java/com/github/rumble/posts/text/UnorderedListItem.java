@@ -34,10 +34,10 @@ public class UnorderedListItem extends Base {
 
     @Override
     public View render(Context context, int itemWidth) {
-        TextView tv = createTextView(context);
-
         SpannableString spannable = new SpannableString(getFormattedText());
         spannable.setSpan(new BulletSpan(16), 0, getText().length(), 0);
+
+        TextView tv = createTextView(context);
         tv.setText(spannable);
 
         return tv;

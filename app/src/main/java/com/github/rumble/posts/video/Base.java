@@ -19,8 +19,11 @@
 package com.github.rumble.posts.video;
 
 import android.content.Context;
+import android.net.Uri;
 import android.view.View;
 import android.webkit.WebView;
+import android.widget.MediaController;
+import android.widget.VideoView;
 
 import com.github.rumble.posts.ContentItem;
 import com.github.rumble.posts.WebViewItem;
@@ -98,9 +101,8 @@ public class Base extends ContentItem {
 
     @Override
     public View render(Context context, int itemWidth) {
-        WebView wv = new WebViewItem(context);
-
-        if (!getEmbedHtml().isEmpty())
+        if (!getEmbedHtml().isEmpty()) {
+            WebView wv = new WebViewItem(context);
             wv.loadDataWithBaseURL(
                     null,
                     "<html><head></head><body>" + getEmbedHtml() + "</body></html>",
@@ -108,7 +110,31 @@ public class Base extends ContentItem {
                     "UTF-8",
                     null
             );
-        else
+
+            wv.setMinimumWidth(itemWidth);
+            wv.setMinimumHeight((itemWidth * getEmbedIframe().getHeight()) / getEmbedIframe().getWidth());
+
+            return wv;
+        } if ((getMedia() != null) && !getMedia().getUrl().isEmpty()) {
+            Uri uri = Uri.parse(getMedia().getUrl());
+
+            MediaController mc = new MediaController(context);
+            VideoView vv  = new VideoView(context);
+
+            vv.setMediaController(mc);
+            vv.setVideoURI(uri);
+            vv.requestFocus();
+
+            mc.setAnchorView(vv);
+            mc.setMediaPlayer(vv);
+
+            vv.setMinimumWidth(itemWidth);
+            vv.setMinimumHeight((itemWidth * getMedia().getHeight()) / getMedia().getWidth());
+
+            return vv;
+        } else {
+            WebView wv = new WebViewItem(context);
+            /*
             wv.loadDataWithBaseURL(
                     null,
                     "<html><head></head><body><iframe src=\"" + getUrl() + "&output=embed\" style=\"display:block;background-color:transparent;overflow:hidden\" scrolling=\"no\" frameBorder=\"0\" data-can-gutter data-can-resize width=\"" + itemWidth + "\" height=\"" + itemWidth + "\" allowfullscreen mozallowfullscreen webkitallowfullscreen></iframe></body></html>",
@@ -116,7 +142,10 @@ public class Base extends ContentItem {
                     "UTF-8",
                     null
             );
+            */
 
-        return wv;
+            wv.loadUrl(getUrl());
+            return wv;
+        }
     }
 }

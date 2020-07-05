@@ -19,11 +19,17 @@
 package com.github.rumble.posts.link;
 
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
 import android.text.method.LinkMovementMethod;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.TextView;
 
 import com.github.rumble.posts.ContentItem;
+import com.github.rumble.posts.WebViewItem;
 import com.github.rumble.posts.media.Media;
 
 import org.json.JSONException;
@@ -86,8 +92,26 @@ public class Base extends ContentItem {
     public View render(Context context, int itemWidth) {
         TextView tv = new TextView(context);
 
-        tv.setMovementMethod(LinkMovementMethod.getInstance());
-        tv.setText("<a href=\"" + getUrl() + "\" target=\"_blank\">" + getDisplayUrl() + "</a>");
+        GradientDrawable gd = new GradientDrawable();
+        gd.setShape(GradientDrawable.RECTANGLE);
+        gd.setColor(Color.TRANSPARENT);
+        gd.setStroke(2, Color.GRAY);
+        gd.setCornerRadius(15.0f);
+        tv.setBackground(gd);
+
+        tv.setSingleLine(false);
+        tv.setMaxLines(2);
+        tv.setText(getTitle() + "\n" + getSiteName());
+
+        tv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                v.getContext().startActivity(
+                        new Intent(Intent.ACTION_VIEW, Uri.parse(getUrl()))
+                );
+            }
+        });
+
         return tv;
     }
 }

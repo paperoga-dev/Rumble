@@ -22,8 +22,8 @@
             android:text="@string/dashboard"
             android:textAlignment="center" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvDashboard"
+        <ListView
+            android:id="@+id/lvDashboard"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </LinearLayout>

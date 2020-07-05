@@ -18,7 +18,9 @@
 
 package com.github.rumble.posts.text.formatting;
 
+import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.style.URLSpan;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,5 +40,11 @@ public class Link extends Base {
 
     @Override
     public void apply(SpannableStringBuilder stringBuilder) {
+        stringBuilder.setSpan(
+                new URLSpan(getUrl()),
+                getStart(),
+                Math.min(getEnd(), stringBuilder.toString().length() - 1),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        );
     }
 }

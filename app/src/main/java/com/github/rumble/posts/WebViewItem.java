@@ -27,6 +27,8 @@ public class WebViewItem extends WebView {
     public WebViewItem(Context context) {
         super(context);
 
+        setInitialScale(1);
+
         getSettings().setJavaScriptEnabled(true);
         getSettings().setJavaScriptCanOpenWindowsAutomatically(false);
         getSettings().setLoadWithOverviewMode(true);

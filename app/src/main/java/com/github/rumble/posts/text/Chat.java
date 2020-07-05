@@ -36,7 +36,6 @@ public class Chat extends Base {
     @Override
     public View render(Context context, int itemWidth) {
         SpannableStringBuilder ssb = getFormattedText();
-
         ssb.setSpan(
                 Typeface.create(Typeface.MONOSPACE, Typeface.NORMAL),
                 0,
@@ -45,7 +44,6 @@ public class Chat extends Base {
         );
 
         TextView tv = createTextView(context);
-
         tv.setText(ssb);
 
         return tv;

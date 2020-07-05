@@ -21,8 +21,8 @@
             android:layout_height="wrap_content"
             android:textAlignment="center" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvBlog"
+        <ListView
+            android:id="@+id/lvBlogContent"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </LinearLayout>

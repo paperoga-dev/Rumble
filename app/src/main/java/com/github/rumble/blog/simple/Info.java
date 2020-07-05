@@ -20,9 +20,6 @@ package com.github.rumble.blog.simple;
 
 import android.content.Context;
 
-import com.github.rumble.blog.simple.Avatar;
-import com.github.rumble.blog.simple.Id;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
