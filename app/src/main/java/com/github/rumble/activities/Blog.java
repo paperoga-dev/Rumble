@@ -1,15 +1,13 @@
 package com.github.rumble.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.RecyclerView.OnScrollListener;
 
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.widget.AbsListView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.github.rumble.Constants;
@@ -34,29 +32,24 @@ public class Blog extends AppCompatActivity {
         this.currentOffset = 0;
         this.fetching = false;
 
-        RecyclerView rv = findViewById(R.id.rvBlog);
-        rv.setLayoutManager(new LinearLayoutManager(this));
+        ListView lv = findViewById(R.id.lvBlogContent);
+        postsAdapter = new Post.Adapter(this);
+        lv.setAdapter(postsAdapter);
 
-        postsAdapter = new Post.Adapter();
-        rv.setAdapter(postsAdapter);
-
-        rv.addOnScrollListener(new OnScrollListener() {
+        lv.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                ListView lv = (ListView) view;
+
+                if ((scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) &&
+                        ((lv.getLastVisiblePosition() - lv.getHeaderViewsCount() - lv.getFooterViewsCount()) >= (lv.getAdapter().getCount() - 1)) &&
+                        !fetching) {
+                    fetchNewItems();
+                }
             }
 
             @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-
-                LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-
-                if (!fetching) {
-                    if (linearLayoutManager != null && linearLayoutManager.findLastCompletelyVisibleItemPosition() == postsAdapter.getItemCount() - 1) {
-                        fetchNewItems();
-                    }
-                }
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
             }
         });
 
