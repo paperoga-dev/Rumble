@@ -18,8 +18,9 @@
 
 package com.github.rumble.posts;
 
+import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
+import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -28,6 +29,7 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -37,7 +39,6 @@ import com.github.rumble.R;
 import com.github.rumble.api.array.ContentInterface;
 import com.github.rumble.blog.simple.Info;
 import com.github.rumble.posts.layout.Rows;
-import com.google.android.flexbox.FlexboxLayout;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -71,15 +72,32 @@ public interface Post {
         }
     }
 
-    class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
+    class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-        public static class ViewHolder extends RecyclerView.ViewHolder {
-            public ViewHolder(View view) {
-                super(view);
+        private static class LoadingViewHolder extends RecyclerView.ViewHolder {
+            public LoadingViewHolder(View itemView) {
+                super(itemView);
+            }
+        }
+
+        public static class ItemViewHolder extends RecyclerView.ViewHolder {
+
+            public LinearLayout layoutPostContent;
+            public TextView tvTimeStamp;
+            public TextView tvTags;
+
+            public ItemViewHolder(View itemView) {
+                super(itemView);
+
+                this.layoutPostContent = itemView.findViewById(R.id.layoutPostContent);
+                this.tvTimeStamp = itemView.findViewById(R.id.tvTimestamp);
+                this.tvTags = itemView.findViewById(R.id.tvTags);
             }
         }
 
         private final List<Item> posts;
+        private final int VIEW_TYPE_ITEM = 0;
+        private final int VIEW_TYPE_LOADING = 1;
 
         public Adapter() {
             super();
@@ -87,27 +105,54 @@ public interface Post {
             this.posts = new ArrayList<>();
         }
 
+        public void addNullItem() {
+            posts.add(null);
+            notifyItemInserted(posts.size() - 1);
+        }
+
+        public void removeNullItem() {
+            posts.remove(posts.size() - 1);
+            notifyItemRemoved(posts.size());
+        }
+
         public void addItems(List<Item> items) {
-            int startPosition = items.size();
             posts.addAll(items);
-            notifyItemRangeInserted(startPosition, items.size());
+            notifyDataSetChanged();
         }
 
         @Override
         public int getItemViewType(int position) {
-            return position;
+            return (posts.get(position) == null)? VIEW_TYPE_LOADING : VIEW_TYPE_ITEM;
         }
 
         @NonNull
         @Override
-        public Adapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            FlexboxLayout fbl = (FlexboxLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.post_item, parent, false);
-            posts.get(viewType).render(parent.getContext(), fbl, parent.getWidth());
-            return new ViewHolder(fbl);
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            switch (viewType) {
+                case VIEW_TYPE_ITEM:
+                    return new ItemViewHolder(
+                            LayoutInflater.from(parent.getContext()).inflate(R.layout.post_item, parent, false)
+                    );
+
+                case VIEW_TYPE_LOADING:
+                    return new LoadingViewHolder(
+                            LayoutInflater.from(parent.getContext())
+                                    .inflate(R.layout.items_loading, parent, false)
+                    );
+
+                default:
+                    return null;
+            }
         }
 
         @Override
-        public void onBindViewHolder(@NonNull Adapter.ViewHolder viewHolder, int position) {
+        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
+            if (viewHolder instanceof ItemViewHolder) {
+                ItemViewHolder ivh = (ItemViewHolder) viewHolder;
+
+                int itemWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
+                posts.get(position).render((ItemViewHolder) viewHolder, itemWidth);
+            }
         }
 
         @Override
@@ -227,55 +272,39 @@ public interface Post {
             return list;
         }
 
-        public void render(Context context, FlexboxLayout flexLayout, int viewWidth) {
-            FlexboxLayout.LayoutParams lpItem = new FlexboxLayout.LayoutParams(flexLayout.getLayoutParams());
-            lpItem.setWidth(FlexboxLayout.LayoutParams.WRAP_CONTENT);
-            lpItem.setHeight(FlexboxLayout.LayoutParams.WRAP_CONTENT);
-
-            FlexboxLayout.LayoutParams lpFirstItem = new FlexboxLayout.LayoutParams(lpItem);
-            lpFirstItem.setWrapBefore(true);
-
+        public void render(Adapter.ItemViewHolder viewHolder, LinearLayout postLayout, int viewWidth) {
             for (Trail trail : getTrail()) {
-                trail.render(context, flexLayout, viewWidth);
-
-                View lineView = new View(context);
-
-                FlexboxLayout.LayoutParams lpLine = new FlexboxLayout.LayoutParams(lpFirstItem);
-                lpLine.setHeight((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, context.getResources().getDisplayMetrics()));
-                lineView.setLayoutParams(lpLine);
-                lineView.setBackgroundColor(Color.parseColor("#77f27123"));
-                flexLayout.addView(lineView);
+                trail.render(viewHolder, postLayout, viewWidth);
             }
 
+            View postContentView = LayoutInflater.from(viewHolder.itemView.getContext()).inflate(R.layout.post_content, postLayout);
+            TextView tvBlogName = postContentView.findViewById(R.id.blogTitle);
+            tvBlogName.setText(getBlog().getName());
 
-            TextView tvTitle = new TextView(context);
-            SpannableStringBuilder ssbTitle = new SpannableStringBuilder(getBlog().getName());
-            ssbTitle.setSpan(
-                    new android.text.style.StyleSpan(Typeface.BOLD),
-                    0,
-                    getBlog().getName().length(),
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-            );
-            tvTitle.setText(ssbTitle);
-            flexLayout.addView(tvTitle, lpFirstItem);
+            /*
+            int dp5 = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, viewHolder.itemView.getContext().getResources().getDisplayMetrics());
 
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1.0f);
+            lp.setMargins(dp5, dp5, dp5, dp5);
+
+            LinearLayout contentLayout = postContentView.findViewById(R.id.blogContent);
             List<List<Integer>> rows = getBlocksLayout();
 
             for (List<Integer> row : rows) {
-                boolean isFirst = true;
+                LinearLayout rowLayout = (LinearLayout) LayoutInflater.from(viewHolder.itemView.getContext()).inflate(R.layout.post_item_row, contentLayout);
 
                 for (Integer item : row) {
-                    View itemView = getContent().get(item).render(context, viewWidth / row.size());
+                    View itemView = getContent().get(item).render(viewHolder.itemView.getContext(), viewWidth / row.size() - dp5 * 2);
                     if (itemView instanceof TextView)
                         Linkify.addLinks((TextView) itemView, Linkify.ALL);
 
-                    if (isFirst)
-                        flexLayout.addView(itemView, lpFirstItem);
-                    else
-                        flexLayout.addView(itemView, lpItem);
-                    isFirst = false;
+                    rowLayout.addView(itemView, lp);
                 }
             }
+            */
         }
     }
 
@@ -317,31 +346,17 @@ public interface Post {
             return shortUrl;
         }
 
-        public void render(Context context, FlexboxLayout flexLayout, int viewWidth) {
-            super.render(context, flexLayout, viewWidth);
+        public void render(Adapter.ItemViewHolder viewHolder, int viewWidth) {
+            viewHolder.layoutPostContent.removeAllViews();
+            super.render(viewHolder, viewHolder.layoutPostContent, viewWidth);
+            viewHolder.layoutPostContent.requestLayout();
 
-            FlexboxLayout.LayoutParams lpItem = new FlexboxLayout.LayoutParams(flexLayout.getLayoutParams());
-            lpItem.setWidth(FlexboxLayout.LayoutParams.WRAP_CONTENT);
-            lpItem.setHeight(FlexboxLayout.LayoutParams.WRAP_CONTENT);
+            viewHolder.tvTimeStamp.setText(getTimestamp().toString());
 
-            FlexboxLayout.LayoutParams lpFirstItem = new FlexboxLayout.LayoutParams(lpItem);
-            lpFirstItem.setWrapBefore(true);
+            viewHolder.tvTags.setMaxLines(getTags().size());
 
-            TextView tvTimestamp = new TextView(context);
-            tvTimestamp.setText(getTimestamp().toString());
-            flexLayout.addView(tvTimestamp, lpFirstItem);
-
-            boolean isFirst = true;
             for (String tag : getTags()) {
-                TextView tvTag = new TextView(context);
-                tvTag.setText("#" + tag);
-
-                if (isFirst)
-                    flexLayout.addView(tvTag, lpFirstItem);
-                else
-                    flexLayout.addView(tvTag, lpItem);
-
-                isFirst = false;
+                viewHolder.tvTags.append("#" + tag + "\n");
             }
         }
     }

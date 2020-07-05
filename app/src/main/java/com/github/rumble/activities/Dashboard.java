@@ -33,16 +33,8 @@ public class Dashboard extends AppCompatActivity {
         this.currentOffset = 0;
         this.fetching = false;
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(
-                this,
-                LinearLayoutManager.VERTICAL,
-                false
-        );
-
         RecyclerView rv = findViewById(R.id.rvDashboard);
-        rv.addItemDecoration(new DividerItemDecoration(rv.getContext(), layoutManager.getOrientation()));
-        layoutManager.scrollToPosition(0);
-        rv.setLayoutManager(layoutManager);
+        rv.setLayoutManager(new LinearLayoutManager(this));
 
         postsAdapter = new Post.Adapter();
         rv.setAdapter(postsAdapter);
@@ -51,9 +43,18 @@ public class Dashboard extends AppCompatActivity {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
+            }
 
-                if (!recyclerView.canScrollVertically(1) && (newState == RecyclerView.SCROLL_STATE_IDLE)) {
-                    fetchNewItems();
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+
+                if (!fetching) {
+                    if (linearLayoutManager != null && linearLayoutManager.findLastCompletelyVisibleItemPosition() == postsAdapter.getItemCount() - 1) {
+                        fetchNewItems();
+                    }
                 }
             }
         });
@@ -70,6 +71,7 @@ public class Dashboard extends AppCompatActivity {
         if (fetching)
             return;
 
+        postsAdapter.addNullItem();
         fetching = true;
 
         Main.getClient().call(
@@ -80,6 +82,7 @@ public class Dashboard extends AppCompatActivity {
 
                     @Override
                     public void onFailure(BaseException e) {
+                        postsAdapter.removeNullItem();
                         Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_SHORT).show();
                         Log.v(Constants.APP_NAME, e.toString());
                         fetching = false;
@@ -87,6 +90,7 @@ public class Dashboard extends AppCompatActivity {
 
                     @Override
                     public void onSuccess(List<Post.Item> result, int offset, int limit, int count) {
+                        postsAdapter.removeNullItem();
                         postsAdapter.addItems(result);
                         currentOffset += result.size();
                         fetching = false;

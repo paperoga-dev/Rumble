@@ -154,7 +154,7 @@ public class Main extends AppCompatActivity {
         switch (requestCode) {
             case Constants.PERFORM_LOGIN:
                 if (resultCode != RESULT_OK) {
-                    Toast.makeText(getApplicationContext(), "Login failed: " + String.valueOf(resultCode), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Login failed: " + resultCode, Toast.LENGTH_SHORT).show();
                     resetToLoginState();
                     return;
                 }

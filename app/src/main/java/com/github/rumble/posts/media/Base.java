@@ -93,18 +93,6 @@ public class Base extends ContentItem {
         if (getMedia().isEmpty())
             return im;
 
-        /*
-        int maxArea = getMedia().get(0).getWidth() * getMedia().get(0).getHeight();
-        int maxIndex = 0;
-        for (int i = 1; i < getMedia().size(); ++i) {
-            int currentArea = getMedia().get(i).getWidth() * getMedia().get(i).getHeight();
-            if (currentArea > maxArea) {
-                maxArea = currentArea;
-                maxIndex = i;
-            }
-        }
-        */
-
         int nearestIndex = 0;
         int nearestDiff = Math.abs(getMedia().get(0).getWidth() - itemWidth);
         for (int i = 1; i < getMedia().size(); ++i) {
@@ -115,19 +103,13 @@ public class Base extends ContentItem {
             }
         }
 
+        im.setMinimumWidth(itemWidth);
+        im.setMinimumHeight((itemWidth * getMedia().get(nearestIndex).getHeight()) / getMedia().get(nearestIndex).getWidth());
+
         Glide.with(im.getContext())
                 .load(getMedia().get(nearestIndex).getUrl())
-                .skipMemoryCache(true)
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .override(itemWidth)
                 .placeholder(new ColorDrawable(Color.BLACK))
                 .into(im);
-
-        /*
-        WebView wv = new WebViewItem(context);
-        wv.loadUrl(getMedia().get(nearestIndex).getUrl());
-        return wv;
-        */
 
         return im;
     }

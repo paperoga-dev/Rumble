@@ -40,7 +40,7 @@ public class OrderedListItem extends Base {
     public View render(Context context, int itemWidth) {
         TextView tv = createTextView(context);
 
-        SpannableString ss = new SpannableString(String.valueOf(orderNumber) + ". " + getFormattedText());
+        SpannableString ss = new SpannableString(orderNumber + ". " + getFormattedText());
         ss.setSpan(new LeadingMarginSpan.Standard(10, 10),0, getText().length(),0);
         tv.setText(ss);
 
