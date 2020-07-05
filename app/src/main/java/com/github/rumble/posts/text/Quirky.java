@@ -35,10 +35,7 @@ public class Quirky extends Base {
 
     @Override
     public View render(Context context, int itemWidth) {
-        TextView tv = createTextView(context);
-
         SpannableStringBuilder ssb = getFormattedText();
-
         ssb.setSpan(
                 Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL),
                 0,
@@ -46,7 +43,9 @@ public class Quirky extends Base {
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
         );
 
+        TextView tv = createTextView(context);
         tv.setText(ssb);
+
         return tv;
     }
 }

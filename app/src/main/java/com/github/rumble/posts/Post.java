@@ -20,6 +20,8 @@ package com.github.rumble.posts;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.text.util.Linkify;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -32,6 +34,7 @@ import android.widget.TextView;
 import com.github.rumble.R;
 import com.github.rumble.api.array.ContentInterface;
 import com.github.rumble.blog.simple.Info;
+import com.github.rumble.posts.layout.Ask;
 import com.github.rumble.posts.layout.Rows;
 
 import org.json.JSONArray;
@@ -208,6 +211,10 @@ public interface Post {
 
                         list.add(innerBlock);
                     }
+                } else if (getLayout().get(i) instanceof Ask) {
+                    ArrayList<Integer> askBlock = new ArrayList<>();
+                    askBlock.add(-1);
+                    list.add(askBlock);
                 }
             }
 
@@ -254,11 +261,22 @@ public interface Post {
                 lp.setMargins(dp5, dp5, dp5, dp5);
 
                 for (Integer item : row) {
-                    View itemView = getContent().get(item).render(llPostContent.getContext(), viewWidth / row.size() - dp5 * 2);
-                    if (itemView instanceof TextView)
-                        Linkify.addLinks((TextView) itemView, Linkify.ALL);
+                    if (item == -1) {
+                        View itemView = getContent().get(0).render(llPostContent.getContext(), viewWidth / row.size() - dp5 * 2);
 
-                    rowLayout.addView(itemView, lp);
+                        GradientDrawable gd = new GradientDrawable();
+                        gd.setShape(GradientDrawable.RECTANGLE);
+                        gd.setColor(Color.LTGRAY);
+                        gd.setStroke(2, Color.GRAY);
+                        gd.setCornerRadius(15.0f);
+                        itemView.setBackground(gd);
+
+                        rowLayout.addView(itemView, lp);
+
+                    } else {
+                        View itemView = getContent().get(item).render(llPostContent.getContext(), viewWidth / row.size() - dp5 * 2);
+                        rowLayout.addView(itemView, lp);
+                    }
                 }
 
                 llPostContent.addView(rowLayout);

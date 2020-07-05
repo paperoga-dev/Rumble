@@ -19,6 +19,7 @@
 package com.github.rumble.posts.text;
 
 import android.content.Context;
+import android.text.Html;
 import android.view.View;
 import android.widget.TextView;
 
@@ -33,7 +34,7 @@ public class Heading2 extends Base {
     @Override
     public View render(Context context, int itemWidth) {
         TextView tv = createTextView(context);
-        tv.setText(getFormattedText());
+        tv.setText(Html.fromHtml("<h2>" + getFormattedText() + "</h2>"));
 
         return tv;
     }

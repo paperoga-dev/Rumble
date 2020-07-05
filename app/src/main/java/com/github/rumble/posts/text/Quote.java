@@ -19,6 +19,9 @@
 package com.github.rumble.posts.text;
 
 import android.content.Context;
+import android.graphics.Typeface;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.view.View;
 import android.widget.TextView;
 
@@ -32,6 +35,14 @@ public class Quote extends Base {
 
     @Override
     public View render(Context context, int itemWidth) {
+        SpannableStringBuilder ssb = getFormattedText();
+        ssb.setSpan(
+                Typeface.create(Typeface.SERIF, Typeface.NORMAL),
+                0,
+                getText().length(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        );
+
         TextView tv = createTextView(context);
         tv.setText(getFormattedText());
 
