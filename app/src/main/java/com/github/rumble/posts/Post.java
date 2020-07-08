@@ -21,8 +21,9 @@ package com.github.rumble.posts;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
-import android.text.util.Linkify;
+import android.text.Html;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,6 +31,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.VideoView;
 
 import com.github.rumble.R;
 import com.github.rumble.api.array.ContentInterface;
@@ -92,20 +94,6 @@ public interface Post {
             return convertView;
         }
 
-        public void addNullItem() {
-            /*
-            add(null);
-            notifyDataSetChanged();
-            */
-        }
-
-        public void removeNullItem() {
-            /*
-            remove(getItem(getCount() - 1));
-            notifyDataSetChanged();
-            */
-        }
-
         public void addItems(List<Item> items) {
             addAll(items);
             notifyDataSetChanged();
@@ -117,6 +105,8 @@ public interface Post {
         private List<ContentItem> content;
         private List<LayoutItem> layout;
         private List<Trail> trail;
+        private String askingName;
+        private String askingUrl;
 
         public Trail(JSONObject postObject, String brokenBlogName) throws JSONException {
             super();
@@ -171,6 +161,9 @@ public interface Post {
                     }
                 }
             }
+
+            this.askingName = postObject.optString("asking_name");
+            this.askingUrl = postObject.optString("asking_url");
         }
 
         public Info.Base getBlog() {
@@ -187,6 +180,14 @@ public interface Post {
 
         public List<Trail> getTrail() {
             return trail;
+        }
+
+        public String getAskingName() {
+            return askingName;
+        }
+
+        public String getAskingUrl() {
+            return askingUrl;
         }
 
         public List<List<Integer>> getBlocksLayout() {
@@ -215,6 +216,7 @@ public interface Post {
                     ArrayList<Integer> askBlock = new ArrayList<>();
                     askBlock.add(-1);
                     list.add(askBlock);
+                    indexes.remove(i);
                 }
             }
 
@@ -227,7 +229,7 @@ public interface Post {
             return list;
         }
 
-        public void render(LinearLayout linearLayout, int viewWidth) {
+        private void render(LinearLayout linearLayout, int viewWidth, boolean isAReblog) {
             for (Trail trail : getTrail()) {
                 LinearLayout llTrailPostContent = (LinearLayout) LayoutInflater.from(linearLayout.getContext()).inflate(
                         R.layout.post_content,
@@ -235,7 +237,8 @@ public interface Post {
                         false
                 );
 
-                trail.render(llTrailPostContent, viewWidth);
+                trail.render(llTrailPostContent, viewWidth, true);
+                llTrailPostContent.setBackground(new ColorDrawable(0xfff6dba4));
                 linearLayout.addView(llTrailPostContent);
             }
 
@@ -245,7 +248,10 @@ public interface Post {
                     false
             );
 
-            ((TextView) llPostContent.findViewById(R.id.tvContentBlogName)).setText(getBlog().getName());
+            String blogName = getBlog().getName();
+            if (isAReblog)
+                blogName += " \u21BB";
+            ((TextView) llPostContent.findViewById(R.id.tvContentBlogName)).setText(blogName);
 
             List<List<Integer>> rows = getBlocksLayout();
 
@@ -262,7 +268,9 @@ public interface Post {
 
                 for (Integer item : row) {
                     if (item == -1) {
-                        View itemView = getContent().get(0).render(llPostContent.getContext(), viewWidth / row.size() - dp5 * 2);
+                        TextView itemView = (TextView) getContent().get(0).render(llPostContent.getContext(), viewWidth / row.size() - dp5 * 2);
+
+                        itemView.setText(Html.fromHtml("<b>" + getAskingName() + "</b><br>" + itemView.getText()));
 
                         GradientDrawable gd = new GradientDrawable();
                         gd.setShape(GradientDrawable.RECTANGLE);
@@ -272,10 +280,19 @@ public interface Post {
                         itemView.setBackground(gd);
 
                         rowLayout.addView(itemView, lp);
-
                     } else {
                         View itemView = getContent().get(item).render(llPostContent.getContext(), viewWidth / row.size() - dp5 * 2);
-                        rowLayout.addView(itemView, lp);
+                        if (itemView instanceof VideoView) {
+                            VideoView vv = (VideoView) itemView;
+
+                            rowLayout.addView(vv, new LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.MATCH_PARENT,
+                                    vv.getMinimumHeight(),
+                                    1.0f)
+                            );
+                        } else {
+                            rowLayout.addView(itemView, lp);
+                        }
                     }
                 }
 
@@ -283,6 +300,10 @@ public interface Post {
             }
 
             linearLayout.addView(llPostContent);
+        }
+
+        public void render(LinearLayout linearLayout, int viewWidth) {
+            render(linearLayout, viewWidth, false);
         }
     }
 

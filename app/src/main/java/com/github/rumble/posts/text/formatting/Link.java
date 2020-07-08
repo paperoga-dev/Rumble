@@ -43,7 +43,7 @@ public class Link extends Base {
         stringBuilder.setSpan(
                 new URLSpan(getUrl()),
                 getStart(),
-                Math.min(getEnd(), stringBuilder.toString().length() - 1),
+                Math.min(getEnd(), stringBuilder.toString().length()),
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
         );
     }

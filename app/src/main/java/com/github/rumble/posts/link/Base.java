@@ -23,13 +23,10 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
-import android.text.method.LinkMovementMethod;
 import android.view.View;
-import android.webkit.WebView;
 import android.widget.TextView;
 
 import com.github.rumble.posts.ContentItem;
-import com.github.rumble.posts.WebViewItem;
 import com.github.rumble.posts.media.Media;
 
 import org.json.JSONException;

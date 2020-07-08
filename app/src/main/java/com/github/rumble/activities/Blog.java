@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-import android.widget.AbsListView;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.github.rumble.Constants;
@@ -16,6 +14,7 @@ import com.github.rumble.api.array.CompletionInterface;
 import com.github.rumble.blog.array.Posts;
 import com.github.rumble.exception.BaseException;
 import com.github.rumble.posts.Post;
+import com.github.rumble.ui.ListView;
 
 import java.util.List;
 
@@ -33,23 +32,15 @@ public class Blog extends AppCompatActivity {
         this.fetching = false;
 
         ListView lv = findViewById(R.id.lvBlogContent);
+
         postsAdapter = new Post.Adapter(this);
         lv.setAdapter(postsAdapter);
 
-        lv.setOnScrollListener(new AbsListView.OnScrollListener() {
+        lv.setOnUpdateListener(new ListView.OnUpdateListener() {
             @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-                ListView lv = (ListView) view;
-
-                if ((scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) &&
-                        ((lv.getLastVisiblePosition() - lv.getHeaderViewsCount() - lv.getFooterViewsCount()) >= (lv.getAdapter().getCount() - 1)) &&
-                        !fetching) {
+            public void onUpdate() {
+                if (!fetching)
                     fetchNewItems();
-                }
-            }
-
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
             }
         });
 
@@ -65,7 +56,6 @@ public class Blog extends AppCompatActivity {
         if (fetching)
             return;
 
-        postsAdapter.addNullItem();
         fetching = true;
 
         Main.getClient().call(
@@ -76,7 +66,6 @@ public class Blog extends AppCompatActivity {
                 new CompletionInterface<Post.Item, Post.Data>() {
                     @Override
                     public void onSuccess(List<Post.Item> result, int offset, int limit, int count) {
-                        postsAdapter.removeNullItem();
                         postsAdapter.addItems(result);
                         currentOffset += result.size();
                         fetching = false;
@@ -84,7 +73,6 @@ public class Blog extends AppCompatActivity {
 
                     @Override
                     public void onFailure(BaseException e) {
-                        postsAdapter.removeNullItem();
                         Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_SHORT).show();
                         Log.v(Constants.APP_NAME, e.toString());
                         fetching = false;

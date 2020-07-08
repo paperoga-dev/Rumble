@@ -19,6 +19,7 @@
 package com.github.rumble.posts.video;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
 import android.view.View;
 import android.webkit.WebView;
@@ -130,20 +131,18 @@ public class Base extends ContentItem {
 
             vv.setMinimumWidth(itemWidth);
             vv.setMinimumHeight((itemWidth * getMedia().getHeight()) / getMedia().getWidth());
+            vv.setBackgroundColor(Color.TRANSPARENT);
+
+            /*
+            vv.setZOrderOnTop(true);
+            vv.setZOrderMediaOverlay(true);
+            vv.setVisibility(View.VISIBLE);
+            vv.start();
+            */
 
             return vv;
         } else {
             WebView wv = new WebViewItem(context);
-            /*
-            wv.loadDataWithBaseURL(
-                    null,
-                    "<html><head></head><body><iframe src=\"" + getUrl() + "&output=embed\" style=\"display:block;background-color:transparent;overflow:hidden\" scrolling=\"no\" frameBorder=\"0\" data-can-gutter data-can-resize width=\"" + itemWidth + "\" height=\"" + itemWidth + "\" allowfullscreen mozallowfullscreen webkitallowfullscreen></iframe></body></html>",
-                    "text/html; charset=utf-8",
-                    "UTF-8",
-                    null
-            );
-            */
-
             wv.loadUrl(getUrl());
             return wv;
         }

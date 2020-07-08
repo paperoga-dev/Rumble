@@ -108,6 +108,7 @@ public class Base extends ContentItem {
         Glide.with(im.getContext())
                 .load(getMedia().get(nearestIndex).getUrl())
                 .placeholder(new ColorDrawable(Color.BLACK))
+                .centerCrop()
                 .into(im);
 
         return im;
