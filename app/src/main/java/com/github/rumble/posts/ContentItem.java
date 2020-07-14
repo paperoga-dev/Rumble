@@ -39,7 +39,7 @@ public abstract class ContentItem {
                 put("video", com.github.rumble.posts.video.Base.class);
             }};
 
-    static public <T> T allocateOrNothing(Class<T> clazz, JSONObject jsonObject, String key) {
+    static public <T> T allocateOrNothing(Class<T> clazz, JSONObject jsonObject, String key) throws com.github.rumble.exception.RuntimeException {
         try {
             JSONObject object = jsonObject.optJSONObject(key);
             return (object != null) ? clazz.getDeclaredConstructor(JSONObject.class).newInstance(object) : null;
@@ -47,13 +47,13 @@ public abstract class ContentItem {
                 NoSuchMethodException |
                 IllegalAccessException |
                 InstantiationException e) {
-            throw new RuntimeException(clazz.getName() + "has no construction with a JSONObject argument");
+            throw new com.github.rumble.exception.RuntimeException(clazz.getName() + "has no construction with a JSONObject argument");
         }
     }
 
     public abstract View render(Context context, int itemWidth);
 
-    static public ContentItem create(JSONObject contentItem) throws JSONException {
+    static public ContentItem create(JSONObject contentItem) throws JSONException, com.github.rumble.exception.RuntimeException {
         String type = contentItem.getString("type");
         try {
             return (ContentItem) typesMap.get(type)
@@ -62,7 +62,7 @@ public abstract class ContentItem {
         } catch (InvocationTargetException |
                 NoSuchMethodException |
                 IllegalAccessException e) {
-            throw new RuntimeException("Add missing type: " + type);
+            throw new com.github.rumble.exception.RuntimeException("Add missing type: " + type);
         }
     }
 }

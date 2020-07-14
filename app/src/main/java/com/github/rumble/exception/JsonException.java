@@ -22,12 +22,20 @@ import org.json.JSONException;
 
 public class JsonException extends BaseException {
     private JSONException e;
+    private String jsonData;
 
-    public JsonException(JSONException e) {
+    public JsonException(JSONException e, String jsonData) {
         super(e.getMessage());
+
+        this.e = e;
+        this.jsonData = jsonData;
     }
 
     public JSONException getException() {
         return e;
+    }
+
+    public String getJsonData() {
+        return jsonData;
     }
 }

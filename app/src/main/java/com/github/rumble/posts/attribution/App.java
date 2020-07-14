@@ -29,7 +29,7 @@ public class App extends Base {
     private String displayText;
     private Media logo;
 
-    public App(JSONObject attributionObject) throws JSONException {
+    public App(JSONObject attributionObject) throws JSONException, com.github.rumble.exception.RuntimeException {
         super(attributionObject);
 
         this.name = attributionObject.optString("app_name", "");
@@ -49,7 +49,7 @@ public class App extends Base {
         return logo;
     }
 
-    public static Base doCreate(JSONObject attributionObject) throws JSONException {
+    public static Base doCreate(JSONObject attributionObject) throws JSONException, com.github.rumble.exception.RuntimeException {
         return new App(attributionObject);
     }
 }

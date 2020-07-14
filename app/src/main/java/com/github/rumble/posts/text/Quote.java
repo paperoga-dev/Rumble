@@ -29,7 +29,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Quote extends Base {
-    public Quote(JSONObject textObject) throws JSONException {
+    public Quote(JSONObject textObject) throws JSONException, com.github.rumble.exception.RuntimeException {
         super(textObject);
     }
 

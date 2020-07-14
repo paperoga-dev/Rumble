@@ -155,15 +155,10 @@ public final class TumblrClient {
                                 // let's ask a new authentication
                                 Log.v(Constants.APP_NAME, "Auth token not valid");
 
-                                context.getSharedPreferences(Constants.APP_NAME, Context.MODE_PRIVATE)
-                                        .edit()
-                                        .remove(Constants.OAUTH_TOKEN_KEY)
-                                        .remove(Constants.OAUTH_TOKEN_SECRET_KEY)
-                                        .apply();
-
-                                doLogin();
-                                // we cannot reach Tumblr, fail but do not remove our tokens
+                                logout();
                             }
+
+                            // else we cannot reach Tumblr, fail but do not remove our tokens
 
                             if (onLoginListener != null)
                                 onLoginListener.onLoginFailure(e);
@@ -192,11 +187,26 @@ public final class TumblrClient {
         }
     }
 
+    public void logout() {
+        context.getSharedPreferences(Constants.APP_NAME, Context.MODE_PRIVATE).edit()
+                .remove(Constants.OAUTH_TOKEN_KEY)
+                .remove(Constants.OAUTH_TOKEN_SECRET_KEY)
+                .apply();
+        authToken = null;
+    }
+
     /* **** SINGLE ITEM API CALL **** */
     private <T> void doCall(
             final com.github.rumble.api.simple.ApiInterface<T> obj,
             final Map<String, String> queryParams,
             final com.github.rumble.api.simple.CompletionInterface<T> onCompletion) {
+        if (authToken == null) {
+            if (onLoginListener != null) {
+                onLoginListener.onLoginFailure(new com.github.rumble.exception.RuntimeException("Not logged"));
+            }
+
+            return;
+        }
 
         executorService.submit(obj.call(queryParams, onCompletion));
     }
@@ -210,6 +220,14 @@ public final class TumblrClient {
             final Integer limit,
             final Map<String, String> queryParams,
             final com.github.rumble.api.array.CompletionInterface<T, W> onCompletion) {
+
+        if (authToken == null) {
+            if (onLoginListener != null) {
+                onLoginListener.onLoginFailure(new com.github.rumble.exception.RuntimeException("Not logged"));
+            }
+
+            return;
+        }
 
         int newLimit = (limit == -1)? 20 : Math.min(20, limit);
 
@@ -510,5 +528,9 @@ public final class TumblrClient {
 
     public Info.Data getMe() {
         return me;
+    }
+
+    public boolean isLogged() {
+        return authToken != null;
     }
 }

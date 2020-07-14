@@ -34,7 +34,7 @@ public abstract class LayoutItem {
                 put("condensed", com.github.rumble.posts.layout.Condensed.class);
             }};
 
-    static LayoutItem create(JSONObject contentItem) throws JSONException {
+    static LayoutItem create(JSONObject contentItem) throws JSONException, com.github.rumble.exception.RuntimeException {
         String type = contentItem.getString("type");
         try {
             return (LayoutItem) typesMap.get(type)
@@ -43,7 +43,7 @@ public abstract class LayoutItem {
         } catch (InvocationTargetException |
                 NoSuchMethodException |
                 IllegalAccessException e) {
-            throw new RuntimeException("Add missing layout: " + type);
+            throw new com.github.rumble.exception.RuntimeException("Add missing layout: " + type);
         }
     }
 }

@@ -46,7 +46,7 @@ public abstract class Base {
         return url;
     }
 
-    public static Base doCreate(JSONObject attributionObject) throws JSONException {
+    public static Base doCreate(JSONObject attributionObject) throws JSONException, com.github.rumble.exception.RuntimeException {
         if (attributionObject == null)
             return null;
 
@@ -58,7 +58,7 @@ public abstract class Base {
         } catch (InvocationTargetException |
                 NoSuchMethodException |
                 IllegalAccessException e) {
-            throw new RuntimeException("Add missing attribution type: " + attributionType);
+            throw new com.github.rumble.exception.RuntimeException("Add missing attribution type: " + attributionType);
         }
     }
 }

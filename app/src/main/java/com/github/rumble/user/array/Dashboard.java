@@ -38,7 +38,7 @@ public interface Dashboard {
     class Data implements ContentInterface<Post.Item> {
         private final List<Post.Item> posts;
 
-        Data(JSONObject postsObject) throws JSONException {
+        Data(JSONObject postsObject) throws JSONException, com.github.rumble.exception.RuntimeException {
             super();
 
             this.posts = new ArrayList<>();
@@ -95,7 +95,7 @@ public interface Dashboard {
         }
 
         @Override
-        protected Data readData(JSONObject jsonObject) throws JSONException {
+        protected Data readData(JSONObject jsonObject) throws JSONException, com.github.rumble.exception.RuntimeException {
             return new Data(jsonObject);
         }
     }

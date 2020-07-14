@@ -75,7 +75,7 @@ public abstract class Api<T> {
         return m;
     }
 
-    protected abstract T readData(JSONObject jsonObject) throws JSONException;
+    protected abstract T readData(JSONObject jsonObject) throws JSONException, com.github.rumble.exception.RuntimeException;
 
     protected OAuthRequest setupCall(Map<String, ?> queryParams) {
         OAuthRequest request = new OAuthRequest(Verb.GET, Constants.API_ENDPOINT + getPath());

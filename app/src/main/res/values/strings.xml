@@ -4,4 +4,7 @@
     <string name="logout">Logout</string>
     <string name="my_blog">My Blog</string>
     <string name="dashboard">Dashboard</string>
+    <string name="title_activity_fullscreen">FullscreenActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>

@@ -16,30 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.rumble.posts.text;
+package com.github.rumble.posts.text.formatting;
 
-import android.content.Context;
-import android.text.SpannableString;
-import android.text.style.BulletSpan;
-import android.view.View;
-import android.widget.TextView;
+import android.text.SpannableStringBuilder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class UnorderedListItem extends Base {
-    public UnorderedListItem(JSONObject textObject) throws JSONException, com.github.rumble.exception.RuntimeException {
-        super(textObject);
+public class Small extends Base {
+    public Small(JSONObject formattingObject) throws JSONException {
+        super(formattingObject);
     }
 
     @Override
-    public View render(Context context, int itemWidth) {
-        SpannableString spannable = new SpannableString(getFormattedText());
-        spannable.setSpan(new BulletSpan(16), 0, getText().length(), 0);
-
-        TextView tv = createTextView(context);
-        tv.setText(spannable);
-
-        return tv;
+    public void apply(SpannableStringBuilder stringBuilder) {
     }
 }

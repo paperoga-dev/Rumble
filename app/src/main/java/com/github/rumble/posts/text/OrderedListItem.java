@@ -30,7 +30,7 @@ import org.json.JSONObject;
 public class OrderedListItem extends Base {
     private int orderNumber;
 
-    public OrderedListItem(JSONObject textObject) throws JSONException {
+    public OrderedListItem(JSONObject textObject) throws JSONException, com.github.rumble.exception.RuntimeException {
         super(textObject);
 
         this.orderNumber = Base.getOrderedListCounter();

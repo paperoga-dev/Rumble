@@ -18,69 +18,22 @@
 
 package com.github.rumble.activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import com.github.rumble.Constants;
 import com.github.rumble.R;
-import com.github.rumble.TumblrClient;
-import com.github.rumble.api.Authenticate;
-import com.github.rumble.exception.BaseException;
 
-import org.scribe.model.Token;
-
-public class Main extends AppCompatActivity {
-
-    private Authenticate authenticator;
-    static private TumblrClient client;
+public class Main extends Base {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        client = new TumblrClient(getApplicationContext());
-
-        client.setOnLoginListener(new TumblrClient.OnLoginListener() {
-            @Override
-            public void onAccessGranted() {
-                setToLoggedState();
-            }
-
-            @Override
-            public void onAccessRequest(
-                    Authenticate authenticator,
-                    Token requestToken,
-                    String authenticationUrl) {
-
-                setAuthenticator(authenticator);
-
-                Intent i = new Intent(Main.this, Login.class);
-                i.putExtra(Constants.REQUEST_TOKEN, requestToken);
-                i.putExtra(Constants.AUTH_URL, authenticationUrl);
-                startActivityForResult(i, Constants.PERFORM_LOGIN);
-            }
-
-            @Override
-            public void onAccessDenied() {
-                Toast.makeText(getApplicationContext(), "Access denied", Toast.LENGTH_SHORT).show();
-                resetToLoginState();
-            }
-
-            @Override
-            public void onLoginFailure(BaseException e) {
-                Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_SHORT).show();
-                resetToLoginState();
-            }
-        });
 
         findViewById(R.id.btnLogout).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -97,7 +50,7 @@ public class Main extends AppCompatActivity {
         findViewById(R.id.btnLogin).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                client.login();
+                getClient().login();
             }
         });
 
@@ -119,58 +72,35 @@ public class Main extends AppCompatActivity {
             }
         });
 
+        findViewById(R.id.btnTest).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(v.getContext(), com.github.rumble.activities.Test.class);
+                startActivity(intent);
+            }
+        });
+
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
-                client.login();
+                getClient().login();
             }
         });
     }
 
-    private void setAuthenticator(Authenticate authenticator) {
-        this.authenticator = authenticator;
-    }
-
-    private void resetToLoginState() {
+    @Override
+    protected void resetToLoginState() {
         findViewById(R.id.btnLogin).setVisibility(View.VISIBLE);
         findViewById(R.id.btnDashboard).setEnabled(false);
         findViewById(R.id.btnMyBlog).setEnabled(false);
         findViewById(R.id.btnLogout).setVisibility(View.INVISIBLE);
     }
 
-    private void setToLoggedState() {
+    @Override
+    protected void setToLoggedState() {
         findViewById(R.id.btnLogin).setVisibility(View.INVISIBLE);
         findViewById(R.id.btnDashboard).setEnabled(true);
         findViewById(R.id.btnMyBlog).setEnabled(true);
         findViewById(R.id.btnLogout).setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        Log.v(Constants.APP_NAME, "ActivityResult");
-
-        switch (requestCode) {
-            case Constants.PERFORM_LOGIN:
-                if (resultCode != RESULT_OK) {
-                    Toast.makeText(getApplicationContext(), "Login failed: " + resultCode, Toast.LENGTH_SHORT).show();
-                    resetToLoginState();
-                    return;
-                }
-
-                authenticator.verify(
-                    (Token) data.getSerializableExtra(Constants.REQUEST_TOKEN),
-                            data.getStringExtra(Constants.OAUTH_VERIFIER)
-                );
-                break;
-
-            default:
-                break;
-        }
-    }
-
-    static public TumblrClient getClient() {
-        return client;
     }
 }

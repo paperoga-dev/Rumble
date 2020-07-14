@@ -26,6 +26,7 @@ import com.github.rumble.Constants;
 import com.github.rumble.exception.JsonException;
 import com.github.rumble.exception.NetworkException;
 import com.github.rumble.exception.ResponseException;
+import com.github.rumble.exception.RuntimeException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -56,8 +57,10 @@ public abstract class TumblrCall<T> implements Runnable {
         Log.v(Constants.APP_NAME, "Query Params: " + request.getQueryStringParams().asFormUrlEncodedString());
         Log.v(Constants.APP_NAME, "Headers: " + request.getHeaders().toString());
 
+        String jsonResponse = null;
+
         try {
-            String jsonResponse = request.send().getBody();
+            jsonResponse = request.send().getBody();
             Log.v(Constants.APP_NAME, "JSON Response: " + jsonResponse);
 
             JSONObject rootObj = new JSONObject(jsonResponse);
@@ -87,10 +90,12 @@ public abstract class TumblrCall<T> implements Runnable {
                     break;
             }
         } catch (final JSONException e) {
+            final String jsonData = jsonResponse;
+
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
-                    onCompletion.onFailure(new JsonException(e));
+                    onCompletion.onFailure(new JsonException(e, jsonData));
                 }
             });
         } catch (final OAuthException e) {
@@ -100,11 +105,11 @@ public abstract class TumblrCall<T> implements Runnable {
                     onCompletion.onFailure(new NetworkException(e));
                 }
             });
-        } catch (final java.lang.RuntimeException e) {
+        } catch (final com.github.rumble.exception.RuntimeException e) {
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
-                    onCompletion.onFailure(new com.github.rumble.exception.RuntimeException(e));
+                    onCompletion.onFailure(e);
                 }
             });
         }

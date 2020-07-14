@@ -42,7 +42,7 @@ public class Base extends ContentItem {
     private com.github.rumble.posts.attribution.Base attribution;
     private String altText;
 
-    public Base(JSONObject mediaObject) throws JSONException {
+    public Base(JSONObject mediaObject) throws JSONException, com.github.rumble.exception.RuntimeException {
         super();
 
         JSONArray media = mediaObject.getJSONArray("media");
@@ -114,7 +114,7 @@ public class Base extends ContentItem {
         return im;
     }
 
-    public static ContentItem doCreate(JSONObject mediaObject) throws JSONException {
+    public static ContentItem doCreate(JSONObject mediaObject) throws JSONException, com.github.rumble.exception.RuntimeException {
         return new Base(mediaObject);
     }
 }

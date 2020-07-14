@@ -29,7 +29,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Chat extends Base {
-    public Chat(JSONObject textObject) throws JSONException {
+    public Chat(JSONObject textObject) throws JSONException, com.github.rumble.exception.RuntimeException {
         super(textObject);
     }
 

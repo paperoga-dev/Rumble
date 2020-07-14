@@ -27,7 +27,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Heading2 extends Base {
-    public Heading2(JSONObject textObject) throws JSONException {
+    public Heading2(JSONObject textObject) throws JSONException, com.github.rumble.exception.RuntimeException {
         super(textObject);
     }
 

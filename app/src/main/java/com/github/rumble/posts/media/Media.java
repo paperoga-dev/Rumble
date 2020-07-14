@@ -33,7 +33,7 @@ public class Media {
     private int height;
     private Media poster;
 
-    public Media(JSONObject mediaObject) throws JSONException {
+    public Media(JSONObject mediaObject) throws JSONException, com.github.rumble.exception.RuntimeException {
         super();
 
         this.url = mediaObject.getString("url");

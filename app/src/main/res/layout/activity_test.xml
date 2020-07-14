@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#ffffff"
-    tools:context=".activities.Blog">
+    tools:context=".activities.Test">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,15 +16,31 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/tvBlogName"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAlignment="center" />
+            android:orientation="horizontal">
 
-        <com.github.rumble.ui.ListView
-            android:id="@+id/lvBlogContent"
+            <TextView
+                android:id="@+id/txtStatus"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+
+            <Button
+                android:id="@+id/btnStop"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:text="Stop" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/txtDebugMessage"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:scrollbars="vertical" />
+
     </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

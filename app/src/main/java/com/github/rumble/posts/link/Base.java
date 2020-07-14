@@ -41,7 +41,7 @@ public class Base extends ContentItem {
     private String displayUrl;
     private Media poster;
 
-    public Base(JSONObject linkObject) throws JSONException {
+    public Base(JSONObject linkObject) throws JSONException, com.github.rumble.exception.RuntimeException {
         super();
 
         this.url = linkObject.getString("url");
@@ -53,7 +53,7 @@ public class Base extends ContentItem {
         this.poster = allocateOrNothing(Media.class, linkObject, "poster");
     }
 
-    public static ContentItem doCreate(JSONObject linkObject) throws JSONException {
+    public static ContentItem doCreate(JSONObject linkObject) throws JSONException, com.github.rumble.exception.RuntimeException {
         return new Base(linkObject);
     }
 

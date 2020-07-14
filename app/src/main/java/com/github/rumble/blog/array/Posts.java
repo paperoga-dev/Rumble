@@ -59,7 +59,7 @@ public interface Posts {
         }
 
         @Override
-        protected Post.Data readData(JSONObject jsonObject) throws JSONException {
+        protected Post.Data readData(JSONObject jsonObject) throws JSONException, com.github.rumble.exception.RuntimeException {
             return new Post.Data(jsonObject);
         }
     }

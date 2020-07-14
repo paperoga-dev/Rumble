@@ -24,6 +24,9 @@ public class ResponseException extends BaseException {
 
     public ResponseException(int responseCode, String responseMessage) {
         super(responseMessage);
+
+        this.responseCode = responseCode;
+        this.responseMessage = responseMessage;
     }
 
     public int getResponseCode() {

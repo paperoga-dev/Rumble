@@ -28,7 +28,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Indented extends Base {
-    public Indented(JSONObject textObject) throws JSONException {
+    public Indented(JSONObject textObject) throws JSONException, com.github.rumble.exception.RuntimeException {
         super(textObject);
     }
 

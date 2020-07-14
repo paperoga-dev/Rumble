@@ -222,7 +222,7 @@ public interface Info {
         public Data(JSONObject blogObject) throws JSONException {
             super(blogObject);
 
-            this.admin = blogObject.getBoolean("admin");
+            this.admin = blogObject.optBoolean("admin", false);
             this.ask = blogObject.getBoolean("ask");
             this.askAnon = blogObject.getBoolean("ask_anon");
             this.askPageTitle = blogObject.getString("ask_page_title");
@@ -238,16 +238,16 @@ public interface Info {
             this.canSendFanMail = blogObject.optBoolean("can_send_fan_mail", false);
             this.canSubmit = blogObject.optBoolean("can_submit", false);
             this.canSubscribe = blogObject.optBoolean("can_subscribe", false);
-            this.drafts = blogObject.getInt("drafts");
-            this.facebook = blogObject.getString("facebook").equalsIgnoreCase("Y");
-            this.facebookOpengraphEnabled = blogObject.getString("facebook_opengraph_enabled").equalsIgnoreCase("Y");
+            this.drafts = blogObject.optInt("drafts", -1);
+            this.facebook = blogObject.optString("facebook", "").equalsIgnoreCase("Y");
+            this.facebookOpengraphEnabled = blogObject.optString("facebook_opengraph_enabled", "").equalsIgnoreCase("Y");
             this.followed = blogObject.getBoolean("followed");
-            this.followers = blogObject.getInt("followers");
+            this.followers = blogObject.optInt("followers", -1);
             this.isBlockedFromPrimary = blogObject.getBoolean("is_blocked_from_primary");
             this.isNSFW = blogObject.getBoolean("is_nsfw");
-            this.messages = blogObject.getInt("messages");
+            this.messages = blogObject.optInt("messages", -1);
             this.posts = blogObject.getInt("posts");
-            this.primary = blogObject.getBoolean("primary");
+            this.primary = blogObject.optBoolean("primary", false);
             this.queue = blogObject.optInt("queue", 0);
             this.shareLikes = blogObject.getBoolean("share_likes");
             this.submissionPageTitle = blogObject.optString("submission_page_title", "");
@@ -256,7 +256,7 @@ public interface Info {
             this.subscribed = blogObject.getBoolean("subscribed");
             this.totalPosts = blogObject.getInt("total_posts");
 
-            String tweet = blogObject.getString("tweet");
+            String tweet = blogObject.optString("tweet", "N");
             if (tweet.equalsIgnoreCase("Auto"))
                 this.tweet = Tweet.Auto;
             else if (tweet.equalsIgnoreCase("Y"))
@@ -264,10 +264,10 @@ public interface Info {
             else
                 this.tweet = Tweet.No;
 
-            this.twitterEnabled = blogObject.getBoolean("twitter_enabled");
-            this.twitterSend = blogObject.getBoolean("twitter_send");
+            this.twitterEnabled = blogObject.optBoolean("twitter_enabled", false);
+            this.twitterSend = blogObject.optBoolean("twitter_send", false);
 
-            if (blogObject.getString("type").equalsIgnoreCase("public"))
+            if (blogObject.optString("type", "public").equalsIgnoreCase("public"))
                 this.type = Type.Public;
             else
                 this.type = Type.Private;

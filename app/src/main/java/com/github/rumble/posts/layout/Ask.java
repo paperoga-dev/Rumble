@@ -32,7 +32,7 @@ public class Ask extends LayoutItem {
     private final List<Integer> blocks;
     private Base attribution;
 
-    public Ask(JSONObject layoutObject) throws JSONException {
+    public Ask(JSONObject layoutObject) throws JSONException, com.github.rumble.exception.RuntimeException {
         super();
 
         this.blocks = new ArrayList<>();
@@ -58,7 +58,7 @@ public class Ask extends LayoutItem {
         return attribution;
     }
 
-    public static LayoutItem doCreate(JSONObject layoutObject) throws JSONException {
+    public static LayoutItem doCreate(JSONObject layoutObject) throws JSONException, com.github.rumble.exception.RuntimeException {
         return new Ask(layoutObject);
     }
 }

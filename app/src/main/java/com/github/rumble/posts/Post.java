@@ -36,6 +36,7 @@ import android.widget.VideoView;
 import com.github.rumble.R;
 import com.github.rumble.api.array.ContentInterface;
 import com.github.rumble.blog.simple.Info;
+import com.github.rumble.exception.RuntimeException;
 import com.github.rumble.posts.layout.Ask;
 import com.github.rumble.posts.layout.Rows;
 
@@ -108,7 +109,7 @@ public interface Post {
         private String askingName;
         private String askingUrl;
 
-        public Trail(JSONObject postObject, String brokenBlogName) throws JSONException {
+        public Trail(JSONObject postObject, String brokenBlogName) throws JSONException, com.github.rumble.exception.RuntimeException {
             super();
 
             this.blog = new Info.Base(brokenBlogName);
@@ -116,7 +117,7 @@ public interface Post {
             loadContent(postObject);
         }
 
-        public Trail(JSONObject postObject, JSONObject idObject) throws JSONException {
+        public Trail(JSONObject postObject, JSONObject idObject) throws JSONException, com.github.rumble.exception.RuntimeException {
             super(idObject);
 
             this.blog = new Info.Base(postObject.getJSONObject("blog"));
@@ -124,7 +125,7 @@ public interface Post {
             loadContent(postObject);
         }
 
-        private void loadContent(JSONObject postObject) throws JSONException {
+        private void loadContent(JSONObject postObject) throws JSONException, com.github.rumble.exception.RuntimeException {
             this.content = new ArrayList<>();
             JSONArray content = postObject.getJSONArray("content");
             for (int i = 0; i < content.length(); ++i) {
@@ -143,8 +144,8 @@ public interface Post {
             JSONArray trail = postObject.optJSONArray("trail");
             if (trail != null) {
                 for (int i = 0; i < trail.length(); ++i) {
-                    String brokenBlogName = trail.getJSONObject(i).optString("broken_blog_name");
-                    if (!brokenBlogName.isEmpty()) {
+                    String brokenBlogName = trail.getJSONObject(i).optString("broken_blog_name", null);
+                    if (brokenBlogName != null) {
                         this.trail.add(
                                 new Trail(
                                         trail.getJSONObject(i),
@@ -313,7 +314,7 @@ public interface Post {
         private String url;
         private String shortUrl;
 
-        public Item(JSONObject postObject) throws JSONException {
+        public Item(JSONObject postObject) throws JSONException, com.github.rumble.exception.RuntimeException {
             super(postObject, postObject);
 
             this.timestamp = new Date(postObject.getLong("timestamp") * 1000L);
@@ -350,7 +351,7 @@ public interface Post {
         private int totalPosts;
         private List<Item> posts;
 
-        public Data(JSONObject postsObject) throws JSONException {
+        public Data(JSONObject postsObject) throws JSONException, com.github.rumble.exception.RuntimeException {
             super();
 
             this.totalPosts = postsObject.getInt("total_posts");

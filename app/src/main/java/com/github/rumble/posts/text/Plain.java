@@ -26,7 +26,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Plain extends Base {
-    public Plain(JSONObject textObject) throws JSONException {
+    public Plain(JSONObject textObject) throws JSONException, com.github.rumble.exception.RuntimeException {
         super(textObject);
     }
 

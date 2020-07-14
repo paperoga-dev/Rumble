@@ -29,7 +29,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Quirky extends Base {
-    public Quirky(JSONObject textObject) throws JSONException {
+    public Quirky(JSONObject textObject) throws JSONException, com.github.rumble.exception.RuntimeException {
         super(textObject);
     }
 

@@ -47,7 +47,7 @@ public class Base extends ContentItem {
     private com.github.rumble.posts.attribution.Base attribution;
     private boolean canAutoPlayOnCellular;
 
-    public Base(JSONObject videoObject) throws JSONException {
+    public Base(JSONObject videoObject) throws JSONException, com.github.rumble.exception.RuntimeException {
         super();
 
         this.url = videoObject.optString("url", "");
@@ -96,7 +96,7 @@ public class Base extends ContentItem {
         return canAutoPlayOnCellular;
     }
 
-    public static ContentItem doCreate(JSONObject videoObject) throws JSONException {
+    public static ContentItem doCreate(JSONObject videoObject) throws JSONException, com.github.rumble.exception.RuntimeException {
         return new Base(videoObject);
     }
 

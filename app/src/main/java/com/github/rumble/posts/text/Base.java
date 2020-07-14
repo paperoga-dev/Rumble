@@ -19,6 +19,7 @@
 package com.github.rumble.posts.text;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
 import android.widget.TextView;
@@ -48,6 +49,7 @@ public abstract class Base extends ContentItem {
                 put("link", com.github.rumble.posts.text.formatting.Link.class);
                 put("mention", com.github.rumble.posts.text.formatting.Mention.class);
                 put("color", com.github.rumble.posts.text.formatting.Color.class);
+                put("small", com.github.rumble.posts.text.formatting.Small.class);
             }};
 
     private static final Map<String, Class<? extends com.github.rumble.posts.text.Base>> typesMap =
@@ -63,7 +65,7 @@ public abstract class Base extends ContentItem {
                 put("unordered-list-item", com.github.rumble.posts.text.UnorderedListItem.class);
             }};
 
-    public Base(JSONObject textObject) throws JSONException, RuntimeException {
+    public Base(JSONObject textObject) throws JSONException, com.github.rumble.exception.RuntimeException {
         super();
 
         this.text = textObject.getString("text");
@@ -86,12 +88,12 @@ public abstract class Base extends ContentItem {
                     InvocationTargetException |
                     NoSuchMethodException |
                     IllegalAccessException e) {
-                throw new RuntimeException("Add missing formatting type: " + type);
+                throw new com.github.rumble.exception.RuntimeException("Add missing formatting type: " + type);
             }
         }
     }
 
-    public static ContentItem doCreate(JSONObject textObject) {
+    public static ContentItem doCreate(JSONObject textObject) throws com.github.rumble.exception.RuntimeException {
         String subType = textObject.optString("subtype", "plain");
 
         try {
@@ -107,7 +109,7 @@ public abstract class Base extends ContentItem {
                 InvocationTargetException |
                 NoSuchMethodException |
                 IllegalAccessException e) {
-            throw new RuntimeException("Add missing text subtype: " + subType);
+            throw new com.github.rumble.exception.RuntimeException("Add missing text subtype: " + subType);
         }
     }
 
