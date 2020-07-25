@@ -15,12 +15,17 @@
         android:screenOrientation="sensor"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activities.Test"></activity>
 
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
 
+        <activity
+            android:name=".activities.Post"
+            android:theme="@android:style/Theme.NoTitleBar" />
+        <activity
+            android:name=".activities.Test"
+            android:theme="@android:style/Theme.NoTitleBar" />
         <activity
             android:name=".activities.Blog"
             android:theme="@android:style/Theme.NoTitleBar" />

@@ -25,46 +25,8 @@ import org.json.JSONObject;
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
-public interface Avatar {
-    class Data {
-        /*
-        {
-          "width": 512,
-          "height": 512
-          "url": "https://66.media.tumblr.com/avatar_ed354109bd89_512.png"
-        }
-        */
-
-        private int width;   // Number - Avatar width
-        private int height;  // Number - Avatar height
-        private String url;  // String - Avatar url
-
-        Data(int size, String url) {
-            this.width = size;
-            this.height = size;
-            this.url = url;
-        }
-
-        public Data(JSONObject avatarObject) throws JSONException {
-            this.width = avatarObject.getInt("width");
-            this.height = avatarObject.getInt("height");
-            this.url = avatarObject.getString("url");
-        }
-
-        public int getWidth() {
-            return width;
-        }
-
-        public int getHeight() {
-            return height;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-    }
-
-    class Api extends Id<Data> {
+public interface FollowedBy {
+    class Api extends Id<Boolean> {
 
         public Api(
                 Context context,
@@ -78,12 +40,12 @@ public interface Avatar {
 
         @Override
         protected String getPath() {
-            return super.getPath() + "/avatar";
+            return super.getPath() + "/followed_by";
         }
 
         @Override
-        protected Data readData(JSONObject jsonObject) throws JSONException {
-            return new Data(64, jsonObject.getString("avatar_url"));
+        protected Boolean readData(JSONObject jsonObject) throws JSONException {
+            return jsonObject.getBoolean("followed_by");
         }
     }
 }

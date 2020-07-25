@@ -21,8 +21,8 @@ package com.github.rumble.exception;
 import org.json.JSONException;
 
 public class JsonException extends BaseException {
-    private JSONException e;
-    private String jsonData;
+    private final JSONException e;
+    private final String jsonData;
 
     public JsonException(JSONException e, String jsonData) {
         super(e.getMessage());

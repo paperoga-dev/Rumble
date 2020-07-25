@@ -18,6 +18,7 @@
 
 package com.github.rumble.posts;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -36,7 +37,6 @@ import android.widget.VideoView;
 import com.github.rumble.R;
 import com.github.rumble.api.array.ContentInterface;
 import com.github.rumble.blog.simple.Info;
-import com.github.rumble.exception.RuntimeException;
 import com.github.rumble.posts.layout.Ask;
 import com.github.rumble.posts.layout.Rows;
 
@@ -78,6 +78,7 @@ public interface Post {
         }
 
         @Override
+        @SuppressLint("ViewHolder")
         public View getView(int position, View convertView, ViewGroup parent) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.post_item, parent, false);
 

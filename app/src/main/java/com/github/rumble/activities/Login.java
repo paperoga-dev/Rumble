@@ -47,7 +47,6 @@ public class Login extends Activity {
         }
 
         @Override
-        @SuppressWarnings("deprecation")
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
 
             if (url.toLowerCase().contains(Constants.CALLBACK_URL.toLowerCase())) {

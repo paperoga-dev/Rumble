@@ -19,7 +19,6 @@
 package com.github.rumble.posts.text;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
 import android.widget.TextView;

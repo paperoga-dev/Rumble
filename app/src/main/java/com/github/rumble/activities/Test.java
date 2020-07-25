@@ -47,7 +47,7 @@ public class Test extends Base {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
 
-        this.currentOffset = 16060;
+        this.currentOffset = 36020;
         this.fetching = false;
 
         this.blogName = "masoassai";

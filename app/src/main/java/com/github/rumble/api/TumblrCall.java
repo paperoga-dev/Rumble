@@ -26,7 +26,6 @@ import com.github.rumble.Constants;
 import com.github.rumble.exception.JsonException;
 import com.github.rumble.exception.NetworkException;
 import com.github.rumble.exception.ResponseException;
-import com.github.rumble.exception.RuntimeException;
 
 import org.json.JSONException;
 import org.json.JSONObject;

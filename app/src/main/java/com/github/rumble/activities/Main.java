@@ -72,6 +72,14 @@ public class Main extends Base {
             }
         });
 
+        findViewById(R.id.btnViewPost).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(v.getContext(), com.github.rumble.activities.Post.class);
+                startActivity(intent);
+            }
+        });
+
         findViewById(R.id.btnTest).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -46,6 +46,15 @@
             android:text="@string/dashboard" />
 
         <Button
+            android:id="@+id/btnViewPost"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="50dp"
+            android:layout_marginBottom="50dp"
+            android:text="@string/view_post" />
+
+        <Button
             android:id="@+id/btnMyBlog"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -59,6 +68,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Test" />
+            android:text="@string/test" />
+
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -18,12 +18,14 @@
 
 package com.github.rumble.posts;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
 public class WebViewItem extends WebView {
 
+    @SuppressLint("SetJavaScriptEnabled")
     public WebViewItem(Context context) {
         super(context);
 

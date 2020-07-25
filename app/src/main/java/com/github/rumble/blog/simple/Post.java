@@ -20,51 +20,18 @@ package com.github.rumble.blog.simple;
 
 import android.content.Context;
 
+import com.github.rumble.exception.RuntimeException;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
-public interface Avatar {
-    class Data {
-        /*
-        {
-          "width": 512,
-          "height": 512
-          "url": "https://66.media.tumblr.com/avatar_ed354109bd89_512.png"
-        }
-        */
+import java.util.Map;
 
-        private int width;   // Number - Avatar width
-        private int height;  // Number - Avatar height
-        private String url;  // String - Avatar url
-
-        Data(int size, String url) {
-            this.width = size;
-            this.height = size;
-            this.url = url;
-        }
-
-        public Data(JSONObject avatarObject) throws JSONException {
-            this.width = avatarObject.getInt("width");
-            this.height = avatarObject.getInt("height");
-            this.url = avatarObject.getString("url");
-        }
-
-        public int getWidth() {
-            return width;
-        }
-
-        public int getHeight() {
-            return height;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-    }
-
-    class Api extends Id<Data> {
+public interface Post {
+    class Api extends Id<com.github.rumble.posts.Post.Item> {
+        private final String postId;
 
         public Api(
                 Context context,
@@ -72,18 +39,30 @@ public interface Avatar {
                 Token authToken,
                 String appId,
                 String appVersion,
-                String blogId) {
+                String blogId,
+                String postId) {
             super(context, service, authToken, appId, appVersion, blogId);
+
+            this.postId = postId;
         }
 
         @Override
         protected String getPath() {
-            return super.getPath() + "/avatar";
+            return super.getPath() + "/posts/" + postId;
         }
 
         @Override
-        protected Data readData(JSONObject jsonObject) throws JSONException {
-            return new Data(64, jsonObject.getString("avatar_url"));
+        protected Map<String, String> defaultParams() {
+            Map<String, String> m = super.defaultParams();
+
+            m.put("npf", "true");
+
+            return m;
+        }
+
+        @Override
+        protected com.github.rumble.posts.Post.Item readData(JSONObject jsonObject) throws JSONException, RuntimeException {
+            return new com.github.rumble.posts.Post.Item(jsonObject);
         }
     }
 }

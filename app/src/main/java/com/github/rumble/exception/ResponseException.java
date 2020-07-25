@@ -19,8 +19,8 @@
 package com.github.rumble.exception;
 
 public class ResponseException extends BaseException {
-    private int responseCode;
-    private String responseMessage;
+    private final int responseCode;
+    private final String responseMessage;
 
     public ResponseException(int responseCode, String responseMessage) {
         super(responseMessage);

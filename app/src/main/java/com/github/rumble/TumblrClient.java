@@ -522,6 +522,56 @@ public final class TumblrClient {
     }
     /* **** BLOG BASED API CALLS **** */
 
+    /* **** POST BASED API CALLS **** */
+    public <T> void call(
+            final Class<? extends com.github.rumble.blog.simple.ApiInterface<T>> clazz,
+            final String blogId,
+            final String postId,
+            final Map<String, String> queryParams,
+            final CompletionInterface<T> onCompletion) {
+
+        Class<?>[] cArg = new Class<?>[] {
+                Context.class,
+                OAuthService.class,
+                Token.class,
+                String.class,
+                String.class,
+                String.class,
+                String.class
+        };
+
+        try {
+            doCall(
+                    clazz.getDeclaredConstructor(cArg)
+                            .newInstance(
+                                    context,
+                                    oAuthService,
+                                    authToken,
+                                    appName,
+                                    appVersion,
+                                    blogId,
+                                    postId
+                            ),
+                    queryParams,
+                    onCompletion
+            );
+        } catch (IllegalAccessException |
+                InstantiationException |
+                InvocationTargetException |
+                NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public <T> void call(
+            final Class<? extends com.github.rumble.blog.simple.ApiInterface<T>> clazz,
+            final String blogId,
+            final String postId,
+            final CompletionInterface<T> onCompletion) {
+        call(clazz, blogId, postId, new HashMap<String, String>(), onCompletion);
+    }
+    /* **** POST BASED API CALLS **** */
+
     public void setOnLoginListener(OnLoginListener onLoginListener) {
         this.onLoginListener = onLoginListener;
     }
