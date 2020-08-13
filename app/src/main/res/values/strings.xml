@@ -10,4 +10,6 @@
     <string name="search">Search</string>
     <string name="view_post">View Post</string>
     <string name="test">Test</string>
+    <string name="stop">Stop</string>
+    <string name="difference">Difference</string>
 </resources>

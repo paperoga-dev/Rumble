@@ -242,8 +242,17 @@ public final class TumblrClient {
                             @Override
                             public void onSuccess(List<T> result, int offset, int limit, int count) {
                                 resultList.addAll(result);
+                                if (result.isEmpty()) {
+                                    // This is a Tumblr bug, some array-based APIs return less items
+                                    // than expected. In this case, we return earlier, with the real
+                                    // number of items.
 
-                                int newOffset = offset + result.size();
+                                    if (onCompletion != null)
+                                        onCompletion.onSuccess(resultList, obj.getOffset(), obj.getLimit(), resultList.size());
+                                    return;
+                                }
+
+                                int newOffset = offset + resultList.size();
                                 int newLimit;
 
                                 if (count == -1) {
@@ -253,13 +262,13 @@ public final class TumblrClient {
                                         // the caller did not specify a limit, so the first content
                                         // is fine, we're done
                                         if (onCompletion != null)
-                                            onCompletion.onSuccess(resultList, offset, obj.getLimit(), count);
+                                            onCompletion.onSuccess(resultList, obj.getOffset(), obj.getLimit(), resultList.size());
                                         return;
                                     } else {
                                         if (resultList.size() >= obj.getLimit()) {
                                             // fetched enough content, we're done
                                             if (onCompletion != null)
-                                                onCompletion.onSuccess(resultList, offset, obj.getLimit(), count);
+                                                onCompletion.onSuccess(resultList, obj.getOffset(), obj.getLimit(), resultList.size());
                                             return;
                                         }
 
@@ -273,7 +282,7 @@ public final class TumblrClient {
                                     if (newLimit <= 0) {
                                         // fetched enough content, we're done
                                         if (onCompletion != null)
-                                            onCompletion.onSuccess(resultList, obj.getOffset(), obj.getLimit(), count);
+                                            onCompletion.onSuccess(resultList, obj.getOffset(), obj.getLimit(), resultList.size());
                                         return;
                                     }
                                 }
