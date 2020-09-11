@@ -87,7 +87,7 @@ public class Login extends Activity {
         webView.getSettings().setAppCacheEnabled(false);
         webView.getSettings().setGeolocationEnabled(false);
         webView.getSettings().setDatabaseEnabled(false);
-        webView.getSettings().setDomStorageEnabled(false);
+        webView.getSettings().setDomStorageEnabled(true);
 
         webView.setWebViewClient(new CustomWebViewClient(
                 (Token) getIntent().getSerializableExtra(Constants.REQUEST_TOKEN))

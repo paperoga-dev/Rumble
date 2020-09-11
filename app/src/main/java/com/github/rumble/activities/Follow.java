@@ -77,7 +77,7 @@ public class Follow extends Base {
     {
         getClient().call(
                 com.github.rumble.blog.array.Followers.Api.class,
-                "papero-tombo",
+                getClient().getMe().getBlogs().get(0).getName(),
                 0,
                 -1,
                 new CompletionInterface<Followers.User, Followers.Data>() {
