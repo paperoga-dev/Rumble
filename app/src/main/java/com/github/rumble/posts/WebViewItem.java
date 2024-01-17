@@ -37,7 +37,6 @@ public class WebViewItem extends WebView {
         getSettings().setUseWideViewPort(true);
         getSettings().setGeolocationEnabled(false);
         getSettings().setNeedInitialFocus(false);
-        getSettings().setSaveFormData(false);
         getSettings().setDefaultFontSize(40);
         getSettings().setAppCacheEnabled(true);
         getSettings().setAppCachePath(context.getCacheDir().getPath());

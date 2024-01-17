@@ -2,7 +2,6 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.3"
     defaultConfig {
         applicationId "com.github.rumble"
         minSdkVersion 22
@@ -16,15 +15,16 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    lintOptions {
-        abortOnError false
-    }
     sourceSets {
         main {
             java {
                 srcDirs 'src/main/java', 'src/main/java/posts'
             }
         }
+    }
+    namespace 'com.github.rumble'
+    lint {
+        abortOnError false
     }
     allprojects {
         tasks.withType(JavaCompile) {
@@ -35,7 +35,7 @@ android {
 
 repositories {
     google()
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {

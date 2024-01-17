@@ -272,7 +272,7 @@ public interface Post {
                     if (item == -1) {
                         TextView itemView = (TextView) getContent().get(0).render(llPostContent.getContext(), viewWidth / row.size() - dp5 * 2);
 
-                        itemView.setText(Html.fromHtml("<b>" + getAskingName() + "</b><br>" + itemView.getText()));
+                        itemView.setText(Html.fromHtml("<b>" + getAskingName() + "</b><br>" + itemView.getText(), Html.FROM_HTML_MODE_LEGACY));
 
                         GradientDrawable gd = new GradientDrawable();
                         gd.setShape(GradientDrawable.RECTANGLE);

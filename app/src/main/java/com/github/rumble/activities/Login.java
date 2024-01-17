@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -47,10 +48,11 @@ public class Login extends Activity {
         }
 
         @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+            final String url = request.getUrl().toString();
 
             if (url.toLowerCase().contains(Constants.CALLBACK_URL.toLowerCase())) {
-                Uri uri = Uri.parse(url);
+                Uri uri = request.getUrl();
                 for (String strQuery : uri.getQueryParameterNames())
                     if (strQuery.contentEquals(Constants.OAUTH_VERIFIER)) {
 

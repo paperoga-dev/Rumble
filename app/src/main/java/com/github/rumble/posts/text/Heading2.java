@@ -34,7 +34,7 @@ public class Heading2 extends Base {
     @Override
     public View render(Context context, int itemWidth) {
         TextView tv = createTextView(context);
-        tv.setText(Html.fromHtml("<h2>" + getFormattedText() + "</h2>"));
+        tv.setText(Html.fromHtml("<h2>" + getFormattedText() + "</h2>", Html.FROM_HTML_MODE_LEGACY));
 
         return tv;
     }

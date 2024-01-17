@@ -22,6 +22,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.github.rumble.api.OAuthApi;
@@ -91,7 +93,7 @@ public final class TumblrClient {
                 1,
                 0L,
                 TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<Runnable>()
+                new LinkedBlockingQueue<>()
         );
 
         try {
@@ -139,7 +141,7 @@ public final class TumblrClient {
                     authToken,
                     appName,
                     appVersion)
-                    .call(new HashMap<String, String>(), new CompletionInterface<Info.Data>() {
+                    .call(new HashMap<>(), new CompletionInterface<Info.Data>() {
                         @Override
                         public void onSuccess(Info.Data result) {
                             me = result;
@@ -287,12 +289,13 @@ public final class TumblrClient {
                                     }
                                 }
 
-                                doCall(resultList,
+                                new Handler(Looper.getMainLooper()).postDelayed(() -> doCall(resultList,
                                         obj,
                                         newOffset,
                                         newLimit,
                                         queryParams,
-                                        onCompletion);
+                                        onCompletion), 1000
+                                );
                             }
 
                             @Override
@@ -343,7 +346,7 @@ public final class TumblrClient {
     public <T> void call(
             final Class<? extends com.github.rumble.api.simple.ApiInterface<T>> clazz,
             final CompletionInterface<T> onCompletion) {
-        call(clazz, new HashMap<String, String>(), onCompletion);
+        call(clazz, new HashMap<>(), onCompletion);
     }
 
     public <T, W extends ContentInterface<T>> void call(
@@ -365,7 +368,7 @@ public final class TumblrClient {
 
         try {
             doCall(
-                    new ArrayList<T>(),
+                    new ArrayList<>(),
                     clazz.getDeclaredConstructor(cArg)
                             .newInstance(
                                     context,
@@ -402,14 +405,14 @@ public final class TumblrClient {
             final int offset,
             final int limit,
             final com.github.rumble.api.array.CompletionInterface<T, W> onCompletion) {
-        call(clazz, offset, limit, new HashMap<String, String>(), onCompletion);
+        call(clazz, offset, limit, new HashMap<>(), onCompletion);
     }
 
     public <T, W extends ContentInterface<T>> void call(
             final Class<? extends com.github.rumble.api.array.ApiInterface<T, W>> clazz,
             final int offset,
             final com.github.rumble.api.array.CompletionInterface<T, W> onCompletion) {
-        call(clazz, offset, 20, new HashMap<String, String>(), onCompletion);
+        call(clazz, offset, 20, new HashMap<>(), onCompletion);
     }
     /* **** USER BASED API CALLS **** */
 
@@ -455,7 +458,7 @@ public final class TumblrClient {
             final Class<? extends com.github.rumble.blog.simple.ApiInterface<T>> clazz,
             final String blogId,
             final CompletionInterface<T> onCompletion) {
-        call(clazz, blogId, new HashMap<String, String>(), onCompletion);
+        call(clazz, blogId, new HashMap<>(), onCompletion);
     }
 
     public <T, W extends ContentInterface<T>> void call(
@@ -479,7 +482,7 @@ public final class TumblrClient {
 
         try {
             doCall(
-                    new ArrayList<T>(),
+                    new ArrayList<>(),
                     clazz.getDeclaredConstructor(cArg)
                             .newInstance(
                                     context,
@@ -519,7 +522,7 @@ public final class TumblrClient {
             final int offset,
             final int limit,
             final com.github.rumble.api.array.CompletionInterface<T, W> onCompletion) {
-        call(clazz, blogId, offset, limit, new HashMap<String, String>(), onCompletion);
+        call(clazz, blogId, offset, limit, new HashMap<>(), onCompletion);
     }
 
     public <T, W extends ContentInterface<T>> void call(
@@ -527,7 +530,7 @@ public final class TumblrClient {
             final String blogId,
             final int offset,
             final com.github.rumble.api.array.CompletionInterface<T, W> onCompletion) {
-        call(clazz, blogId, offset, 20, new HashMap<String, String>(), onCompletion);
+        call(clazz, blogId, offset, 20, new HashMap<>(), onCompletion);
     }
     /* **** BLOG BASED API CALLS **** */
 
@@ -577,7 +580,7 @@ public final class TumblrClient {
             final String blogId,
             final String postId,
             final CompletionInterface<T> onCompletion) {
-        call(clazz, blogId, postId, new HashMap<String, String>(), onCompletion);
+        call(clazz, blogId, postId, new HashMap<>(), onCompletion);
     }
     /* **** POST BASED API CALLS **** */
 
